@@ -2,14 +2,8 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
   def up
     change_table :articles do |t|
       t.column :supplier_order_unit_un_ece, :string, length: 3
-
-      t.column :price_unit, :string
       t.column :price_unit_un_ece, :string, length: 3
-
-      t.column :bill_unit, :string
       t.column :bill_unit_un_ece, :string, length: 3
-
-      t.column :group_order_unit, :string
       t.column :group_order_unit_un_ece, :string, length: 3
       t.column :group_order_granularity, :float
     end
@@ -18,14 +12,13 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.references :article, null: false
 
       t.column :sort, :integer, null: false
-      t.column :amount, :integer
-      t.column :unit, :string
+      t.column :amount, :float
       t.column :unit_un_ece, :string, length: 3
     end
 
     articles = select_all('SELECT id, unit_quantity FROM articles')
     articles.each do |article|
-      update("INSERT INTO article_unit_conversions (article_id, sort, amount, unit) VALUES (#{quote article['id']}, #{quote 1}, #{quote article['unit_quantity']}, #{quote 'pc'})")
+      update("INSERT INTO article_unit_conversions (article_id, sort, amount) VALUES (#{quote article['id']}, #{quote 1}, #{quote article['unit_quantity']})")
     end
 
     change_table :articles do |t|
@@ -36,13 +29,8 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
   def down
     change_table :articles do |t|
       t.remove :supplier_order_unit_un_ece
-      t.remove :price_unit
       t.remove :price_unit_un_ece
-
-      t.remove :bill_unit
       t.remove :bill_unit_un_ece
-
-      t.remove :group_order_unit
       t.remove :group_order_unit_un_ece
       t.remove :group_order_granularity
       t.column :unit_quantity, :integer, null: false
