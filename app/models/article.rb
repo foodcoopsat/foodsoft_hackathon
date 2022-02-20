@@ -49,6 +49,8 @@ class Article < ApplicationRecord
   #   @return [Array<Order>] Orders this article appears in.
   has_many :orders, through: :order_articles
 
+  has_many :article_unit_conversions
+
   # Replace numeric seperator with database format
   localize_input_of :price, :tax, :deposit
   # Get rid of unwanted whitespace. {Unit#new} may even bork on whitespace.
@@ -230,6 +232,15 @@ class Article < ApplicationRecord
   def mark_as_deleted
     check_article_in_use
     update_column :deleted_at, Time.now
+  end
+
+  def unit_quantity
+    first_conversion = article_unit_conversions.first
+    if first_conversion.nil?
+      '1'
+    else
+      first_conversion.amount
+    end
   end
 
   protected
