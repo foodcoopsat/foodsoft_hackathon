@@ -81,6 +81,7 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
     t.string "bill_unit_un_ece"
     t.string "group_order_unit_un_ece"
     t.float "group_order_granularity"
+    t.float "minimum_order_amount"
     t.index ["article_category_id"], name: "index_articles_on_article_category_id"
     t.index ["name", "supplier_id"], name: "index_articles_on_name_and_supplier_id"
     t.index ["supplier_id"], name: "index_articles_on_supplier_id"

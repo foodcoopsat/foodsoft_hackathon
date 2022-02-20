@@ -6,6 +6,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.column :bill_unit_un_ece, :string, length: 3
       t.column :group_order_unit_un_ece, :string, length: 3
       t.column :group_order_granularity, :float
+      t.column :minimum_order_amount, :float
     end
 
     create_table :article_unit_conversions do |t|
@@ -33,6 +34,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.remove :bill_unit_un_ece
       t.remove :group_order_unit_un_ece
       t.remove :group_order_granularity
+      t.remove :minimum_order_amount
       t.column :unit_quantity, :integer, null: false
     end
 
