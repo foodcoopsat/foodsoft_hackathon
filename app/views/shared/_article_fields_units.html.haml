@@ -1,6 +1,41 @@
--# use the local 'f', or supply 'f_uq' and 'f_unit' for more control (like in balancing)
+- content_for :javascript do
+  :javascript
+    var parcel = $($.parseHTML("#{escape_javascript(render('shared/parcel'))}"));
+    var parcels = #{raw @parcels.to_json};
+
+    $(function() {
+      $(document).on('touchclick', 'a[data-add-parcel]', function() {
+        parcel.clone().appendTo('#parcels');
+        return false;
+      });
+
+      $(document).on('touchclick', 'a[data-remove-parcel]', function() {
+        $(this).parents('tr').remove();
+        return false;
+      });
+    });
+
 .fold-line
-  = (f_uq rescue f).input :unit_quantity, label: Article.human_attribute_name(:unit),
-    input_html: {class: 'input-mini', title: Article.human_attribute_name(:unit_quantity)}
-  = (f_unit rescue f).input :unit, label: '&times;'.html_safe,
-    input_html: {class: 'input-mini', title: Article.human_attribute_name(:unit)}
+  = f.input :unit_offered_by_supplier, label: "Unit offered by supplier", input_html: {class: 'input-mini', title: "unit in which article can be ordered from supplier"}
+  = f.input :unit_description, label: "descr.", input_html: {class: 'input-mini', title: "free text unit"}
+  = link_to t('.add_content'), '#', 'data-add-parcel' => true, class: 'btn', title: "add content"
+.fold-line
+  = "."
+.fold-line
+  .control-group
+    %label.control-label{for: 'parcels'}
+      = "Parcels"
+    %table#fc_base_price{:class => "controls"}
+      %tbody
+        = render :partial => 'shared/parcel', :collection => [1]
+.fold-line
+  = f.input :min_order_quantity, label: "Mininum order quantity" do
+    .input-append
+      = f.input_field :min_order_quantity, class: 'input-mini', title: "total minimum order quantity for this article"
+      / TODO: replace 'pck' with unit offered by supplier
+      %span.add-on pck
+.fold-line
+  = f.input :billing_unit, label: "Billing unit", input_html: {class: 'input-small', title: "unit dropdown"}
+.fold-line
+  = f.input :goa_granularity, label: "Allow orders per", input_html: {class: 'input-mini', title: "steps in which ordergroups can order this article"}
+  = f.input :goa_unit, label: '&times;'.html_safe, input_html: {class: 'input-small', title: "unit dropdown"}
