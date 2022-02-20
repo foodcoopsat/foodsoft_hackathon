@@ -21,10 +21,11 @@ en:
         price: Price (net)
         supplier: Supplier
         tax: VAT
-        unit: Unit
+        unit: Supplier order unit
         unit_quantity: Unit quantity
         unit_quantity_short: U.Q.
         units: Units
+        supplier_order_unit_un_ece: Supplier order unit
       article_category:
         description: Import names
         name: Name
@@ -1637,8 +1638,8 @@ en:
     error_notification:
       default_message: Errors were found. Please check the form.
     hints:
-      article:
-        unit: e.g. KG or 1L or 500g
+      # article:
+      #   unit: e.g. KG or 1L or 500g
       article_category:
         description: comma-separated list of category names recognised at import/synchronisation
       order_article:

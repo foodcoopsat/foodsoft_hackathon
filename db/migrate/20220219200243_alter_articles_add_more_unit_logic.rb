@@ -19,7 +19,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
 
     articles = select_all('SELECT id, unit_quantity FROM articles')
     articles.each do |article|
-      update("INSERT INTO article_unit_conversions (article_id, sort, amount) VALUES (#{quote article['id']}, #{quote 1}, #{quote article['unit_quantity']})")
+      update("INSERT INTO article_unit_conversions (article_id, sort, amount, unit_un_ece) VALUES (#{quote article['id']}, #{quote 1}, #{quote article['unit_quantity']}, #{quote 'XPP'})")
     end
 
     change_table :articles do |t|

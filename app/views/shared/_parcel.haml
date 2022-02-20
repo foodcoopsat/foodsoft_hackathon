@@ -1,8 +1,0 @@
-%tr
-  %td= text_field_tag 'articles[parcels][unit_quantifier]', nil, class: 'input-mini', title: "unit quantifier"
-  %td= '&times;'.html_safe
-  %td= text_field_tag 'articles[parcels][unit]', nil, class: 'input-mini', title: "unit dropdown"
-  %td.actions{style: 'width:1em'}
-    = link_to t('.remove'), method: :delete, 'data-remove-parcel' => true, title: 'remove', class: 'btn btn-danger btn-mini' do
-      = glyph :remove
-  %td= link_to t('.add_content'), '#', 'data-add-parcel' => true, class: 'btn btn-small'

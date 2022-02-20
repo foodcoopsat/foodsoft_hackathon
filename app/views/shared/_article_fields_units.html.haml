@@ -1,41 +1,61 @@
-- content_for :javascript do
-  :javascript
-    var parcel = $($.parseHTML("#{escape_javascript(render('shared/parcel'))}"));
-    var parcels = #{raw @parcels.to_json};
-
-    $(function() {
-      $(document).on('touchclick', 'a[data-add-parcel]', function() {
-        parcel.clone().appendTo('#parcels');
-        return false;
-      });
-
-      $(document).on('touchclick', 'a[data-remove-parcel]', function() {
-        $(this).parents('tr').remove();
-        return false;
-      });
+-# content_for :javascript do
+:javascript
+  var articleUnitConversionTemplate$ = $($.parseHTML("#{escape_javascript(render(partial: 'shared/article_unit_conversion', locals: {article_unit_conversion: @empty_article_unit_conversion, f: f}))}"));
+  function addButtonListeners() {
+    const removeButton$ = $('*[data-remove-conversion]').off('click').on('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log($(e.target).parents('tr')[0]);
+      $(e.target).parents('tr').remove();
     });
+  }
+
+  const addButton$ = $('*[data-add-conversion]');
+  addButton$.off('click').on('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newRow$ = articleUnitConversionTemplate$.clone();
+    $('#fc_base_price tbody').append(newRow$);
+
+    const sortField$ = $('[name$="[sort]"]', newRow$);
+    const index = $('#fc_base_price tbody tr').length - 1;
+    sortField$.val(index + 1);
+    sortField$.attr('name', `article[article_unit_conversions_attributes][${index}][sort]`);
+    sortField$.attr('id', `article_article_unit_conversions_attributes_${index}_sort`);
+
+    addButtonListeners();
+  });
+
+  addButtonListeners();
+
+-# var parcel = $($.parseHTML("#{escape_javascript(render('shared/parcel'))}"));
+-# var parcels = #{raw @parcels.to_json};
 
 .fold-line
-  = f.input :unit_offered_by_supplier, label: "Unit offered by supplier", input_html: {class: 'input-mini', title: "unit in which article can be ordered from supplier"}
-  = f.input :unit_description, label: "descr.", input_html: {class: 'input-mini', title: "free text unit"}
-  = link_to t('.add_content'), '#', 'data-add-parcel' => true, class: 'btn', title: "add content"
+  -# title: unit in which article can be ordered from supplier
+  %div{:class => 'pull-right'}
+    = f.select :supplier_order_unit_un_ece, options_for_select(@article_units, @article.supplier_order_unit_un_ece), include_blank: true
+  -# title: free text unit
+  = f.input :unit, input_html: {class: 'input-mini'}
 .fold-line
   = "."
 .fold-line
   .control-group
-    %label.control-label{for: 'parcels'}
-      = "Parcels"
+    %label.control-label{for: 'unit_conversions'}
+      = "Unit conversions"
     %table#fc_base_price{:class => "controls"}
       %tbody
-        = render :partial => 'shared/parcel', :collection => [1]
+        = render :partial => 'shared/article_unit_conversion', :collection => @article.article_unit_conversions, locals: {f: f}
+    = link_to t('.add_content'), '#', 'data-add-conversion' => true, class: 'btn', title: "add content"
 .fold-line
-  = f.input :min_order_quantity, label: "Mininum order quantity" do
+  = f.input :minimum_order_amount, label: "Mininum order quantity" do
     .input-append
-      = f.input_field :min_order_quantity, class: 'input-mini', title: "total minimum order quantity for this article"
+      = f.input_field :minimum_order_amount, class: 'input-mini', title: "total minimum order quantity for this article"
       / TODO: replace 'pck' with unit offered by supplier
-      %span.add-on pck
+      %span.add-on
+        = format_article_unit(@article, :supplier_order_unit)
 .fold-line
-  = f.input :billing_unit, label: "Billing unit", input_html: {class: 'input-small', title: "unit dropdown"}
+  = f.input :bill_unit_un_ece, label: "Billing unit", input_html: {class: 'input-small', title: "unit dropdown"}
 .fold-line
-  = f.input :goa_granularity, label: "Allow orders per", input_html: {class: 'input-mini', title: "steps in which ordergroups can order this article"}
-  = f.input :goa_unit, label: '&times;'.html_safe, input_html: {class: 'input-small', title: "unit dropdown"}
+  = f.input :group_order_granularity, label: "Allow orders per", input_html: {class: 'input-mini', title: "steps in which ordergroups can order this article"}
+  = f.input :group_order_unit_un_ece, label: '&times;'.html_safe, input_html: {class: 'input-small', title: "unit dropdown"}

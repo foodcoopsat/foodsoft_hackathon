@@ -79,20 +79,7 @@ class Article < ApplicationRecord
   before_save :update_price_history
   before_destroy :check_article_in_use
 
-  attr_accessor :unit_offered_by_supplier
-  attr_accessor :unit_description
-
-  attr_accessor :unit_quantifier
-  attr_accessor :base_unit
-  attr_accessor :price_unit
-  attr_accessor :goa_granularity
-  attr_accessor :goa_unit
-  attr_accessor :billing_unit
-  attr_accessor :min_order_quantity
-
-  def test_attribute
-    "hhhhh"
-  end
+  accepts_nested_attributes_for :article_unit_conversions, allow_destroy: true
 
   def self.ransackable_attributes(auth_object = nil)
     %w(id name supplier_id article_category_id unit note manufacturer origin unit_quantity order_number)
