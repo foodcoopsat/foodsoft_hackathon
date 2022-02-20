@@ -33,6 +33,18 @@ afterwards.
 
 ## Setup
 
+**1. Clone foodsoft-repository within local folder**
+
+For collaboration purposes consider cloning your fork of the `foodcoops/foodsoft` repository.
+
+Open/navigate to folder and execute:
+```git clone [LINK-TO-REPOSITORY.git]```
+
+
+Note: If you wish to setup foodsoft without git, you may manually download the sourcecode files and proceed from there.
+    
+**2. Run setup within cloned repository (local folder)**
+
 Then start the database server and setup foodsoft development (this will take
 some time, containers needs to be pulled from docker registry and a lot
 dependencies needs to be installed)
