@@ -57,17 +57,21 @@ class ArticlesController < ApplicationController
 
   def edit
     @article_units = ArticleUnits.as_options
-    @article = Article.includes(:article_unit_conversions).find(params[:id])
-    @empty_article_unit_conversion = ArticleUnitConversion.new
-    @empty_article_unit_conversion.article = @article
-    @empty_article_unit_conversion.sort = -1
+    @article = Article.includes(:article_unit_ratios).find(params[:id])
+    @empty_article_unit_ratio = ArticleUnitRatio.new
+    @empty_article_unit_ratio.article = @article
+    @empty_article_unit_ratio.sort = -1
     # render :action =>   'edit'
     render :action => 'new', layout: false
   end
 
   # Updates one Article and highlights the line if succeded
   def update
-    @article = Article.find(params[:id])
+    @article_units = ArticleUnits.as_options
+    @article = Article.includes(:article_unit_ratios).find(params[:id])
+    @empty_article_unit_ratio = ArticleUnitRatio.new
+    @empty_article_unit_ratio.article = @article
+    @empty_article_unit_ratio.sort = -1
 
     if @article.update_attributes(params[:article])
       render :layout => false

@@ -49,19 +49,20 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
     t.index ["article_id"], name: "index_article_prices_on_article_id"
   end
 
-  create_table "article_unit_conversions", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
+  create_table "article_unit_ratios", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
     t.bigint "article_id", null: false
     t.integer "sort", null: false
-    t.float "amount"
-    t.string "unit_un_ece"
-    t.index ["article_id"], name: "index_article_unit_conversions_on_article_id"
+    t.float "quantity"
+    t.string "unit"
+    t.index ["article_id"], name: "index_article_unit_ratios_on_article_id"
+    t.index ["sort"], name: "index_article_unit_ratios_on_sort"
   end
 
   create_table "articles", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
     t.string "name", default: "", null: false
     t.integer "supplier_id", default: 0, null: false
     t.integer "article_category_id", default: 0, null: false
-    t.string "unit", default: ""
+    t.string "unit"
     t.string "note"
     t.boolean "availability", default: true, null: false
     t.string "manufacturer"
@@ -76,12 +77,12 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
     t.datetime "deleted_at"
     t.string "type"
     t.integer "quantity", default: 0
-    t.string "supplier_order_unit_un_ece"
-    t.string "price_unit_un_ece"
-    t.string "bill_unit_un_ece"
-    t.string "group_order_unit_un_ece"
+    t.string "supplier_order_unit"
+    t.string "price_unit"
+    t.string "billing_unit"
+    t.string "group_order_unit"
     t.float "group_order_granularity"
-    t.float "minimum_order_amount"
+    t.float "minimum_order_quantity"
     t.index ["article_category_id"], name: "index_articles_on_article_category_id"
     t.index ["name", "supplier_id"], name: "index_articles_on_name_and_supplier_id"
     t.index ["supplier_id"], name: "index_articles_on_supplier_id"

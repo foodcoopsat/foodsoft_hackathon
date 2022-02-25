@@ -3,8 +3,8 @@
     .input-prepend
       %span.add-on= t 'number.currency.format.unit'
       = f.input_field :price, class: 'input-mini'
-  = f.input :price_unit_un_ece, label: 'per' do
-    = f.input_field :price_unit_un_ece, class: 'input-small', title: "unit dropdown"
+  = f.input :price_unit, label: 'per' do
+    = f.input_field :price_unit, class: 'input-small', title: "unit dropdown"
 .fold-line
   = f.input :tax do
     .input-append

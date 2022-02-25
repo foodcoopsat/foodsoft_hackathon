@@ -25,7 +25,7 @@ en:
         unit_quantity: Unit quantity
         unit_quantity_short: U.Q.
         units: Units
-        supplier_order_unit_un_ece: Supplier order unit
+        supplier_order_unit: Supplier order unit
       article_category:
         description: Import names
         name: Name

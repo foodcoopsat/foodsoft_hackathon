@@ -49,7 +49,7 @@ class Article < ApplicationRecord
   #   @return [Array<Order>] Orders this article appears in.
   has_many :orders, through: :order_articles
 
-  has_many :article_unit_conversions
+  has_many :article_unit_ratios
 
   # Replace numeric seperator with database format
   localize_input_of :price, :tax, :deposit
@@ -61,7 +61,7 @@ class Article < ApplicationRecord
   scope :not_in_stock, -> { where(type: nil) }
 
   # Validations
-  validates_presence_of :name, :unit, :price, :tax, :deposit, :unit_quantity, :supplier_id, :article_category
+  validates_presence_of :name, :price, :tax, :deposit, :supplier_id, :article_category
   validates_length_of :name, :in => 4..60
   validates_length_of :unit, :in => 1..15
   validates_length_of :note, :maximum => 255
@@ -69,7 +69,6 @@ class Article < ApplicationRecord
   validates_length_of :manufacturer, :maximum => 255
   validates_length_of :order_number, :maximum => 255
   validates_numericality_of :price, :greater_than_or_equal_to => 0
-  validates_numericality_of :unit_quantity, :greater_than => 0
   validates_numericality_of :deposit, :tax
   # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type], if: Proc.new {|a| a.supplier.shared_sync_method.blank? or a.supplier.shared_sync_method == 'import' }
   # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type, :unit, :unit_quantity]
@@ -79,7 +78,7 @@ class Article < ApplicationRecord
   before_save :update_price_history
   before_destroy :check_article_in_use
 
-  accepts_nested_attributes_for :article_unit_conversions, allow_destroy: true
+  accepts_nested_attributes_for :article_unit_ratios, allow_destroy: true
 
   def self.ransackable_attributes(auth_object = nil)
     %w(id name supplier_id article_category_id unit note manufacturer origin unit_quantity order_number)
@@ -222,11 +221,11 @@ class Article < ApplicationRecord
   end
 
   def unit_quantity
-    first_conversion = article_unit_conversions.first
-    if first_conversion.nil?
+    first_ration = article_unit_ratios.first
+    if first_ration.nil?
       '1'
     else
-      first_conversion.amount
+      first_ration.quantity
     end
   end
 

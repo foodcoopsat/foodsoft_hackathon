@@ -13,11 +13,9 @@ module ArticlesHelper
     classes.join(" ")
   end
 
-  def format_article_unit(article, base_name)
-    base_name = base_name.to_s
-    return article.send(base_name) if base_name.respond_to?(base_name)
+  def format_supplier_article_unit(article)
+    return ArticleUnits.as_options.invert[article.supplier_order_unit] unless article.supplier_order_unit.nil?
 
-    unit_id = article.send(base_name + '_un_ece')
-    ArticleUnits.as_options.invert[unit_id] || ('?' + unit_id.to_s)
+    article.unit
   end
 end
