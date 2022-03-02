@@ -15,6 +15,7 @@
 //= require i18n
 //= require i18n/translations
 //= require_self
+//= require article-edit-form
 //= require ordering
 //= require stupidtable
 //= require touchclick
