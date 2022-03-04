@@ -1,7 +1,7 @@
 = simple_form_for [@supplier, @article], :validate => true, :remote => true do |f|
   :javascript
     var articleUnitRatioTemplate$ = $($.parseHTML("#{escape_javascript(render(partial: 'shared/article_unit_ratio', locals: {article_unit_ratio: @empty_article_unit_ratio, f: f, article_unit_ratio_counter: -1}))}"));
-    new ArticleEditForm(articleUnitRatioTemplate$, $('.article-form'));
+    new ArticleForm(articleUnitRatioTemplate$, $('.article-form'));
 
   = f.hidden_field :shared_updated_on
   = f.hidden_field :supplier_id

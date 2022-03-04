@@ -15,7 +15,7 @@
 //= require i18n
 //= require i18n/translations
 //= require_self
-//= require article-edit-form
+//= require article-form
 //= require ordering
 //= require stupidtable
 //= require touchclick
@@ -23,6 +23,18 @@
 //= require recurring_select
 
 $.fn.select2.defaults.set('theme', 'bootstrap');
+
+// on first focus (bubbles up to document), open the menu
+$(document).on('focus', '.select2-selection.select2-selection--single', function () {
+  $(this).closest(".select2-container").siblings('select:enabled').select2('open');
+});
+
+// steal focus during close - only capture once and stop propogation
+$('select.select2').on('select2:closing', function (e) {
+  $(e.target).data("select2").$selection.one('focus focusin', function (e) {
+    e.stopPropagation();
+  });
+});
 
 // Load following statements, when DOM is ready
 $(function() {

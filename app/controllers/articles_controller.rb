@@ -1,6 +1,10 @@
 class ArticlesController < ApplicationController
   before_action :authenticate_article_meta, :find_supplier
 
+  before_action :load_article, only: [:edit, :update]
+  before_action :load_article_units, only: [:edit, :update, :new, :create]
+  before_action :new_empty_article_ratio, only: [:edit, :update, :new, :create]
+
   def index
     if params['sort']
       sort = case params['sort']
@@ -56,26 +60,15 @@ class ArticlesController < ApplicationController
   end
 
   def edit
-    @article_units = ArticleUnits.as_options
-    @article = Article.includes(:article_unit_ratios).find(params[:id])
-    @empty_article_unit_ratio = ArticleUnitRatio.new
-    @empty_article_unit_ratio.article = @article
-    @empty_article_unit_ratio.sort = -1
-    # render :action =>   'edit'
     render :action => 'new', layout: false
   end
 
   # Updates one Article and highlights the line if succeded
   def update
-    @article_units = ArticleUnits.as_options
-    @article = Article.includes(:article_unit_ratios).find(params[:id])
-    @empty_article_unit_ratio = ArticleUnitRatio.new
-    @empty_article_unit_ratio.article = @article
-    @empty_article_unit_ratio.sort = -1
-
     if @article.update_attributes(params[:article])
       render :layout => false
     else
+      Rails.logger.info @article.errors.to_yaml.to_s
       render :action => 'new', :layout => false
     end
   end
@@ -243,6 +236,20 @@ class ArticlesController < ApplicationController
   end
 
   private
+
+  def load_article
+    @article = Article.includes(:article_unit_ratios).find(params[:id])
+  end
+
+  def load_article_units
+    @article_units = ArticleUnits.as_options
+  end
+
+  def new_empty_article_ratio
+    @empty_article_unit_ratio = ArticleUnitRatio.new
+    @empty_article_unit_ratio.article = @article unless @article.nil?
+    @empty_article_unit_ratio.sort = -1
+  end
 
   # @return [Number] Number of articles not taken into account when syncing (having no number)
   def ignored_article_count

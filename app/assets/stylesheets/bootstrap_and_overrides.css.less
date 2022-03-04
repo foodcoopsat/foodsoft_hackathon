@@ -448,6 +448,16 @@ i.package.icon-only {
   margin: 0;
 }
 
+// bootstrap 2 doesn't support differnt modal sizes -> let's provide our own modal-xl:
+.modal.modal-xl {
+  width: 80vw;
+  max-width: 650px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+}
+
 // multiple-column layout in forms (landscape tablet and wider only)
 @media (min-width: 768px) {
   .form-horizontal .fold-line {
@@ -546,4 +556,25 @@ span.negative_amout {
   .controls {
     margin-left: 0;
   }
+}
+
+// bootstrap version 2 doesn't support some styles -> let's add makeshift ones manually for now:
+.d-flex {
+  display: flex;
+}
+
+.ml-1 {
+  margin-left: 3px;
+}
+
+td.ml-1 > *:first-child {
+  margin-left: 3px;
+}
+
+.mr-1 {
+  margin-right: 3px;
+}
+
+td.mr-1 > *:last-child {
+  margin-right: 3px;
 }

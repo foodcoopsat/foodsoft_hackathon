@@ -63,7 +63,8 @@ class Article < ApplicationRecord
   # Validations
   validates_presence_of :name, :price, :tax, :deposit, :supplier_id, :article_category
   validates_length_of :name, :in => 4..60
-  validates_length_of :unit, :in => 1..15
+  validates_length_of :unit, :in => 1..15, :unless => :supplier_order_unit
+  validates_presence_of :supplier_order_unit, :unless => :unit
   validates_length_of :note, :maximum => 255
   validates_length_of :origin, :maximum => 255
   validates_length_of :manufacturer, :maximum => 255
@@ -73,6 +74,7 @@ class Article < ApplicationRecord
   # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type], if: Proc.new {|a| a.supplier.shared_sync_method.blank? or a.supplier.shared_sync_method == 'import' }
   # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type, :unit, :unit_quantity]
   validate :uniqueness_of_name
+  validate :only_one_unit_type
 
   # Callbacks
   before_save :update_price_history
@@ -223,9 +225,26 @@ class Article < ApplicationRecord
   def unit_quantity
     first_ration = article_unit_ratios.first
     if first_ration.nil?
-      '1'
+      1
     else
       first_ration.quantity
+    end
+  end
+
+  # TODO: Maybe use the nilify blanks gem instead of the following two methods?:
+  def unit=(value)
+    if value.empty?
+      self[:unit] = nil
+    else
+      super
+    end
+  end
+
+  def supplier_order_unit=(value)
+    if value.empty?
+      self[:supplier_order_unit] = nil
+    else
+      super
     end
   end
 
@@ -263,6 +282,12 @@ class Article < ApplicationRecord
       errors.add :name, :taken if matches.any?
     else
       errors.add :name, :taken_with_unit if matches.where(unit: unit, unit_quantity: unit_quantity).any?
+    end
+  end
+
+  def only_one_unit_type
+    unless unit.blank? || supplier_order_unit.blank?
+      errors.add :unit # not specifying a specific error message as this should be prevented by js
     end
   end
 end
