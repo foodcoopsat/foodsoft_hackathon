@@ -1,6 +1,7 @@
 class ArticleForm {
-  constructor(articleUnitRatioTemplate$, articleForm$) {
+  constructor(articleUnitRatioTemplate$, articleForm$, units) {
     try {
+      this.units = units;
       this.articleUnitRatioTemplate$ = articleUnitRatioTemplate$;
       this.articleForm$ = articleForm$;
       this.unit$ = $('#article_unit', this.articleForm$);
@@ -27,10 +28,9 @@ class ArticleForm {
   }
 
   loadAvailableUnits() {
-    this.availableUnits = $('option', this.supplierUnitSelect$)
-      .map((_, option) => ({key: option.value, label: option.innerText}))
-      .get()
-      .filter(value => value.key !== '');
+    this.availableUnits = Object.entries(this.units)
+      .filter(([, unit]) => unit.visible)
+      .map(([code, unit]) => ({key: code, label: unit.name, baseUnit: unit.baseUnit}));
 
     $('#article_supplier_order_unit', this.articleForm$).select2(this.select2Config);
   }
@@ -137,7 +137,13 @@ class ArticleForm {
   }
 
   filterAvailableRatioUnits() {
-    let remainingAvailableUnits = this.availableUnits.filter(unit => unit.key !== this.supplierUnitSelect$.val());
+    const isUnitOrBaseUnitSelected = (unit, select$) => {
+      const code = select$.val();
+      const selectedUnit = this.units[code];
+      return unit.key !== code && (!unit.baseUnit || !selectedUnit || !selectedUnit.baseUnit || unit.baseUnit !== selectedUnit.baseUnit);
+    };
+
+    let remainingAvailableUnits = this.availableUnits.filter(unit => isUnitOrBaseUnitSelected(unit, this.supplierUnitSelect$));
 
     $('tr select[name$="[unit]"]', this.unitRatiosTable$).each((_, unitSelect) => {
       $('option[value!=""]' + remainingAvailableUnits.map(unit => `[value!="${unit.key}"]`).join(''), unitSelect).remove();
@@ -145,7 +151,7 @@ class ArticleForm {
       for (const missingUnit of missingUnits) {
         $(unitSelect).append($(`<option value="${missingUnit.key}">${missingUnit.label}</option>`));
       }
-      remainingAvailableUnits = remainingAvailableUnits.filter(unit => unit.key !== $(unitSelect).val());
+      remainingAvailableUnits = remainingAvailableUnits.filter(unit => isUnitOrBaseUnitSelected(unit, $(unitSelect)));
     });
 
     this.updateAvailableBillingAndGroupOrderUnits();

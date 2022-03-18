@@ -243,6 +243,7 @@ class ArticlesController < ApplicationController
 
   def load_article_units
     @article_units = ArticleUnits.as_options
+    @units_data = ArticleUnits.units
   end
 
   def new_empty_article_ratio
