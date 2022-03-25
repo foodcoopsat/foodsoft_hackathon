@@ -18,13 +18,21 @@ class ArticleForm {
       this.loadAvailableUnits();
       this.initializeRegularFormFields();
 
+
       this.initializeRatioRows();
       this.bindAddRatioButton();
 
       this.setFieldVisibility();
+
+      this.prepareRatioDataForSequentialRepresentation();
+      this.initializeFormSubmitListener();
     } catch(e) {
       console.log('Could not initialize article form', e);
     }
+  }
+
+  initializeFormSubmitListener() {
+    this.articleForm$.submit(() => this.reverseSequentialRatioDataRepresentation());
   }
 
   loadAvailableUnits() {
@@ -83,8 +91,7 @@ class ArticleForm {
     $('tbody', this.unitRatiosTable$).append(newRow$);
 
     const index = $('input[name^="article[article_unit_ratios_attributes]"][name$="[sort]"]', this.articleForm$).length
-      + $('input[name^="article[article_unit_ratios_attributes]"][name$="[_destroy]"]', this.articleForm$).length
-      + 1;
+      + $('input[name^="article[article_unit_ratios_attributes]"][name$="[_destroy]"]', this.articleForm$).length;
 
     const sortField$ = $('[name$="[sort]"]', newRow$);
     sortField$.val(index);
@@ -105,6 +112,7 @@ class ArticleForm {
       this.initializeRatioRow($(row));
     });
 
+    this.updateUnitMultiplierLabels();
     this.filterAvailableRatioUnits();
   }
 
@@ -118,11 +126,19 @@ class ArticleForm {
       });
 
     const select$ = $('select[name$="[unit]"]', row$);
-    select$.change(() => this.filterAvailableRatioUnits(row$));
+    select$.change(() => {
+      this.filterAvailableRatioUnits(row$)
+      this.updateUnitMultiplierLabels();
+    });
     select$.select2(this.select2Config);
+  }
 
-    const aboveUnit = this.findAboveUnit(row$);
-    $('.unit_multiplier', row$).text(aboveUnit);
+  updateUnitMultiplierLabels() {
+    $('tr', this.unitRatiosTable$).each((_, row) => {
+      const row$ = $(row);
+      const aboveUnit = this.findAboveUnit(row$);
+      $('.unit_multiplier', row$).text(aboveUnit);
+    });
   }
 
   removeRatioRow(row$) {
@@ -133,6 +149,7 @@ class ArticleForm {
     $(this.unitRatiosTable$).after($(`<input type="hidden" name="article[article_unit_ratios_attributes][${index}][_destroy]" value="true">`));
     $(this.unitRatiosTable$).after($(`<input type="hidden" name="article[article_unit_ratios_attributes][${index}][id]" value="${id}">`));
     this.filterAvailableRatioUnits();
+    this.updateUnitMultiplierLabels();
     this.setFieldVisibility();
   }
 
@@ -262,6 +279,38 @@ class ArticleForm {
       .off('keyup.article_form_visibility')
       .on('keyup.article_form_visibility', () => firstUnitRatioQuantity$.trigger('change'));
   }
+
+  prepareRatioDataForSequentialRepresentation() {
+    const numberOfRatios = $(`input[name^="article[article_unit_ratios_attributes]"][name$="[quantity]"]`).length;
+
+    for (let i = numberOfRatios; i > 1; i--) {
+      const currentField$ = $(`input[name="${ratioQuantityFieldNameByIndex(i)}"]`, this.articleForm$);
+      const currentValue = currentField$.val();
+      const previousValue = $(`input[name="${ratioQuantityFieldNameByIndex(i-1)}"]:last`, this.articleForm$).val();
+      currentField$.val(currentValue / previousValue);
+    }
+  }
+
+  reverseSequentialRatioDataRepresentation() {
+    let previousValue;
+    $(`input[name^="article[article_unit_ratios_attributes]"][name$="[quantity]"]`).each((_, field) => {
+      let currentField$ = $(field);
+
+      if (previousValue !== undefined) {
+        const name = currentField$.attr('name');
+        const index = name.match(/article\[article_unit_ratios_attributes\]\[([0-9]+)\]/)[1];
+        const currentValue = currentField$.val();
+        currentField$ = $(`<input type="hidden" name="${ratioQuantityFieldNameByIndex(index)}" value="${currentValue * previousValue}" />`);
+        this.articleForm$.append(currentField$)
+      }
+
+      previousValue = currentField$.val();
+    });
+  }
+}
+
+function ratioQuantityFieldNameByIndex(i) {
+  return `article[article_unit_ratios_attributes][${i}][quantity]`;
 }
 
 
