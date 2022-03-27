@@ -88,8 +88,13 @@ module OrdersHelper
 
     input_classes = 'input input-nano units_received'
     input_classes += ' package' unless order_article.article_price.unit_quantity == 1
+    data = { 'units-expected' => units_expected, 'supplier-order-unit' => order_article.article.supplier_order_unit }
+    order_article.article.article_unit_ratios.all.each_with_index do |ratio, index|
+      data["ratio-quantity-#{index}"] = ratio.quantity
+      data["ratio-unit-#{index}"] = ratio.unit
+    end
     input_html = form.text_field :units_received, class: input_classes,
-                                                  data: { 'units-expected' => units_expected },
+                                                  data: data,
                                                   disabled: order_article.result_manually_changed?,
                                                   autocomplete: 'off'
 

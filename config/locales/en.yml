@@ -1122,6 +1122,9 @@ en:
     tasks:
       required_users: "%{count} members are still needed!"
       task_title: "%{name} (%{duration}h)"
+    unit_conversion_fields:
+      cancel: Cancel
+      apply: Apply
   home:
     apple_bar:
       desc: 'This shows the proportion of completed tasks to the volume of orders for your ordergroup in comparison to the average of the Foodcoop. In practice: for every %{amount} of total orders, you should execute a task!'
