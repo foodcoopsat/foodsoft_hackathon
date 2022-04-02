@@ -18,4 +18,10 @@ module ArticlesHelper
 
     article.unit
   end
+
+  def format_group_order_unit(article)
+    return ArticleUnits.as_options.invert[article.group_order_unit] unless article.group_order_unit.nil?
+
+    article.unit
+  end
 end

@@ -191,11 +191,17 @@ class OrderArticle < ApplicationRecord
 
   # @return [Number] Units missing for the last +unit_quantity+ of the article.
   def missing_units
-    _missing_units(price.unit_quantity, quantity, tolerance)
+    raise 'TODO: Not yet implemented' unless article_price.nil?
+
+    unit_ratio = article.get_unit_ratio(1, article.supplier_order_unit, article.group_order_unit)
+    _missing_units(unit_ratio, quantity, tolerance)
   end
 
   def missing_units_was
-    _missing_units(price.unit_quantity, quantity_was, tolerance_was)
+    raise 'TODO: Not yet implemented' unless article_price.nil?
+
+    unit_ratio = article.get_unit_ratio(1, article.supplier_order_unit, article.group_order_unit)
+    _missing_units(unit_ratio, quantity_was, tolerance_was)
   end
 
   # Check if the result of any associated GroupOrderArticle was overridden manually
@@ -245,10 +251,10 @@ class OrderArticle < ApplicationRecord
     end
   end
 
-  def _missing_units(unit_quantity, quantity, tolerance)
-    units = unit_quantity - ((quantity % unit_quantity) + tolerance)
+  def _missing_units(unit_ratio, quantity, tolerance)
+    units = unit_ratio - ((quantity % unit_ratio) + tolerance)
     units = 0 if units < 0
-    units = 0 if units == unit_quantity
+    units = 0 if units == unit_ratio
     units
   end
 end

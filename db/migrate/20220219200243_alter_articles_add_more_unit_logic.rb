@@ -5,7 +5,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.column :price_unit, :string, length: 3
       t.column :billing_unit, :string, length: 3
       t.column :group_order_unit, :string, length: 3
-      t.column :group_order_granularity, :float
+      t.column :group_order_granularity, :float, null: false, default: 1
       t.column :minimum_order_quantity, :float
       t.change :unit, :string, null: true, default: nil
     end
@@ -14,7 +14,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.references :article, null: false
 
       t.column :sort, :integer, null: false, index: true
-      t.column :quantity, :float
+      t.column :quantity, :float, null: false
       t.column :unit, :string, length: 3
     end
 

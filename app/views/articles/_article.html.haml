@@ -3,7 +3,7 @@
   %td{'data-check-this' => "#checkbox_#{article.id}", :class => 'click-me'}= article.name
   %td= article.origin
   %td= truncate(article.article_category.name, :length => 11) if article.article_category
-  %td= article.unit
+  %td= format_supplier_article_unit(article)
   %td= truncate(article.note, :length => 11)
   %td= article.unit_quantity
   %td{:class => "currency"}

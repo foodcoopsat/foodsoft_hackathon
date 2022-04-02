@@ -17,7 +17,7 @@
 //= require_self
 //= require article-form
 //= require unit-conversion-field
-//= require ordering
+//= require group-order-form
 //= require stupidtable
 //= require touchclick
 //= require delta_input

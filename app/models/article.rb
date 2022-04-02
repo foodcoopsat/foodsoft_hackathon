@@ -231,8 +231,23 @@ class Article < ApplicationRecord
     end
   end
 
-  # TODO: Maybe use the nilify blanks gem instead of the following two methods?:
-  def unit=(value)
+  def get_unit_ratio_quantity(unit)
+    return 1 if unit == self.supplier_order_unit
+
+    self.article_unit_ratios.find_by_unit(unit).quantity
+  end
+
+  def get_unit_ratio(quantity, input_unit, output_unit)
+    quantity / self.get_unit_ratio_quantity(input_unit) * self.get_unit_ratio_quantity(output_unit)
+  end
+
+  def get_price(output_unit)
+    self.price / self.get_unit_ratio_quantity(output_unit) * self.get_unit_ratio_quantity(self.price_unit)
+  end
+
+  def
+  # TODO: Maybe use the nilify blanks gem instead of the following three methods?:
+  def(unit = value)
     if value.empty?
       self[:unit] = nil
     else
@@ -243,6 +258,14 @@ class Article < ApplicationRecord
   def supplier_order_unit=(value)
     if value.empty?
       self[:supplier_order_unit] = nil
+    else
+      super
+    end
+  end
+
+  def group_order_unit=(value)
+    if value.empty?
+      self[:group_order_unit] = nil
     else
       super
     end
