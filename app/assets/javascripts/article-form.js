@@ -10,6 +10,7 @@ class ArticleForm {
       this.minimumOrderQuantity$ = $('#article_minimum_order_quantity', this.articleForm$);
       this.billingUnit$ = $('#article_billing_unit', this.articleForm$);
       this.groupOrderUnit$ = $('#article_group_order_unit', this.articleForm$);
+      this.price$ = $('#article_price', this.articleForm$);
       this.priceUnit$ = $('#article_price_unit', this.articleForm$);
       this.select2Config = {
         dropdownParent: this.articleForm$.parents('#modalContainer')
@@ -24,7 +25,9 @@ class ArticleForm {
 
       this.setFieldVisibility();
 
+      this.loadRatios();
       this.prepareRatioDataForSequentialRepresentation();
+      this.convertPriceToPriceUnit();
       this.initializeFormSubmitListener();
     } catch(e) {
       console.log('Could not initialize article form', e);
@@ -32,7 +35,40 @@ class ArticleForm {
   }
 
   initializeFormSubmitListener() {
-    this.articleForm$.submit(() => this.reverseSequentialRatioDataRepresentation());
+    this.articleForm$.submit(() => {
+      this.undoSequentialRatioDataRepresentation();
+      this.loadRatios();
+      this.undoPriceConversion();
+    });
+  }
+
+  // TODO: Code duplication with unit conversion field:
+  getUnitQuantity(unitId) {
+    if (unitId === this.supplierUnitSelect$.val()) {
+      return 1;
+    }
+
+    const ratio = this.ratios.find(ratio => ratio.unit === unitId);
+    if (ratio !== undefined) {
+      return ratio.quantity;
+    }
+
+    const unit = this.units[unitId];
+    const relatedRatio = this.ratios.find(ratio => this.units[ratio.unit].baseUnit === unit.baseUnit);
+    const relatedUnit = this.units[relatedRatio.unit];
+    return relatedRatio.quantity / unit.conversionFactor * relatedUnit.conversionFactor;
+  }
+
+  getUnitRatio(quantity, inputUnit, outputUnit) {
+    return quantity / this.getUnitQuantity(inputUnit) * this.getUnitQuantity(outputUnit);
+  }
+
+  undoPriceConversion() {
+    const relativePrice = this.price$.val();
+    const ratio = this.getUnitRatio(1, this.priceUnit$.val(), this.groupOrderUnit$.val());
+    const groupOrderUnitPrice = relativePrice / ratio;
+    const hiddenPriceField$ = $(`<input type="hidden" name="${this.price$.attr('name')}" value="${groupOrderUnitPrice}" />`);
+    this.articleForm$.append(hiddenPriceField$);
   }
 
   loadAvailableUnits() {
@@ -215,9 +251,16 @@ class ArticleForm {
 
     unitsSelectedAbove.push(...selectedRatioUnits);
 
-    this.updateUnitsInSelect(unitsSelectedAbove, this.billingUnit$);
-    this.updateUnitsInSelect(unitsSelectedAbove, this.groupOrderUnit$);
-    this.updateUnitsInSelect(unitsSelectedAbove, this.priceUnit$);
+    const availableUnits = [];
+    for (const unitSelectedAbove of unitsSelectedAbove) {
+      availableUnits.push(unitSelectedAbove, ...this.availableUnits.filter(unit =>
+        unit.key !== unitSelectedAbove.key && unit.baseUnit === unitSelectedAbove.key
+      ));
+    }
+
+    this.updateUnitsInSelect(availableUnits, this.billingUnit$);
+    this.updateUnitsInSelect(availableUnits, this.groupOrderUnit$);
+    this.updateUnitsInSelect(availableUnits, this.priceUnit$);
   }
 
   updateUnitsInSelect(units, unitSelect$) {
@@ -291,20 +334,39 @@ class ArticleForm {
     }
   }
 
-  reverseSequentialRatioDataRepresentation() {
+  convertPriceToPriceUnit() {
+    const groupOrderUnitPrice = this.price$.val();
+    const ratio = this.getUnitRatio(1, this.priceUnit$.val(), this.groupOrderUnit$.val());
+    const relativePrice = groupOrderUnitPrice * ratio;
+    this.price$.val(relativePrice);
+  }
+
+  loadRatios() {
+    this.ratios = [];
+    this.unitRatiosTable$.find('tr').each((_, element) => {
+      const tr$ = $(element);
+      const unit = tr$.find(`select[name^="article[article_unit_ratios_attributes]"][name$="[unit]"]`).val();
+      const quantity = tr$.find(`input[name^="article[article_unit_ratios_attributes]"][name$="[quantity]"]:last`).val();
+      this.ratios.push({unit, quantity});
+    });
+  }
+
+  undoSequentialRatioDataRepresentation() {
     let previousValue;
     $(`input[name^="article[article_unit_ratios_attributes]"][name$="[quantity]"]`).each((_, field) => {
       let currentField$ = $(field);
+      let quantity = currentField$.val();
 
       if (previousValue !== undefined) {
+        const td$ = currentField$.parents('td');
         const name = currentField$.attr('name');
         const index = name.match(/article\[article_unit_ratios_attributes\]\[([0-9]+)\]/)[1];
-        const currentValue = currentField$.val();
-        currentField$ = $(`<input type="hidden" name="${ratioQuantityFieldNameByIndex(index)}" value="${currentValue * previousValue}" />`);
-        this.articleForm$.append(currentField$)
+        quantity = quantity * previousValue;
+        currentField$ = $(`<input type="hidden" name="${ratioQuantityFieldNameByIndex(index)}" value="${quantity}" />`);
+        td$.append(currentField$);
       }
 
-      previousValue = currentField$.val();
+      previousValue = quantity;
     });
   }
 }

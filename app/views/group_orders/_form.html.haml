@@ -20,7 +20,13 @@
         indexAsync: true
       });
     });*/
-    new GroupOrderForm($('.group_order_form'), units);
+    new GroupOrderForm($('.group_order_form'), {
+      units,
+      toleranceIsCostly: #{FoodsoftConfig[:tolerance_is_costly]},
+      groupBalance: #{group_balance},
+      minimumBalance: #{FoodsoftConfig[:minimum_balance] or 0},
+      stockit: #{@order.stockit?}
+    });
 
 - title t('.title'), false
 .row-fluid
@@ -66,13 +72,7 @@
           %i.icon.icon-remove
 
 = form_for @group_order, html: {class: 'group_order_form'} do |f|
-  %template#unit_conversion_popover_content_template
-    %div.popover_contents
-      .d-flex
-        %input.quantity{:type => 'number'}
-        %select.unit
-      %input.cancel.btn{:type => 'button', :value => t('helpers.unit_conversion_fields.cancel')}
-      %input.apply.btn.btn-primary{:type => 'button', :value => t('helpers.unit_conversion_fields.apply')}
+  = render 'shared/js_templates/unit_conversion_popover_template'
   = f.hidden_field :lock_version
   = f.hidden_field :order_id
   = f.hidden_field :updated_by_user_id
@@ -117,7 +117,11 @@
 
             - quantity_data = ratio_quantity_data(order_article, order_article.article.group_order_unit)
             - quantity_data['ratio-group-order-unit-supplier-unit'] = @ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit]
-            %td.quantity
+            - quantity_data['others_quantity'] = @ordering_data[:order_articles][order_article.id][:others_quantity]
+            - quantity_data['others_tolerance'] = @ordering_data[:order_articles][order_article.id][:others_tolerance]
+            - quantity_data['used_quantity'] = @ordering_data[:order_articles][order_article.id][:used_quantity]
+            - quantity_data['price'] = @ordering_data[:order_articles][order_article.id][:price]
+            %td.quantity.group-order-input
               %span.used= @ordering_data[:order_articles][order_article.id][:used_quantity]
               +
               %span.unused= @ordering_data[:order_articles][order_article.id][:quantity] - @ordering_data[:order_articles][order_article.id][:used_quantity]
@@ -128,7 +132,7 @@
                 %a.btn.btn-ordering.increase
                   %i.icon-plus
 
-            %td.tolerance{style: ('display:none' if @order.stockit?)}
+            %td.tolerance.group-order-input{style: ('display:none' if @order.stockit?)}
               - if (@ordering_data[:order_articles][order_article.id][:unit] > 1)
                 %span.used= @ordering_data[:order_articles][order_article.id][:used_tolerance]
                 +
@@ -141,7 +145,7 @@
                     %i.icon-plus
 
             %td{id: "td_price_#{order_article.id}", style: "text-align:right; padding-right:10px; width:4em"}
-              %span{id: "price_#{order_article.id}_display"}= number_to_currency(@ordering_data[:order_articles][order_article.id][:total_price])
+              %span{id: "price_#{order_article.id}_display", data: {price: @ordering_data[:order_articles][order_article.id][:total_price]}}= number_to_currency(@ordering_data[:order_articles][order_article.id][:total_price])
               .article-info
                 .article-name= order_article.article.name
                 .pull-right

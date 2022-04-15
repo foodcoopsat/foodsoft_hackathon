@@ -3,13 +3,7 @@
   :javascript
     const units = #{raw(ArticleUnits.units.to_json)};
     $('.units_received').each((_, field) => new UnitConversionField($(field), units, $('#unit_conversion_popover_content_template')));
-%template#unit_conversion_popover_content_template
-  %div.popover_contents
-    .d-flex
-      %input.quantity{:type => 'number'}
-      %select.unit
-    %input.cancel.btn{:type => 'button', :value => t('helpers.unit_conversion_fields.cancel')}
-    %input.apply.btn.btn-primary{:type => 'button', :value => t('helpers.unit_conversion_fields.apply')}
+= render 'shared/js_templates/unit_conversion_popover_template'
 = fields_for 'order_articles', order_article, index: order_article.id do |form|
   - cssclass = "order-article #{cycle('even', 'odd', name: 'articles')}"
   - cssclass += " unavailable" if (order_article.units_billed||order_article.units_to_order)==0 and order_article.units_received.nil?

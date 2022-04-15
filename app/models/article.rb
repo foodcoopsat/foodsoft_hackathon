@@ -246,7 +246,7 @@ class Article < ApplicationRecord
   end
 
   def
-  # TODO: Maybe use the nilify blanks gem instead of the following three methods?:
+  # TODO: Maybe use the nilify blanks gem instead of the following four methods?:
   def(unit = value)
     if value.empty?
       self[:unit] = nil
@@ -266,6 +266,14 @@ class Article < ApplicationRecord
   def group_order_unit=(value)
     if value.empty?
       self[:group_order_unit] = nil
+    else
+      super
+    end
+  end
+
+  def price_unit=(value)
+    if value.empty?
+      self[:price_unit] = nil
     else
       super
     end

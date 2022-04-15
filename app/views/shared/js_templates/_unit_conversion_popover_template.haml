@@ -1,0 +1,8 @@
+%template#unit_conversion_popover_content_template
+  %div.popover_contents.text-right
+    .d-flex
+      %input.quantity.input-mini.numeric.mr-1{:type => 'number'}
+      %select.unit
+    .conversion-result.mt-1.mb-1
+    %input.cancel.btn{:type => 'button', :value => t('helpers.unit_conversion_fields.cancel')}
+    %input.apply.btn.btn-primary{:type => 'button', :value => t('helpers.unit_conversion_fields.apply')}

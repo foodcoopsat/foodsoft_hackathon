@@ -27,9 +27,26 @@ class UnitConversionField {
   initializeFocusListener() {
     this.field$.popover({title: 'Conversions', placement: 'bottom', trigger: 'manual'});
 
-    this.field$.focus(() => this.field$.popover('show'));
+    this.field$.focus(() => this.openPopover());
 
     this.field$.on('shown.bs.popover', () => this.initializeConversionPopover(this.field$.next('.popover')));
+  }
+
+  openPopover() {
+    $(document).on('mousedown.unit-conversion-field', (e) => {
+      if ($(e.target).parents('.popover').length !== 0 || e.target === this.field$[0]) {
+        return;
+      }
+
+      this.closePopover();
+    });
+    this.field$.popover('show');
+  }
+
+  closePopover() {
+    $(document).off('mousedown.unit-conversion-field');
+    this.field$.off('change.unit-conversion-field');
+    this.field$.popover('hide');
   }
 
   initializeConversionPopover(popover$) {
@@ -46,18 +63,19 @@ class UnitConversionField {
     popoverContent$.append(contents$);
 
     if (showAgainHack) {
-      this.field$.popover('show');
+      this.openPopover();
       return;
     }
 
     this.quantityInput$ = contents$.find('input.quantity');
     this.quantityInput$.val(this.field$.val());
+    this.conversionResult$ = contents$.find('.conversion-result');
     this.unitSelect$ = contents$.find('select.unit');
-    const unitSelectOptions = this.getUnitSelectOptions();
-    this.unitSelect$.append(unitSelectOptions.map(option => $(`<option value${option.value === undefined ? '' : `="${option.value}"`}>${option.label}</option>`)))
+    this.unitSelectOptions = this.getUnitSelectOptions();
+    this.unitSelect$.append(this.unitSelectOptions.map(option => $(`<option value${option.value === undefined ? '' : `="${option.value}"`}>${option.label}</option>`)))
     let initialUnitSelectValue = this.defaultUnit;
     if (initialUnitSelectValue === undefined) {
-      initialUnitSelectValue = unitSelectOptions[0].value;
+      initialUnitSelectValue = this.unitSelectOptions[0].value;
     }
     this.unitSelect$.val(initialUnitSelectValue);
 
@@ -65,10 +83,20 @@ class UnitConversionField {
 
     this.unitSelect$.change(() => this.onUnitSelectChanged());
 
-    contents$.find('input.cancel').click(() => this.field$.popover('hide'));
+    // eslint-disable-next-line no-undef
+    mergeJQueryObjects([this.quantityInput$, this.unitSelect$]).change(() => this.showCurrentConversion())
+    this.quantityInput$.keyup(() => this.quantityInput$.trigger('change'));
+    this.showCurrentConversion();
+
+    this.field$.on('change.unit-conversion-field', () => {
+      this.quantityInput$.val(this.field$.val());
+      this.unitSelect$.val(initialUnitSelectValue);
+    });
+
+    contents$.find('input.cancel').click(() => this.closePopover());
     contents$.find('input.apply').click(() => {
       this.applyConversion();
-      this.field$.popover('hide');
+      this.closePopover();
     });
   }
 
@@ -119,9 +147,19 @@ class UnitConversionField {
     return quantity / this.getUnitQuantity(inputUnit) * this.getUnitQuantity(outputUnit);
   }
 
+  showCurrentConversion() {
+    const unit = this.defaultUnit === undefined ? this.supplierOrderUnit : this.defaultUnit;
+    const unitLabel = this.unitSelectOptions.find(option => option.value === unit).label;
+    this.conversionResult$.text('= ' + this.getConversionResult() + ' x ' + unitLabel);
+  }
+
   applyConversion() {
-    const newValue = this.getUnitRatio(this.quantityInput$.val(), this.unitSelect$.val(), this.defaultUnit === undefined ? this.supplierOrderUnit : this.defaultUnit);
-    this.field$.val(newValue);
+    this.field$.val(this.getConversionResult());
+  }
+
+  getConversionResult() {
+    const result = this.getUnitRatio(this.quantityInput$.val(), this.unitSelect$.val(), this.defaultUnit === undefined ? this.supplierOrderUnit : this.defaultUnit);
+    return Math.round(result * 10000) / 10000;
   }
 
   onUnitSelectChanged() {
