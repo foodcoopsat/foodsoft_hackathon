@@ -191,16 +191,12 @@ class OrderArticle < ApplicationRecord
 
   # @return [Number] Units missing for the last +unit_quantity+ of the article.
   def missing_units
-    raise 'TODO: Not yet implemented' unless article_price.nil?
-
-    unit_ratio = article.get_unit_ratio(1, article.supplier_order_unit, article.group_order_unit)
+    unit_ratio = price.get_unit_ratio(1, price.supplier_order_unit, price.group_order_unit)
     _missing_units(unit_ratio, quantity, tolerance)
   end
 
   def missing_units_was
-    raise 'TODO: Not yet implemented' unless article_price.nil?
-
-    unit_ratio = article.get_unit_ratio(1, article.supplier_order_unit, article.group_order_unit)
+    unit_ratio = price.get_unit_ratio(1, price.supplier_order_unit, price.group_order_unit)
     _missing_units(unit_ratio, quantity_was, tolerance_was)
   end
 

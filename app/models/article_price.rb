@@ -21,6 +21,8 @@ class ArticlePrice < ApplicationRecord
   #   @return [Array<OrderArticle>] Order articles this price is associated with.
   has_many :order_articles
 
+  has_many :article_unit_ratios
+
   localize_input_of :price, :tax, :deposit
 
   validates_presence_of :price, :tax, :deposit, :unit_quantity

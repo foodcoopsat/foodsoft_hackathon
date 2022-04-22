@@ -44,17 +44,24 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
     t.decimal "price", precision: 8, scale: 2, default: "0.0", null: false
     t.decimal "tax", precision: 8, scale: 2, default: "0.0", null: false
     t.decimal "deposit", precision: 8, scale: 2, default: "0.0", null: false
-    t.integer "unit_quantity"
     t.datetime "created_at"
+    t.string "supplier_order_unit"
+    t.string "price_unit"
+    t.string "billing_unit"
+    t.string "group_order_unit"
+    t.float "group_order_granularity", default: 1.0, null: false
+    t.float "minimum_order_quantity"
     t.index ["article_id"], name: "index_article_prices_on_article_id"
   end
 
   create_table "article_unit_ratios", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
-    t.bigint "article_id", null: false
+    t.bigint "article_id"
+    t.bigint "article_price_id"
     t.integer "sort", null: false
     t.float "quantity", null: false
     t.string "unit"
     t.index ["article_id"], name: "index_article_unit_ratios_on_article_id"
+    t.index ["article_price_id"], name: "index_article_unit_ratios_on_article_price_id"
     t.index ["sort"], name: "index_article_unit_ratios_on_sort"
   end
 

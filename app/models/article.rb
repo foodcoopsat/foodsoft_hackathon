@@ -49,7 +49,7 @@ class Article < ApplicationRecord
   #   @return [Array<Order>] Orders this article appears in.
   has_many :orders, through: :order_articles
 
-  has_many :article_unit_ratios
+  has_many :article_unit_ratios, after_add: :on_article_unit_ratios_change, after_remove: :on_article_unit_ratios_change
 
   # Replace numeric seperator with database format
   localize_input_of :price, :tax, :deposit
@@ -222,29 +222,6 @@ class Article < ApplicationRecord
     update_column :deleted_at, Time.now
   end
 
-  def unit_quantity
-    first_ration = article_unit_ratios.first
-    if first_ration.nil?
-      1
-    else
-      first_ration.quantity
-    end
-  end
-
-  def get_unit_ratio_quantity(unit)
-    return 1 if unit == self.supplier_order_unit
-
-    self.article_unit_ratios.find_by_unit(unit).quantity
-  end
-
-  def get_unit_ratio(quantity, input_unit, output_unit)
-    quantity / self.get_unit_ratio_quantity(input_unit) * self.get_unit_ratio_quantity(output_unit)
-  end
-
-  def get_price(output_unit)
-    self.price / self.get_unit_ratio_quantity(output_unit) * self.get_unit_ratio_quantity(self.price_unit)
-  end
-
   def
   # TODO: Maybe use the nilify blanks gem instead of the following four methods?:
   def(unit = value)
@@ -289,17 +266,36 @@ class Article < ApplicationRecord
   # Create an ArticlePrice, when the price-attr are changed.
   def update_price_history
     if price_changed?
-      article_prices.build(
+      article_price = article_prices.build(
         :price => price,
         :tax => tax,
         :deposit => deposit,
-        :unit_quantity => unit_quantity
+        :supplier_order_unit => supplier_order_unit,
+        :price_unit => price_unit,
+        :billing_unit => billing_unit,
+        :group_order_unit => group_order_unit,
+        :group_order_granularity => group_order_granularity,
+        :minimum_order_quantity => minimum_order_quantity
       )
+
+      article_unit_ratios.each do |ratio|
+        ratio = ratio.dup
+        ratio.article_id = nil
+        article_price.article_unit_ratios << ratio
+      end
     end
+
+    @article_unit_ratios_changed = false
+  end
+
+  def on_article_unit_ratios_change(some_change)
+    @article_unit_ratios_changed = true
   end
 
   def price_changed?
-    changed.detect { |attr| attr == 'price' || 'tax' || 'deposit' || 'unit_quantity' } ? true : false
+    changed.any? { |attr| attr == 'price' || 'tax' || 'deposit' || 'supplier_order_unit' || 'price_unit' || 'billing_unit' || 'group_order_unit' || 'group_order_granularity' || 'minimum_order_quantity' || 'article_unit_ratios' } \
+      || @article_unit_ratios_changed \
+      || article_unit_ratios.any?(&:changed?)
   end
 
   # We used have the name unique per supplier+deleted_at+type. With the addition of shared_sync_method all,
