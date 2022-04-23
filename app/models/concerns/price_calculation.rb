@@ -27,7 +27,7 @@ module PriceCalculation
     self.article_unit_ratios.find_by_unit(unit).quantity
   end
 
-  def get_unit_ratio(quantity, input_unit, output_unit)
+  def convert_quantity(quantity, input_unit, output_unit)
     quantity / self.get_unit_ratio_quantity(input_unit) * self.get_unit_ratio_quantity(output_unit)
   end
 

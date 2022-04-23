@@ -1,4 +1,6 @@
 class OrderFax < OrderPdf
+  include ArticlesHelper
+
   BATCH_SIZE = 250
 
   def filename
@@ -59,14 +61,16 @@ class OrderFax < OrderPdf
     total = 0
     data = [I18n.t('documents.order_fax.rows')]
     each_order_article do |oa|
-      subtotal = oa.units_to_order * oa.price.unit_quantity * oa.price.price
+      price = oa.article.get_price(oa.price.supplier_order_unit)
+      subtotal = oa.units_to_order * price
       total += subtotal
       data << [oa.article.order_number,
                oa.units_to_order,
                oa.article.name,
-               oa.price.unit_quantity,
-               oa.article.unit,
-               number_to_currency(oa.price.price),
+               # TODO-article-units: Why should we show the supplier the group order unit quantity?:
+               oa.article.convert_quantity(1, oa.price.supplier_order_unit, oa.price.group_order_unit),
+               format_supplier_article_unit(oa.article),
+               number_to_currency(price),
                number_to_currency(subtotal)]
     end
     data << [I18n.t('documents.order_fax.total'), nil, nil, nil, nil, nil, number_to_currency(total)]
