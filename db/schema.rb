@@ -51,6 +51,7 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
     t.string "group_order_unit"
     t.float "group_order_granularity", default: 1.0, null: false
     t.float "minimum_order_quantity"
+    t.string "unit"
     t.index ["article_id"], name: "index_article_prices_on_article_id"
   end
 

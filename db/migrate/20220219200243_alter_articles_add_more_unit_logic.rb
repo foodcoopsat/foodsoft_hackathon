@@ -17,6 +17,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.column :group_order_unit, :string, length: 3
       t.column :group_order_granularity, :float, null: false, default: 1
       t.column :minimum_order_quantity, :float
+      t.column :unit, :string, null: true, default: nil
     end
 
     create_table :article_unit_ratios do |t|
@@ -66,6 +67,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.remove :group_order_unit
       t.remove :group_order_granularity
       t.remove :minimum_order_quantity
+      t.remove :unit
       t.column :unit_quantity, :integer, null: false
     end
 

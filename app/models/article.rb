@@ -271,6 +271,7 @@ class Article < ApplicationRecord
         :tax => tax,
         :deposit => deposit,
         :supplier_order_unit => supplier_order_unit,
+        :unit => unit,
         :price_unit => price_unit,
         :billing_unit => billing_unit,
         :group_order_unit => group_order_unit,
@@ -293,7 +294,7 @@ class Article < ApplicationRecord
   end
 
   def price_changed?
-    changed.any? { |attr| attr == 'price' || 'tax' || 'deposit' || 'supplier_order_unit' || 'price_unit' || 'billing_unit' || 'group_order_unit' || 'group_order_granularity' || 'minimum_order_quantity' || 'article_unit_ratios' } \
+    changed.any? { |attr| attr == 'price' || 'tax' || 'deposit' || 'supplier_order_unit' || 'unit' || 'price_unit' || 'billing_unit' || 'group_order_unit' || 'group_order_granularity' || 'minimum_order_quantity' || 'article_unit_ratios' } \
       || @article_unit_ratios_changed \
       || article_unit_ratios.any?(&:changed?)
   end

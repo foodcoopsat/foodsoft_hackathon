@@ -12,9 +12,20 @@ class OrderFax < OrderPdf
   end
 
   def body
-    contact = FoodsoftConfig[:contact].symbolize_keys
+    from_paragraph
 
-    # From paragraph
+    recipient_paragraph
+
+    articles_paragraph
+  rescue => exception
+    Rails.logger.info exception.backtrace
+    raise # always reraise
+  end
+
+  private
+
+  def from_paragraph
+    contact = FoodsoftConfig[:contact].symbolize_keys
     bounding_box [margin_box.right - 200, margin_box.top], width: 200 do
       text FoodsoftConfig[:name], size: fontsize(9), align: :right
       move_down 5
@@ -34,8 +45,9 @@ class OrderFax < OrderPdf
         text "#{Supplier.human_attribute_name :email}: #{contact[:email]}", size: fontsize(9), align: :right
       end
     end
+  end
 
-    # Recipient
+  def recipient_paragraph
     bounding_box [margin_box.left, margin_box.top - 60], width: 200 do
       text order.name
       move_down 5
@@ -56,20 +68,21 @@ class OrderFax < OrderPdf
       text "#{Supplier.human_attribute_name :contact_person}: #{order.supplier[:contact_person]}"
       move_down 10
     end
+  end
 
-    # Articles
+  def articles_paragraph
     total = 0
     data = [I18n.t('documents.order_fax.rows')]
     each_order_article do |oa|
-      price = oa.article.get_price(oa.price.supplier_order_unit)
+      price = oa.price.get_price(oa.price.supplier_order_unit)
       subtotal = oa.units_to_order * price
       total += subtotal
       data << [oa.article.order_number,
                oa.units_to_order,
                oa.article.name,
                # TODO-article-units: Why should we show the supplier the group order unit quantity?:
-               oa.article.convert_quantity(1, oa.price.supplier_order_unit, oa.price.group_order_unit),
-               format_supplier_article_unit(oa.article),
+               oa.price.convert_quantity(1, oa.price.supplier_order_unit, oa.price.group_order_unit),
+               format_supplier_article_unit(oa.price),
                number_to_currency(price),
                number_to_currency(subtotal)]
     end
@@ -92,8 +105,6 @@ class OrderFax < OrderPdf
     # headers: ["BestellNr.", "Menge","Name", "Gebinde", "Einheit","Preis/Einheit"],
     # align: {0 => :left}
   end
-
-  private
 
   def order_articles
     order.order_articles.ordered

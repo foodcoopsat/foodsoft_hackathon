@@ -1,5 +1,5 @@
 namespace :units do
-  task :convert do
+  task :convert => :environment do
     base_unit_entries = []
 
     un_ece_20_units = YAML.safe_load(ERB.new(File.read(File.expand_path('config/units-of-measure/un-ece-20.yml', Rails.root))).result)
@@ -37,6 +37,7 @@ namespace :units do
       base_unit_entries << unit if is_base_unit
     end
 
+    # rubocop:disable Style/CombinableLoops
     un_ece_20_units.each do |unit|
       next if unit['conversion']['unit'].blank?
 
@@ -47,6 +48,7 @@ namespace :units do
     un_ece_20_units.each do |unit|
       unit['conversion'].delete('unit')
     end
+    # rubocop:enable Style/CombinableLoops
 
     File.write(File.expand_path('config/units-of-measure/un-ece-20-remastered.yml', Rails.root), un_ece_20_units.to_yaml)
   end
