@@ -81,7 +81,7 @@ class OrderArticle < ApplicationRecord
   #      4        |    5     |     4     |           2
   #
   def calculate_units_to_order(quantity, tolerance = 0)
-    unit_size = price.unit_quantity
+    unit_size = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
     units = quantity / unit_size
     remainder = quantity % unit_size
     units += ((remainder > 0) && (remainder + tolerance >= unit_size) ? 1 : 0)
@@ -89,21 +89,22 @@ class OrderArticle < ApplicationRecord
 
   # Calculate price for ordered quantity.
   def total_price
-    units * price.unit_quantity * price.price
+    units * price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit) * price.price
   end
 
   # Calculate gross price for ordered qunatity.
   def total_gross_price
-    units * price.unit_quantity * price.gross_price
+    units * price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit) * price.gross_price
   end
 
   def ordered_quantities_different_from_group_orders?(ordered_mark = "!", billed_mark = "?", received_mark = "?")
+    converted_quantity = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
     if not units_received.nil?
-      ((units_received * price.unit_quantity) == group_orders_sum[:quantity]) ? false : received_mark
+      ((units_received * converted_quantity) == group_orders_sum[:quantity]) ? false : received_mark
     elsif not units_billed.nil?
-      ((units_billed * price.unit_quantity) == group_orders_sum[:quantity]) ? false : billed_mark
+      ((units_billed * converted_quantity) == group_orders_sum[:quantity]) ? false : billed_mark
     elsif not units_to_order.nil?
-      ((units_to_order * price.unit_quantity) == group_orders_sum[:quantity]) ? false : ordered_mark
+      ((units_to_order * converted_quantity) == group_orders_sum[:quantity]) ? false : ordered_mark
     else
       nil # can happen in integration tests
     end

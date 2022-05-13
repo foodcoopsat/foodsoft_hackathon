@@ -120,9 +120,9 @@ class GroupOrderForm {
 
     const missing$ = row$.find('.missing-units');
 
-    const quantity = parseFloat(quantity$.val());
+    const quantity = parseFloat(quantity$.val().trim().replace(',', '.'));
     const granularity = parseFloat(quantity$.attr('step'));
-    const tolerance = parseFloat(tolerance$.val());
+    const tolerance = tolerance$.length === 1 ? parseFloat(tolerance$.val().trim().replace(',', '.')) : 0;
     const packSize = quantity$.data('ratio-group-order-unit-supplier-unit');
     const othersQuantity = quantity$.data('others-quantity');
     const othersTolerance = quantity$.data('others-tolerance');
@@ -153,7 +153,7 @@ class GroupOrderForm {
     const missing = this.calcMissingItems(packSize, totalQuantity, totalTolerance)
 
     used$.text(isNaN(used) ? '?' : used);
-    unused$.text(isNaN(unused) ? '?' : unused);
+    unused$.text(isNaN(unused) ? '?' : round(unused, 2));
 
     usedTolerance$.text(isNaN(usedTolerance) ? '?' : usedTolerance);
     unusedTolerance$.text(isNaN(unusedTolerance) ? '?' : unusedTolerance);
@@ -167,7 +167,7 @@ class GroupOrderForm {
     totalPrice$.text(I18n.l('currency', totalPrice));
     totalPrice$.data('price', totalPrice);
 
-    missing$.text(missing);
+    missing$.text(round(missing, 2));
     if (packSize > 1) {
       this.setRowStyle(row$, missing, granularity);
     }
@@ -200,4 +200,10 @@ class GroupOrderForm {
     var remainder = quantity % packSize
     return (remainder > 0 && (remainder + tolerance >= packSize));
   }
+}
+
+
+function round(num, precision) {
+  const factor = precision * Math.pow(10, precision);
+  return Math.round((num + Number.EPSILON) * factor) / factor;
 }

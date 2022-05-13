@@ -204,7 +204,7 @@ class Order < ApplicationRecord
     total = 0
     if type == :net || type == :gross || type == :fc
       for oa in order_articles.ordered.includes(:article, :article_price)
-        quantity = oa.units * oa.price.unit_quantity
+        quantity = oa.units * oa.price.convert_quantity(1, oa.price.supplier_order_unit, oa.price.group_order_unit)
         case type
         when :net
           total += quantity * oa.price.price

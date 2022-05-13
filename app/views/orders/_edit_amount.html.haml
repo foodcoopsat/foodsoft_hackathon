@@ -1,8 +1,7 @@
 -# NOTE: if you modify tiny details here you must also change them in `receive_on_order_article_update.js.erb`
 - content_for :javascript do
   :javascript
-    const units = #{raw(ArticleUnits.units.to_json)};
-    $('.units_received').each((_, field) => new UnitConversionField($(field), units, $('#unit_conversion_popover_content_template')));
+    $('.units_received').each((_, field) => new UnitConversionField($(field), #{raw(ArticleUnits.units.to_json)}, $('#unit_conversion_popover_content_template'), false));
 = render 'shared/js_templates/unit_conversion_popover_template'
 = fields_for 'order_articles', order_article, index: order_article.id do |form|
   - cssclass = "order-article #{cycle('even', 'odd', name: 'articles')}"

@@ -133,7 +133,7 @@
                   %i.icon-plus
 
             %td.tolerance.group-order-input{style: ('display:none' if @order.stockit?)}
-              - if (@ordering_data[:order_articles][order_article.id][:unit] > 1)
+              - if (@ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit] != 1)
                 %span.used= @ordering_data[:order_articles][order_article.id][:used_tolerance]
                 +
                 %span.unused= @ordering_data[:order_articles][order_article.id][:tolerance] - @ordering_data[:order_articles][order_article.id][:used_tolerance]

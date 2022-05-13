@@ -100,6 +100,7 @@ class ArticleForm {
     this.filterAvailableRatioUnits();
     this.setMinimumOrderUnitDisplay();
     this.updateAvailableBillingAndGroupOrderUnits();
+    this.updateUnitMultiplierLabels();
   }
 
   setMinimumOrderUnitDisplay() {

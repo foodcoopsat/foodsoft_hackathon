@@ -5,7 +5,7 @@
         %h4.name.pull-left
           = order_article.article.name
           %small
-            = "(#{order_article.article.unit}, #{number_to_currency order_article.price.fc_price}"
+            = "(#{format_group_order_unit(order_article.article)}, #{number_to_currency order_article.price.fc_price}"
             - pkg_info = pkg_helper(order_article.price)
             = ", #{pkg_info}".html_safe unless pkg_info.blank?
             )

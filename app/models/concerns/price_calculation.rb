@@ -2,11 +2,11 @@ module PriceCalculation
   extend ActiveSupport::Concern
 
   def unit_quantity
-    first_ration = article_unit_ratios.first
-    if first_ration.nil?
+    first_ratio = article_unit_ratios.first
+    if first_ratio.nil?
       1
     else
-      first_ration.quantity
+      first_ratio.quantity
     end
   end
 
