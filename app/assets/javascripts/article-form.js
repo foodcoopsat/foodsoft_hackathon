@@ -254,9 +254,14 @@ class ArticleForm {
 
     const availableUnits = [];
     for (const unitSelectedAbove of unitsSelectedAbove) {
-      availableUnits.push(unitSelectedAbove, ...this.availableUnits.filter(unit =>
-        unit.key !== unitSelectedAbove.key && unit.baseUnit === unitSelectedAbove.key
-      ));
+      availableUnits.push(unitSelectedAbove, ...this.availableUnits.filter(availableUnit => {
+        if (availableUnit.key === unitSelectedAbove.key) {
+          return false;
+        }
+
+        const otherUnit = this.availableUnits.find(unit => unit.key === unitSelectedAbove.key);
+        return otherUnit !== undefined && availableUnit.baseUnit === otherUnit.baseUnit;
+      }));
     }
 
     this.updateUnitsInSelect(availableUnits, this.billingUnit$);
