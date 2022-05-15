@@ -115,12 +115,13 @@
               - else
                 %span.missing-units= @ordering_data[:order_articles][order_article.id][:missing_units]
 
-            - quantity_data = ratio_quantity_data(order_article, order_article.article.group_order_unit)
+            - quantity_data = ratio_quantity_data(order_article, order_article.price.group_order_unit)
             - quantity_data['ratio-group-order-unit-supplier-unit'] = @ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit]
             - quantity_data['others_quantity'] = @ordering_data[:order_articles][order_article.id][:others_quantity]
             - quantity_data['others_tolerance'] = @ordering_data[:order_articles][order_article.id][:others_tolerance]
             - quantity_data['used_quantity'] = @ordering_data[:order_articles][order_article.id][:used_quantity]
             - quantity_data['price'] = @ordering_data[:order_articles][order_article.id][:price]
+            - quantity_data['minimum_order_quantity'] = order_article.price.minimum_order_quantity unless order_article.price.minimum_order_quantity.nil?
             %td.quantity.group-order-input
               %span.used= @ordering_data[:order_articles][order_article.id][:used_quantity]
               +
@@ -128,19 +129,19 @@
               .btn-group
                 %a.btn.btn-ordering.decrease
                   %i.icon-minus
-                %input.goa-quantity{type: "number", name: "group_order[group_order_articles_attributes][#{order_article.id}][quantity]", value: @ordering_data[:order_articles][order_article.id][:quantity], data: quantity_data, autocomplete: 'off', class: 'input-mini numeric', min: 0, step: order_article.article.group_order_granularity}
+                %input.goa-quantity{type: "number", name: "group_order[group_order_articles_attributes][#{order_article.id}][quantity]", value: @ordering_data[:order_articles][order_article.id][:quantity], data: quantity_data, autocomplete: 'off', class: 'input-mini numeric', min: 0, step: order_article.price.group_order_granularity}
                 %a.btn.btn-ordering.increase
                   %i.icon-plus
 
             %td.tolerance.group-order-input{style: ('display:none' if @order.stockit?)}
-              - if (@ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit] != 1)
+              - if (@ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit] != 1 || (order_article.price.minimum_order_quantity.presence || 0) > order_article.price.group_order_granularity)
                 %span.used= @ordering_data[:order_articles][order_article.id][:used_tolerance]
                 +
                 %span.unused= @ordering_data[:order_articles][order_article.id][:tolerance] - @ordering_data[:order_articles][order_article.id][:used_tolerance]
                 .btn-group
                   %a.btn.btn-ordering.decrease
                     %i.icon-minus
-                  %input.goa-tolerance{type: "number", name: "group_order[group_order_articles_attributes][#{order_article.id}][tolerance]", data: quantity_data, value: @ordering_data[:order_articles][order_article.id][:tolerance], autocomplete: 'off', class: 'input-mini numeric', min: 0, step: order_article.article.group_order_granularity, max: @ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit]}
+                  %input.goa-tolerance{type: "number", name: "group_order[group_order_articles_attributes][#{order_article.id}][tolerance]", data: quantity_data, value: @ordering_data[:order_articles][order_article.id][:tolerance], autocomplete: 'off', class: 'input-mini numeric', min: 0, step: order_article.price.group_order_granularity, max: @ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit]}
                   %a.btn.btn-ordering.increase
                     %i.icon-plus
 

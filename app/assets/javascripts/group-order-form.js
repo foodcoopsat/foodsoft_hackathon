@@ -127,6 +127,7 @@ class GroupOrderForm {
     const othersQuantity = quantity$.data('others-quantity');
     const othersTolerance = quantity$.data('others-tolerance');
     const usedQuantity = quantity$.data('used-quantity');
+    const minimumOrderQuantity = quantity$.data('minimum-order-quantity');
     const price = quantity$.data('price');
 
     const totalQuantity = quantity + othersQuantity;

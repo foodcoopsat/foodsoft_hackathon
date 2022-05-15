@@ -109,10 +109,10 @@ module OrdersHelper
 
   def ratio_quantity_data(order_article, default_unit = nil)
     data = {}
-    data["supplier-order-unit"] = order_article.article.supplier_order_unit
+    data["supplier-order-unit"] = order_article.price.supplier_order_unit
     data["default-unit"] = default_unit
-    data["custom-unit"] = order_article.article.unit
-    order_article.article.article_unit_ratios.all.each_with_index do |ratio, index|
+    data["custom-unit"] = order_article.price.unit
+    order_article.price.article_unit_ratios.all.each_with_index do |ratio, index|
       data["ratio-quantity-#{index}"] = ratio.quantity
       data["ratio-unit-#{index}"] = ratio.unit
     end
