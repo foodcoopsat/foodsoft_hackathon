@@ -83,6 +83,10 @@ class GroupOrderForm {
     }
     let value = parseFloat(field$.val());
 
+    if (isNaN(value)) {
+      value = 0;
+    }
+
     value += step;
     let remainder = value % step;
     if (remainder !== 0) {
@@ -120,9 +124,15 @@ class GroupOrderForm {
 
     const missing$ = row$.find('.missing-units');
 
-    const quantity = parseFloat(quantity$.val().trim().replace(',', '.'));
+    let quantity = parseFloat(quantity$.val().trim().replace(',', '.'));
+    if (isNaN(quantity)) {
+      quantity = 0;
+    }
     const granularity = parseFloat(quantity$.attr('step'));
-    const tolerance = tolerance$.length === 1 ? parseFloat(tolerance$.val().trim().replace(',', '.')) : 0;
+    let tolerance = tolerance$.length === 1 ? parseFloat(tolerance$.val().trim().replace(',', '.')) : 0;
+    if (isNaN(tolerance)) {
+      tolerance = 0;
+    }
     const packSize = quantity$.data('ratio-group-order-unit-supplier-unit');
     const othersQuantity = quantity$.data('others-quantity');
     const othersTolerance = quantity$.data('others-tolerance');
@@ -133,14 +143,14 @@ class GroupOrderForm {
     const totalQuantity = quantity + othersQuantity;
     const totalTolerance = tolerance + othersTolerance;
 
-    const totalPacks = this.calculatePacks(packSize, totalQuantity, totalTolerance)
+    const totalPacks = this.calculatePacks(packSize, totalQuantity, totalTolerance, minimumOrderQuantity)
 
     const totalPrice = price * (quantity + (this.toleranceIsCostly ? tolerance : 0));
 
     // update used/unused quantity
     const available = Math.max(0, totalPacks * packSize - othersQuantity);
     let used = Math.min(available, quantity);
-    // ensure that at least the amout of items this group has already been allocated is used
+    // ensure that at least the amount of items this group has already been allocated is used
     if (quantity >= usedQuantity && used < usedQuantity) {
       used = usedQuantity;
     }
@@ -151,15 +161,15 @@ class GroupOrderForm {
     const usedTolerance = Math.min(availableForTolerance, tolerance);
     const unusedTolerance = tolerance - usedTolerance;
 
-    const missing = this.calcMissingItems(packSize, totalQuantity, totalTolerance)
+    const missing = this.calcMissingItems(packSize, totalQuantity, totalTolerance, minimumOrderQuantity);
 
-    used$.text(isNaN(used) ? '?' : used);
-    unused$.text(isNaN(unused) ? '?' : round(unused, 2));
+    used$.text(used);
+    unused$.text(unused);
 
-    usedTolerance$.text(isNaN(usedTolerance) ? '?' : usedTolerance);
-    unusedTolerance$.text(isNaN(unusedTolerance) ? '?' : unusedTolerance);
+    usedTolerance$.text(usedTolerance);
+    unusedTolerance$.text(unusedTolerance);
 
-    totalPacks$.text(totalPacks);
+    totalPacks$.text(isNaN(totalPacks) ? '?' : totalPacks);
 
     totalPacks$.css('color', this.packCompletedFromTolerance(packSize, totalQuantity, totalTolerance) ? 'grey' : 'auto');
 
@@ -168,8 +178,8 @@ class GroupOrderForm {
     totalPrice$.text(I18n.l('currency', totalPrice));
     totalPrice$.data('price', totalPrice);
 
-    missing$.text(round(missing, 2));
-    if (packSize > 1) {
+    missing$.text(missing);
+    if (packSize > 1 || minimumOrderQuantity > 1) {
       this.setRowStyle(row$, missing, granularity);
     }
   }
@@ -183,13 +193,21 @@ class GroupOrderForm {
     }
   }
 
-  calculatePacks(packSize, quantity, tolerance) {
+  calculatePacks(packSize, quantity, tolerance, minimumOrderQuantity) {
+    if (quantity < minimumOrderQuantity) {
+      return 0;
+    }
+
     const used = Math.floor(quantity / packSize)
     const remainder = quantity % packSize
     return used + ((remainder > 0) && (remainder + tolerance >= packSize) ? 1 : 0)
   }
 
-  calcMissingItems(packSize, quantity, tolerance) {
+  calcMissingItems(packSize, quantity, tolerance, minimumOrderQuantity) {
+    if (quantity < minimumOrderQuantity) {
+      return minimumOrderQuantity - quantity;
+    }
+
     var remainder = quantity % packSize
     if (isNaN(remainder)) {
       return remainder;

@@ -121,7 +121,7 @@
             - quantity_data['others_tolerance'] = @ordering_data[:order_articles][order_article.id][:others_tolerance]
             - quantity_data['used_quantity'] = @ordering_data[:order_articles][order_article.id][:used_quantity]
             - quantity_data['price'] = @ordering_data[:order_articles][order_article.id][:price]
-            - quantity_data['minimum_order_quantity'] = order_article.price.minimum_order_quantity unless order_article.price.minimum_order_quantity.nil?
+            - quantity_data['minimum_order_quantity'] = @ordering_data[:order_articles][order_article.id][:minimum_order_quantity] unless @ordering_data[:order_articles][order_article.id][:minimum_order_quantity].nil?
             %td.quantity.group-order-input
               %span.used= @ordering_data[:order_articles][order_article.id][:used_quantity]
               +

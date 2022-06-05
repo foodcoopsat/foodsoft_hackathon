@@ -125,7 +125,7 @@ class GroupOrderArticle < ApplicationRecord
       total = order_article.article.quantity
       logger.debug "<#{order_article.article.name}> (stock) => #{total}"
     else
-      total = order_article.units_to_order * order_article.price.unit_quantity
+      total = order_article.price.convert_quantity(order_article.units_to_order, order_article.article.supplier_order_unit, order_article.article.group_order_unit)
       logger.debug "<#{order_article.article.name}> units_to_order #{order_article.units_to_order} => #{total}"
     end
 

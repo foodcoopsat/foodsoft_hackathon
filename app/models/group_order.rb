@@ -55,7 +55,8 @@ class GroupOrder < ApplicationRecord
           :total_price => (goa ? goa.total_price : 0),
           :missing_units => order_article.missing_units,
           :ratio_group_order_unit_supplier_unit => order_article.article.convert_quantity(1, order_article.article.supplier_order_unit, order_article.article.group_order_unit),
-          :quantity_available => (order.stockit? ? order_article.article.quantity_available : 0)
+          :quantity_available => (order.stockit? ? order_article.article.quantity_available : 0),
+          :minimum_order_quantity => order_article.price.minimum_order_quantity ? order_article.price.convert_quantity(order_article.price.minimum_order_quantity, order_article.article.supplier_order_unit, order_article.article.group_order_unit) : nil
         }
       end
     end
