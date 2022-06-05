@@ -157,7 +157,7 @@ class GroupOrderForm {
 
     const unused = quantity - used;
 
-    const availableForTolerance = Math.max(0, available - used - othersTolerance);
+    const availableForTolerance = quantity < minimumOrderQuantity ? minimumOrderQuantity - quantity : Math.max(0, available - used - othersTolerance);
     const usedTolerance = Math.min(availableForTolerance, tolerance);
     const unusedTolerance = tolerance - usedTolerance;
 
@@ -169,7 +169,7 @@ class GroupOrderForm {
     usedTolerance$.text(usedTolerance);
     unusedTolerance$.text(unusedTolerance);
 
-    totalPacks$.text(isNaN(totalPacks) ? '?' : totalPacks);
+    totalPacks$.text(totalPacks);
 
     totalPacks$.css('color', this.packCompletedFromTolerance(packSize, totalQuantity, totalTolerance) ? 'grey' : 'auto');
 
@@ -205,7 +205,7 @@ class GroupOrderForm {
 
   calcMissingItems(packSize, quantity, tolerance, minimumOrderQuantity) {
     if (quantity < minimumOrderQuantity) {
-      return minimumOrderQuantity - quantity;
+      return minimumOrderQuantity - quantity + tolerance;
     }
 
     var remainder = quantity % packSize

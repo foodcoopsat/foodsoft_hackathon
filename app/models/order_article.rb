@@ -81,12 +81,11 @@ class OrderArticle < ApplicationRecord
   #      4        |    5     |     4     |           2
   #
   def calculate_units_to_order(quantity, tolerance = 0)
-    minimum_order_quantity = price.minimum_order_quantity.nil? ? nil : price.convert_quantity(price.minimum_order_quantity, price.supplier_order_unit, price.group_order_unit)
-    unit_size = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
-    if quantity > 0 && !price.minimum_order_quantity.nil? && quantity < price.minimum_order_quantity && quantity + tolerance >= minimum_order_quantity
-      return price.minimum_order_quantity / unit_size
+    if quantity > 0 && !price.minimum_order_quantity.nil? && quantity < price.minimum_order_quantity && quantity + tolerance >= price.minimum_order_quantity
+      return price.minimum_order_quantity
     end
 
+    unit_size = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
     units = quantity / unit_size
     remainder = quantity % unit_size
     units += ((remainder > 0) && (remainder + tolerance >= unit_size) ? 1 : 0)
