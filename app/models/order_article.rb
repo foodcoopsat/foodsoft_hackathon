@@ -180,7 +180,8 @@ class OrderArticle < ApplicationRecord
           else
             # Creates a new article_price if neccessary
             # Set created_at timestamp to order ends, to make sure the current article price isn't changed
-            create_article_price!(price_attributes.merge(article_id: article_id, created_at: order.ends)) and save
+            price_attributes = price_attributes.merge(article_id: article_id, created_at: order.ends)
+            create_article_price!(price_attributes) and save
           end
 
           # Updates ordergroup values

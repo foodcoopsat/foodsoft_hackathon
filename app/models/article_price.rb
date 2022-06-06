@@ -29,4 +29,6 @@ class ArticlePrice < ApplicationRecord
   validates_numericality_of :price, :greater_than_or_equal_to => 0
   validates_numericality_of :unit_quantity, :greater_than => 0
   validates_numericality_of :deposit, :tax
+
+  accepts_nested_attributes_for :article_unit_ratios, allow_destroy: true
 end

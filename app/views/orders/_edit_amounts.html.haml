@@ -2,8 +2,12 @@
 - new_article_data = articles_for_select2(new_articles, @order_articles.map(&:article_id)) {|a| "#{a.name} (#{a.unit_quantity}⨯#{a.unit})"}
 - content_for :javascript do
   :javascript
-    $('.units_received').each((_, field) => new UnitConversionField($(field), #{raw(ArticleUnits.units.to_json)}, $('#unit_conversion_popover_content_template'), false));
-    new ReceiveOrderForm($('table#order_articles').parents('form'), '#{j pkg_helper_icon}');
+    $('.units_received').each((_, field) => $(field).unitConversionField({
+      units: #{raw(ArticleUnits.units.to_json)},
+      popoverTemplate$: $('#unit_conversion_popover_content_template'),
+      useTargetUnitForStep: false
+    }));
+    $('table#order_articles').parents('form').receiveOrderForm({packageHelperIconOrAction: '#{j pkg_helper_icon}', newOrderArticlePath:'#{order_order_articles_path(@order)}'});
 = render 'shared/js_templates/unit_conversion_popover_template'
 %table#order_articles.ordered-articles.table.table-striped.stupidtable{style: 'margin-bottom: 0'}
   %thead

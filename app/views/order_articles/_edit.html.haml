@@ -2,7 +2,7 @@
   .modal-header
     = close_button :modal
     %h3= t '.title'
-  .modal-body
+  .modal-body.article-form
     - if params[:without_units]
       = hidden_field_tag :without_units, true
     - else
@@ -22,8 +22,12 @@
         %div.alert= t '.stock_alert'
       - else
         = simple_fields_for :article_price, @order_article.article_price do |fprice|
-          = render partial: 'shared/article_fields_units', locals: {f_unit: f, f_uq: fprice}
-          = render partial: 'shared/article_fields_price', locals: {f: fprice}
+          :javascript
+            const articleUnitRatioTemplate$ = $($.parseHTML("#{escape_javascript(render(partial: 'shared/article_unit_ratio', locals: {article_unit_ratio: @empty_article_unit_ratio, f: fprice, article_unit_ratio_counter: -1}))}"));
+            const units = #{raw(ArticleUnits.units.to_json)};
+            new ArticleForm(articleUnitRatioTemplate$, $('.article-form').parents('form'), units, 'article_price');
+          = render partial: 'shared/article_fields_units', locals: {f: fprice, article: @order_article.article_price}
+          = render partial: 'shared/article_fields_price', locals: {f: fprice, article: @order_article.article_price}
 
       = form.input :update_global_price, as: :boolean
       = f.input :order_number

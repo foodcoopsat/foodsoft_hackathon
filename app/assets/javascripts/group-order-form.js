@@ -27,12 +27,10 @@ class GroupOrderForm {
     // eslint-disable-next-line no-undef
     const quantityAndTolerance$ = mergeJQueryObjects([quantity$, tolerance$]);
     // eslint-disable-next-line no-undef
-    quantityAndTolerance$.each((_, element) => new UnitConversionField(
-      $(element),
-      this.units,
-      this.form$.find('#unit_conversion_popover_content_template'),
-      'group-order-unit'
-    ));
+    quantityAndTolerance$.each((_, element) => $(element).unitConversionField({
+      units: this.units,
+      popoverTemplate$: this.form$.find('#unit_conversion_popover_content_template'),
+    }));
     row$.find('.btn-ordering').mousedown((e) => e.preventDefault());
     row$.find('.btn-ordering.decrease').click((event) => this.increaseOrDecrease($(event.target).parents('.btn-group').find('input.numeric'), false));
     row$.find('.btn-ordering.increase').click((event) => this.increaseOrDecrease($(event.target).parents('.btn-group').find('input.numeric'), true));
