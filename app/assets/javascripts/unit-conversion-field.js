@@ -14,6 +14,8 @@ class UnitConversionField {
       return;
     }
 
+    this.converter = new UnitsConverter(this.units, this.ratios, this.supplierOrderUnit);
+
     this.initializeFocusListener();
   }
 
@@ -134,26 +136,6 @@ class UnitConversionField {
     return options;
   }
 
-  getUnitQuantity(unitId) {
-    if (unitId === this.supplierOrderUnit) {
-      return 1;
-    }
-
-    const ratio = this.ratios.find(ratio => ratio.unit === unitId);
-    if (ratio !== undefined) {
-      return ratio.quantity;
-    }
-
-    const unit = this.units[unitId];
-    const relatedRatio = this.ratios.find(ratio => this.units[ratio.unit].baseUnit === unit.baseUnit);
-    const relatedUnit = this.units[relatedRatio.unit];
-    return relatedRatio.quantity / unit.conversionFactor * relatedUnit.conversionFactor;
-  }
-
-  getUnitRatio(quantity, inputUnit, outputUnit) {
-    return quantity / this.getUnitQuantity(inputUnit) * this.getUnitQuantity(outputUnit);
-  }
-
   showCurrentConversion() {
     const unit = this.defaultUnit === undefined ? this.supplierOrderUnit : this.defaultUnit;
     const unitLabel = this.unitSelectOptions.find(option => option.value === unit).label;
@@ -180,18 +162,18 @@ class UnitConversionField {
   }
 
   getConversionResult() {
-    const result = this.getUnitRatio(this.getQuantityInputValue(), convertEmptyStringToUndefined(this.unitSelect$.val()), this.getTargetUnit());
+    const result = this.converter.getUnitRatio(this.getQuantityInputValue(), convertEmptyStringToUndefined(this.unitSelect$.val()), this.getTargetUnit());
     return Math.round(result * 10000) / 10000;
   }
 
   onUnitSelectChanged() {
-    const newValue = this.getUnitRatio(this.getQuantityInputValue(), this.previousUnitSelectValue, convertEmptyStringToUndefined(this.unitSelect$.val()));
+    const newValue = this.converter.getUnitRatio(this.getQuantityInputValue(), this.previousUnitSelectValue, convertEmptyStringToUndefined(this.unitSelect$.val()));
     this.quantityInput$.val(newValue);
 
     const selectedUnit = convertEmptyStringToUndefined(this.unitSelect$.val());
     this.previousUnitSelectValue = selectedUnit;
 
-    const step = this.useTargetUnitForStep ? this.getUnitRatio(1, this.getTargetUnit(), selectedUnit) : 0.001;
+    const step = this.useTargetUnitForStep ? this.converter.getUnitRatio(1, this.getTargetUnit(), selectedUnit) : 0.001;
     this.quantityInput$.attr('step', step);
   }
 }

@@ -48,10 +48,14 @@ module OrdersHelper
   #   Sensible in tables with multiple columns.
   # @return [String] Text showing unit and unit quantity when applicable.
   def pkg_helper(article, options = {})
-    first_ratio = article&.article_unit_ratios&.first
-    return '' if first_ratio.nil? || first_ratio.quantity == 1
+    if options[:unit].nil? || article.supplier_order_unit == options[:unit]
+      first_ratio = article&.article_unit_ratios&.first
+      return '' if first_ratio.nil? || first_ratio.quantity == 1
 
-    uq_text = "× #{first_ratio.quantity} #{ArticleUnits.as_options.invert[first_ratio.unit]}"
+      uq_text = "× #{first_ratio.quantity} #{ArticleUnits.as_options.invert[first_ratio.unit]}"
+    else
+      uq_text = ArticleUnits.as_options.invert[options[:unit]]
+    end
     uq_text = content_tag(:span, uq_text, class: 'hidden-phone') if options[:soft_uq]
     if options[:plain]
       uq_text
@@ -84,13 +88,16 @@ module OrdersHelper
 
   def receive_input_field(form)
     order_article = form.object
-    units_expected = (order_article.units_billed || order_article.units_to_order) *
-                     1.0 * order_article.article.unit_quantity / order_article.article_price.unit_quantity
+    price = order_article.article_price
+    quantity = order_article.units_billed || order_article.units_to_order
+    # units_expected = (order_article.units_billed || order_article.units_to_order) *
+    #                  1.0 * order_article.article.unit_quantity / order_article.article_price.unit_quantity
+    units_expected = price.convert_quantity(quantity, price.supplier_order_unit, price.billing_unit)
 
     input_classes = 'input input-nano units_received'
-    input_classes += ' package' unless order_article.article_price.unit_quantity == 1
-    data = { 'units-expected' => units_expected }
-    data.merge!(self.ratio_quantity_data(order_article))
+    input_classes += ' package' unless price.unit_quantity == 1 || price.supplier_order_unit != price.billing_unit
+    data = { units_expected: units_expected, billing_unit: price.billing_unit }
+    data.merge!(self.ratio_quantity_data(order_article, price.billing_unit))
     input_html = form.text_field :units_received, class: input_classes,
                                                   data: data,
                                                   disabled: order_article.result_manually_changed?,

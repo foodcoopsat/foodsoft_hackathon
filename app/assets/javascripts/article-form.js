@@ -42,25 +42,9 @@ class ArticleForm {
     });
   }
 
-  // TODO: Code duplication with unit conversion field:
-  getUnitQuantity(unitId) {
-    if (unitId === this.supplierUnitSelect$.val()) {
-      return 1;
-    }
-
-    const ratio = this.ratios.find(ratio => ratio.unit === unitId);
-    if (ratio !== undefined) {
-      return ratio.quantity;
-    }
-
-    const unit = this.units[unitId];
-    const relatedRatio = this.ratios.find(ratio => this.units[ratio.unit].baseUnit === unit.baseUnit);
-    const relatedUnit = this.units[relatedRatio.unit];
-    return relatedRatio.quantity / unit.conversionFactor * relatedUnit.conversionFactor;
-  }
-
   getUnitRatio(quantity, inputUnit, outputUnit) {
-    return quantity / this.getUnitQuantity(inputUnit) * this.getUnitQuantity(outputUnit);
+    const converter = new UnitsConverter(this.units, this.ratios, this.supplierUnitSelect$.val());
+    return converter.getUnitRatio(quantity, inputUnit, outputUnit);
   }
 
   undoPriceConversion() {

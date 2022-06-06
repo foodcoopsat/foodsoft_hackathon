@@ -1,0 +1,114 @@
+class ReceiveOrderForm {
+  constructor(receiveForm$, packageHelperIcon) {
+    this.receiveForm$ = receiveForm$;
+    this.packageHelperIcon = packageHelperIcon;
+    $(document).on('change keyup', 'input[data-units-expected]', (e) => {
+      this.updateDelta(e.target);
+    });
+
+    $(document).on('touchclick', '#order_articles .unlocker', () => this.unlockReceiveInputField());
+
+    $(document).on('click', '#set_all_to_zero', () => {
+      $('tbody input').each((_, input) => {
+        $(input).val(0);
+        this.updateDelta(input);
+      });
+    });
+
+    $('input[data-units-expected]').each((_, field) => {
+      this.convertToBillingUnit($(field));
+      this.updateDelta(field);
+    });
+
+    this.receiveForm$.submit(() => {
+      $('input[data-units-expected]').each((_, field) => {
+        this.convertFromBillingUnit($(field));
+      });
+    });
+
+    this.initAddArticle('#add_article');
+  }
+
+  convertFieldUnit(field$, fromUnit, toUnit) {
+    const units = parseFloat(field$.val());
+    if (isNaN(units)) {
+      return;
+    }
+
+    return field$[0].unitConversionField.converter.getUnitRatio(units, fromUnit, toUnit);
+  }
+
+  convertToBillingUnit(field$) {
+    field$.val(this.convertFieldUnit(field$, field$.data('supplier-order-unit'), field$.data('billing-unit')));
+  }
+
+  convertFromBillingUnit(field$) {
+    const convertedValue = this.convertFieldUnit(field$, field$.data('billing-unit'), field$.data('supplier-order-unit'));
+    const hiddenReceivedField$ = $(`<input type="hidden" name="${field$.attr('name')}" value="${convertedValue}" />`);
+    this.receiveForm$.append(hiddenReceivedField$);
+  }
+
+  updateDelta(input) {
+    var units = $(input).val();
+    var expected = $(input).data('units-expected');
+    var delta = Math.round((units-expected)*100)/100.0;
+    var html;
+
+    if (units.replace(/\s/g,"")=="") {
+      // no value
+      html = '';
+    } else if (isNaN(units)) {
+      html = '<i class="icon-remove" style="color: red"></i>';
+    } else if (delta == 0) {
+      // equal value
+      html = '<i class="icon-ok" style="color: green"></i>';
+    } else {
+      if (delta < 0) {
+        html = '<span style="color: red">- '+(-delta)+'</span>';
+      } else /*if (units> expected)*/ {
+        html = '<span style="color: green">+ '+(delta)+'</span>';
+      }
+      // show package icon only if the receive field has one
+      if ($(input).hasClass('package')) {
+        html += this.packageHelperIcon;
+      }
+    }
+
+    $(input).closest('tr').find('.units_delta').html(html);
+
+    // un-dim row when received is nonzero
+    $(input).closest('tr').toggleClass('unavailable', expected == 0 && html=='');
+  }
+
+
+
+  initAddArticle(sel) {
+    $(sel).removeAttr('disabled').select2({
+      placeholder: I18n.t('orders.receive.add_article'),
+      formatNoMatches: () =>  I18n.t('no_articles_available')
+      // TODO implement adding a new article, like in deliveries
+    }).on('change', (e) => {
+      var $input = $(e.target);
+      var selectedArticleId = $input.val();
+      if(!selectedArticleId) {
+        return false;
+      }
+
+      $.ajax({
+        url: '#{order_order_articles_path(@order)}',
+        type: 'post',
+        data: JSON.stringify({order_article: {article_id: selectedArticleId}}),
+        contentType: 'application/json; charset=UTF-8'
+      });
+
+      $input.val('').trigger('change');
+    });
+    $(sel).val('').trigger('change');
+  }
+
+  unlockReceiveInputField() {
+    $('.units_received', $(this).closest('tr')).prop('disabled', false).focus();
+    $(this).closest('.input-prepend').prop('title', I18n.t('orders.edit_amount.field_unlocked_title'));
+    $(this).replaceWith('<i class="icon icon-warning-sign add-on"></i>');
+  }
+}

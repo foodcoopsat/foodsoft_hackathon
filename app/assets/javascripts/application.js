@@ -15,9 +15,11 @@
 //= require i18n
 //= require i18n/translations
 //= require_self
+//= require units-converter
 //= require article-form
 //= require unit-conversion-field
 //= require group-order-form
+//= require receive-order-form
 //= require stupidtable
 //= require touchclick
 //= require delta_input
