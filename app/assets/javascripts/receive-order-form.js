@@ -8,7 +8,7 @@
         this.updateDelta(e.target);
       });
 
-      $(document).on('touchclick', '#order_articles .unlocker', () => this.unlockReceiveInputField());
+      $(document).on('touchclick', '#order_articles .unlocker', (e) => this.unlockReceiveInputField($(e.target)));
 
       $(document).on('click', '#set_all_to_zero', () => {
         $('tbody input').each((_, input) => {
@@ -37,7 +37,11 @@
         return;
       }
 
-      return field$.unitConversionField('getConverter').getUnitRatio(units, fromUnit, toUnit);
+      const converter = field$.unitConversionField('getConverter');
+      if (converter === undefined) {
+        return units;
+      }
+      return converter.getUnitRatio(units, fromUnit, toUnit);
     }
 
     convertToBillingUnit(field$) {
@@ -119,10 +123,10 @@
       $(sel).val('').trigger('change');
     }
 
-    unlockReceiveInputField() {
-      $('.units_received', $(this).closest('tr')).prop('disabled', false).focus();
-      $(this).closest('.input-prepend').prop('title', I18n.t('orders.edit_amount.field_unlocked_title'));
-      $(this).replaceWith('<i class="icon icon-warning-sign add-on"></i>');
+    unlockReceiveInputField(unlockButton$) {
+      $('.units_received', unlockButton$.closest('tr')).prop('disabled', false).focus();
+      unlockButton$.closest('.input-prepend').prop('title', I18n.t('orders.edit_amount.field_unlocked_title'));
+      unlockButton$.replaceWith('<i class="icon icon-warning-sign add-on"></i>');
     }
   }
 

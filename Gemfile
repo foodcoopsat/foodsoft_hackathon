@@ -75,6 +75,7 @@ group :development do
   gem 'mailcatcher'
   gem 'web-console'
   gem 'listen'
+  gem 'byebug'
 
   # Better error output
   gem 'better_errors'

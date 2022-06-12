@@ -29,15 +29,30 @@ module OrdersHelper
       nil
     else
       units_info = []
+      price = order_article.price
       [:units_to_order, :units_billed, :units_received].map do |unit|
         if n = order_article.send(unit)
-          line = n.to_s + ' '
-          line += pkg_helper(order_article.price, options) + ' ' unless n == 0
+          converted_quantity = price.convert_quantity(n, price.supplier_order_unit, price.billing_unit.presence || price.supplier_order_unit)
+          line = converted_quantity.to_s + ' '
+          line += pkg_helper(price, options) + ' ' unless n == 0
           line += OrderArticle.human_attribute_name("#{unit}_short", count: n)
           units_info << line
         end
       end
       units_info.join(', ').html_safe
+    end
+  end
+
+  def ordered_quantities_different_from_group_orders?(order_article, ordered_mark = "!", billed_mark = "?", received_mark = "?")
+    price = order_article.price
+    group_orders_sum_quantity = order_article.group_orders_sum[:quantity]
+    converted_quantity = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
+    if !order_article.units_received.nil?
+      (order_article.units_received * converted_quantity) == group_orders_sum_quantity ? false : received_mark
+    elsif !units_billed.nil?
+      (order_article.units_billed * converted_quantity) == group_orders_sum_quantity ? false : billed_mark
+    elsif !units_to_order.nil?
+      (order_article.units_to_order * converted_quantity) == group_orders_sum_quantity ? false : ordered_mark
     end
   end
 

@@ -101,19 +101,6 @@ class OrderArticle < ApplicationRecord
     units * price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit) * price.gross_price
   end
 
-  def ordered_quantities_different_from_group_orders?(ordered_mark = "!", billed_mark = "?", received_mark = "?")
-    converted_quantity = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
-    if not units_received.nil?
-      ((units_received * converted_quantity) == group_orders_sum[:quantity]) ? false : received_mark
-    elsif not units_billed.nil?
-      ((units_billed * converted_quantity) == group_orders_sum[:quantity]) ? false : billed_mark
-    elsif not units_to_order.nil?
-      ((units_to_order * converted_quantity) == group_orders_sum[:quantity]) ? false : ordered_mark
-    else
-      nil # can happen in integration tests
-    end
-  end
-
   # redistribute articles over ordergroups
   #   quantity       Number of units to distribute
   #   surplus        What to do when there are more articles than ordered quantity
