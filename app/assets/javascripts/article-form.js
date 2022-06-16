@@ -13,13 +13,14 @@ class ArticleForm {
       this.groupOrderUnit$ = $(`#${this.unitFieldsPrefix}_group_order_unit`, this.articleForm$);
       this.price$ = $(`#${this.unitFieldsPrefix}_price`, this.articleForm$);
       this.priceUnit$ = $(`#${this.unitFieldsPrefix}_price_unit`, this.articleForm$);
+      this.unitsToOrder$ = $('#order_article_units_to_order', this.articleForm$);
+      this.unitsReceived$ = $('#order_article_units_received', this.articleForm$);
       this.select2Config = {
         dropdownParent: this.articleForm$.parents('#modalContainer')
       };
 
       this.loadAvailableUnits();
       this.initializeRegularFormFields();
-
 
       this.initializeRatioRows();
       this.bindAddRatioButton();
@@ -29,6 +30,8 @@ class ArticleForm {
       this.loadRatios();
       this.prepareRatioDataForSequentialRepresentation();
       this.convertPriceToPriceUnit();
+      this.initializeOrderedAndReceivedUnits();
+      this.convertOrderedAndReceivedUnits(this.supplierUnitSelect$.val(), this.billingUnit$.val());
       this.initializeFormSubmitListener();
     } catch(e) {
       console.log('Could not initialize article form', e);
@@ -40,6 +43,7 @@ class ArticleForm {
       this.undoSequentialRatioDataRepresentation();
       this.loadRatios();
       this.undoPriceConversion();
+      this.undoOrderAndReceivedUnitsConversion();
     });
   }
 
@@ -54,6 +58,10 @@ class ArticleForm {
     const groupOrderUnitPrice = relativePrice / ratio;
     const hiddenPriceField$ = $(`<input type="hidden" name="${this.price$.attr('name')}" value="${groupOrderUnitPrice}" />`);
     this.articleForm$.append(hiddenPriceField$);
+  }
+
+  undoOrderAndReceivedUnitsConversion() {
+    this.convertOrderedAndReceivedUnits(this.billingUnit$.val(), this.supplierUnitSelect$.val());
   }
 
   loadAvailableUnits() {
@@ -245,7 +253,7 @@ class ArticleForm {
         }
 
         const otherUnit = this.availableUnits.find(unit => unit.key === unitSelectedAbove.key);
-        return otherUnit !== undefined && availableUnit.baseUnit === otherUnit.baseUnit;
+        return otherUnit !== undefined && otherUnit.baseUnit !== null && availableUnit.baseUnit === otherUnit.baseUnit;
       }));
     }
 
@@ -330,6 +338,32 @@ class ArticleForm {
     const ratio = this.getUnitRatio(1, this.priceUnit$.val(), this.groupOrderUnit$.val());
     const relativePrice = groupOrderUnitPrice * ratio;
     this.price$.val(relativePrice);
+  }
+
+  initializeOrderedAndReceivedUnits() {
+    this.billingUnit$.change(() => this.updateOrderedAndReceivedUnits());
+    this.billingUnit$.trigger('change');
+  }
+
+  updateOrderedAndReceivedUnits() {
+    const billingUnitKey = this.billingUnit$.val();
+    const billingUnit = this.availableUnits.find((availableUnit) => availableUnit.key === billingUnitKey);
+    const inputs$ = mergeJQueryObjects([this.unitsToOrder$, this.unitsReceived$]);
+    inputs$.parent().find('.unit_label').remove();
+    inputs$.after($(`<span class="unit_label ml-1">x ${billingUnit.label}</span>`));
+    if (this.previousBillingUnit !== undefined) {
+      this.convertOrderedAndReceivedUnits(this.previousBillingUnit, billingUnitKey);
+    }
+    this.previousBillingUnit = billingUnitKey;
+  }
+
+  convertOrderedAndReceivedUnits(fromUnit, toUnit) {
+    const inputs$ = mergeJQueryObjects([this.unitsToOrder$, this.unitsReceived$]);
+    inputs$.each((_, input) => {
+      const input$ = $(input);
+      const convertedValue = this.getUnitRatio(input$.val(), fromUnit, toUnit);
+      input$.val(convertedValue);
+    });
   }
 
   loadRatios() {
