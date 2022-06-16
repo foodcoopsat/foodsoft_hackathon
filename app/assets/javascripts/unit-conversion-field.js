@@ -4,12 +4,16 @@
 (function ( $ ) {
 
   class UnitConversionField {
-    constructor(field$, units, popoverTemplate$, useTargetUnitForStep = true) {
+    constructor(field$, units, popoverTemplate$, useTargetUnitForStep = true, ratios = undefined, supplierOrderUnit = undefined, defaultUnit = undefined, customUnit = undefined) {
       this.field$ = field$;
       this.popoverTemplate$ = popoverTemplate$;
       this.popoverTemplate = this.popoverTemplate$[0].content.querySelector('.popover_contents');
       this.units = units;
       this.useTargetUnitForStep = useTargetUnitForStep;
+      this.ratios = ratios;
+      this.supplierOrderUnit = supplierOrderUnit;
+      this.defaultUnit = defaultUnit;
+      this.customUnit = customUnit;
 
       this.loadArticleUnitRatios();
 
@@ -24,23 +28,31 @@
     }
 
     loadArticleUnitRatios() {
-      this.ratios = [];
-      for (let i = 0; this.field$.data(`ratio-quantity-${i}`) !== undefined; i++) {
-        this.ratios.push({
-          quantity: parseFloat(this.field$.data(`ratio-quantity-${i}`)),
-          unit: this.field$.data(`ratio-unit-${i}`),
-        });
+      if (!this.ratios) {
+        this.ratios = [];
+        for (let i = 0; this.field$.data(`ratio-quantity-${i}`) !== undefined; i++) {
+          this.ratios.push({
+            quantity: parseFloat(this.field$.data(`ratio-quantity-${i}`)),
+            unit: this.field$.data(`ratio-unit-${i}`),
+          });
+        }
       }
 
-      this.supplierOrderUnit = this.field$.data('supplier-order-unit');
-      this.customUnit = this.field$.data('custom-unit');
-      this.defaultUnit = this.field$.data('default-unit');
+      if (this.supplierOrderUnit === undefined) {
+        this.supplierOrderUnit = this.field$.data('supplier-order-unit');
+      }
+      if (this.customUnit === undefined) {
+        this.customUnit = this.field$.data('custom-unit');
+      }
+      if (this.defaultUnit === undefined) {
+        this.defaultUnit = this.field$.data('default-unit');
+      }
     }
 
     initializeFocusListener() {
       this.field$.popover({title: 'Conversions', placement: 'bottom', trigger: 'manual'});
 
-      this.field$.focus(() => this.openPopover());
+      this.field$.on('focus.unit-conversion-field',() => this.openPopover());
 
       this.field$.on('shown.bs.popover', () => this.initializeConversionPopover(this.field$.next('.popover')));
     }
@@ -199,8 +211,15 @@
         return conversionField;
       case 'getConverter':
         return conversionField === undefined ? undefined : conversionField.converter;
+      case 'destroy':
+        if (conversionField === undefined) {
+          break;
+        }
+        conversionField.converter.field$.off('focus.unit-conversion-field');
+        convertersMap.delete($(this)[0]);
+        break;
       default: {
-        const converter = new UnitConversionField($(this), optionsOrAction.units, optionsOrAction.popoverTemplate$, optionsOrAction.useTargetUnitForStep);
+        const converter = new UnitConversionField($(this), optionsOrAction.units, optionsOrAction.popoverTemplate$, optionsOrAction.useTargetUnitForStep, optionsOrAction.ratios, optionsOrAction.supplierOrderUnit, optionsOrAction.defaultUnit, optionsOrAction.customUnit);
         convertersMap.set($(this)[0], converter);
         break;
       }

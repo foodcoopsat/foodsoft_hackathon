@@ -5,6 +5,7 @@ class ArticleForm {
       this.unitFieldsPrefix = fieldNamePrefix;
       this.articleUnitRatioTemplate$ = articleUnitRatioTemplate$;
       this.articleForm$ = articleForm$;
+      this.unitConversionPopoverTemplate$ = this.articleForm$.find('#unit_conversion_popover_content_template');
       this.unit$ = $(`#${this.unitFieldsPrefix}_unit`, this.articleForm$);
       this.supplierUnitSelect$ = $(`#${this.unitFieldsPrefix}_supplier_order_unit`, this.articleForm$);
       this.unitRatiosTable$ = $('#fc_base_price', this.articleForm$);
@@ -33,7 +34,7 @@ class ArticleForm {
       this.initializeOrderedAndReceivedUnits();
       this.convertOrderedAndReceivedUnits(this.supplierUnitSelect$.val(), this.billingUnit$.val());
       this.initializeFormSubmitListener();
-    } catch(e) {
+    } catch (e) {
       console.log('Could not initialize article form', e);
     }
   }
@@ -67,7 +68,7 @@ class ArticleForm {
   loadAvailableUnits() {
     this.availableUnits = Object.entries(this.units)
       .filter(([, unit]) => unit.visible)
-      .map(([code, unit]) => ({key: code, label: unit.name, baseUnit: unit.baseUnit}));
+      .map(([code, unit]) => ({ key: code, label: unit.name, baseUnit: unit.baseUnit }));
 
     $(`#${this.unitFieldsPrefix}_supplier_order_unit`, this.articleForm$).select2(this.select2Config);
   }
@@ -231,15 +232,15 @@ class ArticleForm {
     const unitsSelectedAbove = [];
     if (this.supplierUnitSelect$.val() != '') {
       const chosenOption$ = $(`option[value="${this.supplierUnitSelect$.val()}"]`, this.supplierUnitSelect$);
-      unitsSelectedAbove.push({key: chosenOption$.val(), label: chosenOption$.text()});
+      unitsSelectedAbove.push({ key: chosenOption$.val(), label: chosenOption$.text() });
     } else {
-      unitsSelectedAbove.push({key: '', label: this.unit$.val()});
+      unitsSelectedAbove.push({ key: '', label: this.unit$.val() });
     }
 
     const selectedRatioUnits = $('tr select[name$="[unit]"]', this.unitRatiosTable$).map((_, ratioSelect) => ({
-        key: $(ratioSelect).val(),
-        label: $(`option[value="${$(ratioSelect).val()}"]`, ratioSelect).text()
-      }))
+      key: $(ratioSelect).val(),
+      label: $(`option[value="${$(ratioSelect).val()}"]`, ratioSelect).text()
+    }))
       .get()
       .filter(option => option.key !== '');
 
@@ -330,7 +331,7 @@ class ArticleForm {
     for (let i = numberOfRatios; i > 1; i--) {
       const currentField$ = $(`input[name="${ratioQuantityFieldNameByIndex(i)}"]`, this.articleForm$);
       const currentValue = currentField$.val();
-      const previousValue = $(`input[name="${ratioQuantityFieldNameByIndex(i-1)}"]:last`, this.articleForm$).val();
+      const previousValue = $(`input[name="${ratioQuantityFieldNameByIndex(i - 1)}"]:last`, this.articleForm$).val();
       currentField$.val(currentValue / previousValue);
     }
   }
@@ -343,7 +344,10 @@ class ArticleForm {
   }
 
   initializeOrderedAndReceivedUnits() {
-    this.billingUnit$.change(() => this.updateOrderedAndReceivedUnits());
+    this.billingUnit$.change(() => {
+      this.updateOrderedAndReceivedUnits();
+      this.initializeOrderedAndReceivedUnitsConverters();
+    });
     this.billingUnit$.trigger('change');
   }
 
@@ -368,13 +372,29 @@ class ArticleForm {
     });
   }
 
+  initializeOrderedAndReceivedUnitsConverters() {
+    this.unitsToOrder$.unitConversionField('destroy');
+    this.unitsReceived$.unitConversionField('destroy');
+
+    const opts = {
+      units: this.units,
+      popoverTemplate$: this.unitConversionPopoverTemplate$,
+      ratios: this.ratios,
+      supplierOrderUnit: this.supplierUnitSelect$.val(),
+      customUnit: this.unit$.val(),
+      defaultUnit: this.billingUnit$.val()
+    };
+    this.unitsToOrder$.unitConversionField(opts);
+    this.unitsReceived$.unitConversionField(opts);
+  }
+
   loadRatios() {
     this.ratios = [];
-    this.unitRatiosTable$.find('tr').each((_, element) => {
+    this.unitRatiosTable$.find('tbody tr').each((_, element) => {
       const tr$ = $(element);
       const unit = tr$.find(`select[name^="${this.unitFieldsPrefix}[article_unit_ratios_attributes]"][name$="[unit]"]`).val();
       const quantity = tr$.find(`input[name^="${this.unitFieldsPrefix}[article_unit_ratios_attributes]"][name$="[quantity]"]:last`).val();
-      this.ratios.push({unit, quantity});
+      this.ratios.push({ unit, quantity });
     });
   }
 
@@ -405,7 +425,7 @@ function ratioQuantityFieldNameByIndex(i) {
 
 
 function mergeJQueryObjects(array_of_jquery_objects) {
-  return $($.map(array_of_jquery_objects, function(el) {
-      return el.get();
+  return $($.map(array_of_jquery_objects, function (el) {
+    return el.get();
   }));
 }

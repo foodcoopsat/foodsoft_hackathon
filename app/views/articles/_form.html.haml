@@ -4,6 +4,7 @@
     const units = #{raw(ArticleUnits.units.to_json)};
     new ArticleForm(articleUnitRatioTemplate$, $('.article-form').parents('form'), units);
 
+  = render 'shared/js_templates/unit_conversion_popover_template'
   = f.hidden_field :shared_updated_on
   = f.hidden_field :supplier_id
   .modal-header
