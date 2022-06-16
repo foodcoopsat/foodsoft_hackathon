@@ -281,6 +281,8 @@ class ArticleForm {
         unitSelect$.val(unitSelect$.find('option:first').val());
       }
     }
+
+    unitSelect$.trigger('change');
   }
 
   setFieldVisibility() {
