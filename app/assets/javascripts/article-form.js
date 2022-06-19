@@ -1,7 +1,8 @@
 class ArticleForm {
-  constructor(articleUnitRatioTemplate$, articleForm$, units, fieldNamePrefix = 'article') {
+  constructor(articleUnitRatioTemplate$, articleForm$, units, priceMarkup, fieldNamePrefix = 'article') {
     try {
       this.units = units;
+      this.priceMarkup = priceMarkup;
       this.unitFieldsPrefix = fieldNamePrefix;
       this.articleUnitRatioTemplate$ = articleUnitRatioTemplate$;
       this.articleForm$ = articleForm$;
@@ -14,6 +15,9 @@ class ArticleForm {
       this.groupOrderUnit$ = $(`#${this.unitFieldsPrefix}_group_order_unit`, this.articleForm$);
       this.price$ = $(`#${this.unitFieldsPrefix}_price`, this.articleForm$);
       this.priceUnit$ = $(`#${this.unitFieldsPrefix}_price_unit`, this.articleForm$);
+      this.tax$ = $(`#${this.unitFieldsPrefix}_tax`, this.articleForm$);
+      this.deposit$ = $(`#${this.unitFieldsPrefix}_deposit`, this.articleForm$);
+      this.fcPrice$ = $(`#${this.unitFieldsPrefix}_fc_price`, this.articleForm$);
       this.unitsToOrder$ = $('#order_article_units_to_order', this.articleForm$);
       this.unitsReceived$ = $('#order_article_units_received', this.articleForm$);
       this.select2Config = {
@@ -31,12 +35,39 @@ class ArticleForm {
       this.loadRatios();
       this.prepareRatioDataForSequentialRepresentation();
       this.convertPriceToPriceUnit();
+      this.initializePriceDisplay();
       this.initializeOrderedAndReceivedUnits();
       this.convertOrderedAndReceivedUnits(this.supplierUnitSelect$.val(), this.billingUnit$.val());
       this.initializeFormSubmitListener();
     } catch (e) {
       console.log('Could not initialize article form', e);
     }
+  }
+
+  initializePriceDisplay() {
+    mergeJQueryObjects([this.price$, this.priceUnit$]).on('change keyup', () => {
+      const price = parseFloat(this.price$.val());
+      const tax = parseFloat(this.tax$.val());
+      const deposit = parseFloat(this.deposit$.val());
+      const grossPrice = (price + deposit) * (tax / 100 + 1);
+      const fcPrice = grossPrice  * (this.priceMarkup / 100 + 1);
+      const priceUnitLabel = this.getUnitLabel(this.priceUnit$.val());
+      let unitSuffix = priceUnitLabel.trim() === '' ? '' : ` x ${priceUnitLabel}`;
+      this.fcPrice$.text(isNaN(fcPrice) ? '?' : `${I18n.l('currency', fcPrice)}${unitSuffix}`);
+    });
+
+    this.price$.trigger('change');
+  }
+
+  getUnitLabel(unitKey) {
+    if (unitKey === '') {
+      return this.unit$.val();
+    }
+    const unit = this.availableUnits.find((availableUnit) => availableUnit.key === unitKey);
+    if (unit === undefined) {
+      return '?';
+    }
+    return unit.label;
   }
 
   initializeFormSubmitListener() {
@@ -353,10 +384,12 @@ class ArticleForm {
 
   updateOrderedAndReceivedUnits() {
     const billingUnitKey = this.billingUnit$.val();
-    const billingUnit = this.availableUnits.find((availableUnit) => availableUnit.key === billingUnitKey);
+    const billingUnitLabel = this.getUnitLabel(billingUnitKey);
     const inputs$ = mergeJQueryObjects([this.unitsToOrder$, this.unitsReceived$]);
     inputs$.parent().find('.unit_label').remove();
-    inputs$.after($(`<span class="unit_label ml-1">x ${billingUnit.label}</span>`));
+    if (billingUnitLabel.trim() !== '') {
+      inputs$.after($(`<span class="unit_label ml-1">x ${billingUnitLabel}</span>`));
+    }
     if (this.previousBillingUnit !== undefined) {
       this.convertOrderedAndReceivedUnits(this.previousBillingUnit, billingUnitKey);
     }
