@@ -212,10 +212,10 @@
       case 'getConverter':
         return conversionField === undefined ? undefined : conversionField.converter;
       case 'destroy':
-        if (conversionField === undefined || conversionField.converter === undefined) {
+        if (conversionField === undefined || conversionField.field$ === undefined) {
           break;
         }
-        conversionField.converter.field$.off('focus.unit-conversion-field');
+        conversionField.field$.off('focus.unit-conversion-field');
         convertersMap.delete($(this)[0]);
         break;
       default: {
