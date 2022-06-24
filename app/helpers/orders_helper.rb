@@ -49,9 +49,9 @@ module OrdersHelper
     converted_quantity = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
     if !order_article.units_received.nil?
       (order_article.units_received * converted_quantity) == group_orders_sum_quantity ? false : received_mark
-    elsif !units_billed.nil?
+    elsif !order_article.units_billed.nil?
       (order_article.units_billed * converted_quantity) == group_orders_sum_quantity ? false : billed_mark
-    elsif !units_to_order.nil?
+    elsif !order_article.units_to_order.nil?
       (order_article.units_to_order * converted_quantity) == group_orders_sum_quantity ? false : ordered_mark
     end
   end
