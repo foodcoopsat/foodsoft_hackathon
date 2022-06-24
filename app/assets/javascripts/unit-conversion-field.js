@@ -212,7 +212,7 @@
       case 'getConverter':
         return conversionField === undefined ? undefined : conversionField.converter;
       case 'destroy':
-        if (conversionField === undefined) {
+        if (conversionField === undefined || conversionField.converter === undefined) {
           break;
         }
         conversionField.converter.field$.off('focus.unit-conversion-field');
