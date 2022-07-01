@@ -497,6 +497,7 @@ en:
     form:
       title_edit: Edit article
       title_new: Add new article
+      per: per
     import_search_results:
       action_import: import
       already_imported: imported

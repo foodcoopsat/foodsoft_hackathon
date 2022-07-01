@@ -52,8 +52,9 @@ class ArticleForm {
       const grossPrice = (price + deposit) * (tax / 100 + 1);
       const fcPrice = grossPrice  * (this.priceMarkup / 100 + 1);
       const priceUnitLabel = this.getUnitLabel(this.priceUnit$.val());
-      let unitSuffix = priceUnitLabel.trim() === '' ? '' : ` x ${priceUnitLabel}`;
-      this.fcPrice$.text(isNaN(fcPrice) ? '?' : `${I18n.l('currency', fcPrice)}${unitSuffix}`);
+      this.fcPrice$.find('.price_value').text(isNaN(fcPrice) ? '?' : I18n.l('currency', fcPrice));
+      this.fcPrice$.find('.price_per_text').toggle(priceUnitLabel.trim() !== '');
+      this.fcPrice$.find('.price_unit').text(priceUnitLabel);
     });
 
     this.price$.trigger('change');
@@ -329,18 +330,6 @@ class ArticleForm {
       $('tbody tr', this.unitRatiosTable$).remove();
     }
 
-    const firstUnitRatioSet = !!firstUnitRatioQuantity$.val() && !!firstUnitRatioUnit$.val();
-    const billingUnitAndGroupOrderUnitVisible = unitRationsVisible && firstUnitRatioSet;
-
-    mergeJQueryObjects([
-      this.billingUnit$,
-      this.groupOrderUnit$
-    ]).parents('.fold-line').toggle(billingUnitAndGroupOrderUnitVisible);
-
-    if (!billingUnitAndGroupOrderUnitVisible) {
-      mergeJQueryObjects([this.billingUnit$, this.groupOrderUnit$]).val('');
-    }
-
     mergeJQueryObjects([
       this.unit$,
       this.supplierUnitSelect$,
@@ -360,9 +349,9 @@ class ArticleForm {
     const numberOfRatios = $(`input[name^="${this.unitFieldsPrefix}[article_unit_ratios_attributes]"][name$="[quantity]"]`).length;
 
     for (let i = numberOfRatios; i > 1; i--) {
-      const currentField$ = $(`input[name="${ratioQuantityFieldNameByIndex(i)}"]`, this.articleForm$);
+      const currentField$ = $(`input[name="${this.ratioQuantityFieldNameByIndex(i)}"]`, this.articleForm$);
       const currentValue = currentField$.val();
-      const previousValue = $(`input[name="${ratioQuantityFieldNameByIndex(i - 1)}"]:last`, this.articleForm$).val();
+      const previousValue = $(`input[name="${this.ratioQuantityFieldNameByIndex(i - 1)}"]:last`, this.articleForm$).val();
       currentField$.val(currentValue / previousValue);
     }
   }
@@ -443,18 +432,19 @@ class ArticleForm {
         const ratioNameRegex = new RegExp(`${this.unitFieldsPrefix}\\[article_unit_ratios_attributes\\]\\[([0-9]+)\\]`);
         const index = name.match(ratioNameRegex)[1];
         quantity = quantity * previousValue;
-        currentField$ = $(`<input type="hidden" name="${ratioQuantityFieldNameByIndex(index)}" value="${quantity}" />`);
+        currentField$ = $(`<input type="hidden" name="${this.ratioQuantityFieldNameByIndex(index)}" value="${quantity}" />`);
         td$.append(currentField$);
       }
 
       previousValue = quantity;
     });
   }
+
+  ratioQuantityFieldNameByIndex(i) {
+    return `${this.unitFieldsPrefix}[article_unit_ratios_attributes][${i}][quantity]`;
+  }
 }
 
-function ratioQuantityFieldNameByIndex(i) {
-  return `${this.unitFieldsPrefix}[article_unit_ratios_attributes][${i}][quantity]`;
-}
 
 
 function mergeJQueryObjects(array_of_jquery_objects) {

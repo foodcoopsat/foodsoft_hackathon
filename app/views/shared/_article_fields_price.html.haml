@@ -3,7 +3,7 @@
     .input-prepend
       %span.add-on= t 'number.currency.format.unit'
       = f.input_field :price, class: 'input-mini'
-  = f.input :price_unit, as: :select, collection: [], input_html: {'data-initial-value': article.price_unit, class: 'input-medium'}, label: 'per'.html_safe, include_blank: false
+  = f.input :price_unit, as: :select, collection: [], input_html: {'data-initial-value': article.price_unit, class: 'input-medium'}, label: t('articles.form.per'), include_blank: false
 .fold-line
   = f.input :tax do
     .input-append
@@ -17,5 +17,8 @@
   .control-group
     %label.control-label{for: 'article_fc_price'}
       = Article.human_attribute_name(:fc_price)
-    .controls.control-text#article_fc_price{:style => 'width:8em'}
+    .controls.control-text#article_fc_price
+      %span.price_value
+      %span.price_per_text=t('articles.form.per')
+      %span.price_unit
 
