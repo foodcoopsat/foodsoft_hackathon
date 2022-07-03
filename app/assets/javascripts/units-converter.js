@@ -17,8 +17,12 @@ class UnitsConverter {
 
     const unit = this.units[unitId];
     const relatedRatio = this.ratios.find(ratio => this.units[ratio.unit].baseUnit === unit.baseUnit);
-    const relatedUnit = this.units[relatedRatio.unit];
-    return relatedRatio.quantity / unit.conversionFactor * relatedUnit.conversionFactor;
+    if (relatedRatio !== undefined) {
+      const relatedUnit = this.units[relatedRatio.unit];
+      return relatedRatio.quantity / unit.conversionFactor * relatedUnit.conversionFactor;
+    }
+
+    return 1 / unit.conversionFactor;
   }
 
   getUnitRatio(quantity, inputUnit, outputUnit) {

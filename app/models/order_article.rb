@@ -184,6 +184,7 @@ class OrderArticle < ApplicationRecord
 
   # @return [Number] Units missing for the last +unit_quantity+ of the article.
   def missing_units
+    Rails.logger.info "---testflo #{price.class} ID: #{price.id}, #{price.supplier_order_unit}, #{price.group_order_unit}"
     unit_ratio = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
     _missing_units(unit_ratio, quantity, tolerance)
   end

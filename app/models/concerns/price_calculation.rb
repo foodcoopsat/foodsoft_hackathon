@@ -24,7 +24,15 @@ module PriceCalculation
   def get_unit_ratio_quantity(unit)
     return 1 if unit == self.supplier_order_unit
 
-    self.article_unit_ratios.find_by_unit(unit).quantity
+    ratio = self.article_unit_ratios.find_by_unit(unit)
+    return ratio.quantity unless ratio.nil?
+
+    related_ratio = self.article_unit_ratios.detect { |ratio| ArticleUnits.units[ratio.unit][:baseUnit] == ArticleUnits.units[unit][:baseUnit] }
+    unless related_ratio.nil?
+      return related_ratio.quantity / ArticleUnits.units[unit][:conversionFactor] * ArticleUnits.units[related_ratio.unit][:conversionFactor]
+    end
+
+    1 / ArticleUnits.units[unit][:conversionFactor]
   end
 
   def convert_quantity(quantity, input_unit, output_unit)

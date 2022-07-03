@@ -18,9 +18,9 @@
       this.loadArticleUnitRatios();
 
       // if every ratio is the same, don't even bother showing the popover:
-      if (this.ratios.every(ratio => ratio.quantity === 1)) {
-        return;
-      }
+      // if (this.units[] this.ratios.every(ratio => ratio.quantity === 1)) {
+      //   return;
+      // }
 
       this.converter = new UnitsConverter(this.units, this.ratios, this.supplierOrderUnit);
 
@@ -131,7 +131,11 @@
       options.push({
         value: this.supplierOrderUnit,
         label: unit === undefined ? this.customUnit : unit.name
-      })
+      });
+      if (unit !== undefined) {
+        options.push(...this.getRelatedUnits(this.supplierOrderUnit));
+      }
+
 
       for (const ratio of this.ratios) {
         options.push({
@@ -139,14 +143,7 @@
           label: this.units[ratio.unit].name
         });
 
-        options.push(
-          ...Object.entries(this.units)
-          .filter(([unitId, unit]) => unit.visible && unit.baseUnit !== null && unit.baseUnit === this.units[ratio.unit].baseUnit && unitId !== ratio.unit)
-          .map(([unitId, unit]) => ({
-            value: unitId,
-            label: unit.name
-          }))
-        );
+        options.push(...this.getRelatedUnits(ratio.unit));
       }
 
       return options;
@@ -192,6 +189,15 @@
       const step = this.useTargetUnitForStep ? this.converter.getUnitRatio(1, this.getTargetUnit(), selectedUnit) : 0.001;
       this.quantityInput$.attr('step', step);
     }
+
+    getRelatedUnits(unitId) {
+      return Object.entries(this.units)
+        .filter(([id, unit]) => unit.visible && unit.baseUnit !== null && unit.baseUnit === this.units[unitId].baseUnit && id !== unitId)
+        .map(([id, unit]) => ({
+          value: id,
+          label: unit.name
+        }));
+    }
   }
 
   function convertEmptyStringToUndefined(str) {
@@ -228,5 +234,5 @@
     return this;
   };
 
-}( jQuery ));
 
+}( jQuery ));
