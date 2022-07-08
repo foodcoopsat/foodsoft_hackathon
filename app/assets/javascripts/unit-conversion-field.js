@@ -16,11 +16,12 @@
       this.customUnit = customUnit;
 
       this.loadArticleUnitRatios();
+      this.unitSelectOptions = this.getUnitSelectOptions();
 
-      // if every ratio is the same, don't even bother showing the popover:
-      // if (this.units[] this.ratios.every(ratio => ratio.quantity === 1)) {
-      //   return;
-      // }
+      // if there's less then two options, don't even bother showing the popover:
+      if (this.unitSelectOptions.length < 2) {
+        return;
+      }
 
       this.converter = new UnitsConverter(this.units, this.ratios, this.supplierOrderUnit);
 
@@ -96,7 +97,6 @@
       this.quantityInput$.val(this.field$.val());
       this.conversionResult$ = contents$.find('.conversion-result');
       this.unitSelect$ = contents$.find('select.unit');
-      this.unitSelectOptions = this.getUnitSelectOptions();
       this.unitSelect$.append(this.unitSelectOptions.map(option => $(`<option value${option.value === undefined ? '' : `="${option.value}"`}>${option.label}</option>`)))
       let initialUnitSelectValue = this.defaultUnit;
       if (initialUnitSelectValue === undefined) {
