@@ -161,22 +161,22 @@ class GroupOrderForm {
 
     const missing = this.calcMissingItems(packSize, totalQuantity, totalTolerance, minimumOrderQuantity);
 
-    used$.text(used);
-    unused$.text(unused);
+    used$.text(round(used));
+    unused$.text(round(unused));
 
-    usedTolerance$.text(usedTolerance);
-    unusedTolerance$.text(unusedTolerance);
+    usedTolerance$.text(round(usedTolerance));
+    unusedTolerance$.text(round(unusedTolerance));
 
-    totalPacks$.text(totalPacks);
+    totalPacks$.text(round(totalPacks));
 
     totalPacks$.css('color', this.packCompletedFromTolerance(packSize, totalQuantity, totalTolerance) ? 'grey' : 'auto');
 
-    totalQuantity$.text(totalQuantity);
-    totalTolerance$.text(totalTolerance);
-    totalPrice$.text(I18n.l('currency', totalPrice));
-    totalPrice$.data('price', totalPrice);
+    totalQuantity$.text(round(totalQuantity));
+    totalTolerance$.text(round(totalTolerance));
+    totalPrice$.text(I18n.l('currency', round(totalPrice)));
+    totalPrice$.data('price', round(totalPrice));
 
-    missing$.text(missing);
+    missing$.text(round(missing));
     if (packSize > 1 || minimumOrderQuantity > 1) {
       this.setRowStyle(row$, missing, granularity);
     }
@@ -221,6 +221,9 @@ class GroupOrderForm {
 
 
 function round(num, precision) {
+  if (precision === undefined) {
+    precision = 2;
+  }
   const factor = precision * Math.pow(10, precision);
   return Math.round((num + Number.EPSILON) * factor) / factor;
 }
