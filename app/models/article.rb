@@ -222,9 +222,8 @@ class Article < ApplicationRecord
     update_column :deleted_at, Time.now
   end
 
-  def
-  # TODO: Maybe use the nilify blanks gem instead of the following four methods?:
-  def(unit = value)
+  # TODO: Maybe use the nilify blanks gem instead of the following five methods?:
+  def unit=(value)
     if value.empty?
       self[:unit] = nil
     else
@@ -251,6 +250,14 @@ class Article < ApplicationRecord
   def price_unit=(value)
     if value.empty?
       self[:price_unit] = nil
+    else
+      super
+    end
+  end
+
+  def billing_unit=(value)
+    if value.empty?
+      self[:billing_unit] = nil
     else
       super
     end

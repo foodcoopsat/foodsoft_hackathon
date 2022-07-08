@@ -182,17 +182,17 @@ class GroupOrderForm {
     }
   }
 
-  setRowStyle(row$, missing, granularity) {
+  setRowStyle(row$, missing, packSize) {
     row$.removeClass('missing-many missing-few missing-none');
     if (missing === 0) {
       row$.addClass('missing-none');
     } else {
-      row$.addClass(missing <= granularity ? 'missing-few' : 'missing-many');
+      row$.addClass(missing <= packSize ? 'missing-few' : 'missing-many');
     }
   }
 
   calculatePacks(packSize, quantity, tolerance, minimumOrderQuantity) {
-    if (quantity < minimumOrderQuantity) {
+    if (quantity + tolerance < minimumOrderQuantity) {
       return 0;
     }
 
@@ -202,7 +202,7 @@ class GroupOrderForm {
   }
 
   calcMissingItems(packSize, quantity, tolerance, minimumOrderQuantity) {
-    if (quantity < minimumOrderQuantity) {
+    if (quantity + tolerance < minimumOrderQuantity) {
       return minimumOrderQuantity - quantity + tolerance;
     }
 
