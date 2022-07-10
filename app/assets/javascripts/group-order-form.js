@@ -85,8 +85,8 @@ class GroupOrderForm {
       value = 0;
     }
 
-    value += step;
-    let remainder = value % step;
+    value = round(value + step);
+    let remainder = round(value % step);
     if (remainder !== 0) {
       if (!increase) {
         remainder *= -1;
