@@ -188,8 +188,8 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
   create_table "group_order_articles", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
     t.integer "group_order_id", default: 0, null: false
     t.integer "order_article_id", default: 0, null: false
-    t.integer "quantity", default: 0, null: false
-    t.integer "tolerance", default: 0, null: false
+    t.float "quantity", default: 0.0, null: false
+    t.float "tolerance", default: 0.0, null: false
     t.datetime "updated_on", null: false
     t.decimal "result", precision: 8, scale: 3
     t.decimal "result_computed", precision: 8, scale: 3

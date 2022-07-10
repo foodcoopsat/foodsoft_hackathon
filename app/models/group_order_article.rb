@@ -9,7 +9,7 @@ class GroupOrderArticle < ApplicationRecord
   validates_presence_of :group_order, :order_article
   validates_uniqueness_of :order_article_id, :scope => :group_order_id # just once an article per group order
   validate :check_order_not_closed # don't allow changes to closed (aka settled) orders
-  validates :quantity, :tolerance, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  validates :quantity, :tolerance, numericality: { greater_than_or_equal_to: 0 }
 
   scope :ordered, -> { includes(:group_order => :ordergroup).order('groups.name') }
 
@@ -94,7 +94,7 @@ class GroupOrderArticle < ApplicationRecord
 
     # Check if something went terribly wrong and quantites have not been adjusted as desired.
     if (self.quantity != quantity || self.tolerance != tolerance)
-      raise ActiveRecord::RecordNotSaved.new('Unable to update GroupOrderArticle/-Quantities to desired quantities!', self)
+      raise ActiveRecord::RecordNotSaved.new("Unable to update GroupOrderArticle/-Quantities to desired quantities! (#{self.quantity} != #{quantity} || #{self.tolerance} != {tolerance})", self)
     end
 
     # Remove zero-only items.

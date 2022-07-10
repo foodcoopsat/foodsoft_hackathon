@@ -21,15 +21,15 @@ class GroupOrdersController < ApplicationController
 
   def create
     @group_order = GroupOrder.new(params[:group_order])
-    begin
-      @group_order.save_ordering!
-      redirect_to group_order_url(@group_order), :notice => I18n.t('group_orders.create.notice')
-    rescue ActiveRecord::StaleObjectError
-      redirect_to group_orders_url, :alert => I18n.t('group_orders.create.error_stale')
-    rescue => exception
-      logger.error('Failed to update order: ' + exception.message)
-      redirect_to group_orders_url, :alert => I18n.t('group_orders.create.error_general')
-    end
+    # begin
+    @group_order.save_ordering!
+    redirect_to group_order_url(@group_order), :notice => I18n.t('group_orders.create.notice')
+    # rescue ActiveRecord::StaleObjectError
+    #   redirect_to group_orders_url, :alert => I18n.t('group_orders.create.error_stale')
+    # rescue => exception
+    #   logger.error('Failed to update order: ' + exception.message)
+    #   redirect_to group_orders_url, :alert => I18n.t('group_orders.create.error_general')
+    # end
   end
 
   def show
@@ -43,15 +43,15 @@ class GroupOrdersController < ApplicationController
   def update
     @group_order.attributes = params[:group_order]
     @group_order.updated_by = current_user
-    begin
-      @group_order.save_ordering!
-      redirect_to group_order_url(@group_order), :notice => I18n.t('group_orders.update.notice')
-    rescue ActiveRecord::StaleObjectError
-      redirect_to group_orders_url, :alert => I18n.t('group_orders.update.error_stale')
-    rescue => exception
-      logger.error('Failed to update order: ' + exception.message)
-      redirect_to group_orders_url, :alert => I18n.t('group_orders.update.error_general')
-    end
+    # begin
+    @group_order.save_ordering!
+    redirect_to group_order_url(@group_order), :notice => I18n.t('group_orders.update.notice')
+    # rescue ActiveRecord::StaleObjectError
+    #   redirect_to group_orders_url, :alert => I18n.t('group_orders.update.error_stale')
+    # rescue => exception
+    #   logger.error('Failed to update order: ' + exception.message)
+    #   redirect_to group_orders_url, :alert => I18n.t('group_orders.update.error_general')
+    # end
   end
 
   # Shows all Orders of the Ordergroup

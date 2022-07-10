@@ -72,7 +72,7 @@ class GroupOrder < ApplicationRecord
       # Get ordered quantities and update group_order_articles/_quantities...
       if group_order_articles_attributes
         quantities = group_order_articles_attributes.fetch(order_article.id.to_s, { :quantity => 0, :tolerance => 0 })
-        group_order_article.update_quantities(quantities[:quantity].to_i, quantities[:tolerance].to_i)
+        group_order_article.update_quantities(quantities[:quantity].to_f, quantities[:tolerance].to_f)
       end
 
       # Also update results for the order_article
