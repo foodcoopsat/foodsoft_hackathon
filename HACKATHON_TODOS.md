@@ -1,2 +1,1 @@
-- articles form bugfixing (too many units in dropdowns, ...)
-- investigate goa result content change after reducing received number for beer with ordered amount 59 and tolerance 1
+- bread rolls tolerance cannot be raised higher than 1

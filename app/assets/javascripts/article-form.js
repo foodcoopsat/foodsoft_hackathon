@@ -352,14 +352,14 @@ class ArticleForm {
       const currentField$ = $(`input[name="${this.ratioQuantityFieldNameByIndex(i)}"]`, this.articleForm$);
       const currentValue = currentField$.val();
       const previousValue = $(`input[name="${this.ratioQuantityFieldNameByIndex(i - 1)}"]:last`, this.articleForm$).val();
-      currentField$.val(currentValue / previousValue);
+      currentField$.val(round(currentValue / previousValue));
     }
   }
 
   convertPriceToPriceUnit() {
     const groupOrderUnitPrice = this.price$.val();
     const ratio = this.getUnitRatio(1, this.priceUnit$.val(), this.groupOrderUnit$.val());
-    const relativePrice = groupOrderUnitPrice * ratio;
+    const relativePrice = round(groupOrderUnitPrice * ratio);
     this.price$.val(relativePrice);
   }
 
@@ -451,4 +451,12 @@ function mergeJQueryObjects(array_of_jquery_objects) {
   return $($.map(array_of_jquery_objects, function (el) {
     return el.get();
   }));
+}
+
+function round(num, precision) {
+  if (precision === undefined) {
+    precision = 3;
+  }
+  const factor = precision * Math.pow(10, precision);
+  return Math.round((num + Number.EPSILON) * factor) / factor;
 }

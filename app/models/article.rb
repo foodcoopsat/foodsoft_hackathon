@@ -224,7 +224,7 @@ class Article < ApplicationRecord
 
   # TODO: Maybe use the nilify blanks gem instead of the following five methods?:
   def unit=(value)
-    if value.empty?
+    if value.blank?
       self[:unit] = nil
     else
       super
@@ -232,7 +232,7 @@ class Article < ApplicationRecord
   end
 
   def supplier_order_unit=(value)
-    if value.empty?
+    if value.blank?
       self[:supplier_order_unit] = nil
     else
       super
@@ -240,7 +240,7 @@ class Article < ApplicationRecord
   end
 
   def group_order_unit=(value)
-    if value.empty?
+    if value.blank?
       self[:group_order_unit] = nil
     else
       super
@@ -248,7 +248,7 @@ class Article < ApplicationRecord
   end
 
   def price_unit=(value)
-    if value.empty?
+    if value.blank?
       self[:price_unit] = nil
     else
       super
@@ -256,7 +256,7 @@ class Article < ApplicationRecord
   end
 
   def billing_unit=(value)
-    if value.empty?
+    if value.blank?
       self[:billing_unit] = nil
     else
       super
