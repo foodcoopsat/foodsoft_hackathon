@@ -131,12 +131,12 @@ class GroupOrderForm {
     if (isNaN(tolerance)) {
       tolerance = 0;
     }
-    const packSize = quantity$.data('ratio-group-order-unit-supplier-unit');
-    const othersQuantity = quantity$.data('others-quantity');
-    const othersTolerance = quantity$.data('others-tolerance');
-    const usedQuantity = quantity$.data('used-quantity');
-    const minimumOrderQuantity = quantity$.data('minimum-order-quantity');
-    const price = quantity$.data('price');
+    const packSize = parseFloat(quantity$.data('ratio-group-order-unit-supplier-unit'));
+    const othersQuantity = parseFloat(quantity$.data('others-quantity'));
+    const othersTolerance = parseFloat(quantity$.data('others-tolerance'));
+    const usedQuantity = parseFloat(quantity$.data('used-quantity'));
+    const minimumOrderQuantity = parseFloat(quantity$.data('minimum-order-quantity'));
+    const price = parseFloat(quantity$.data('price'));
 
     const totalQuantity = quantity + othersQuantity;
     const totalTolerance = tolerance + othersTolerance;

@@ -134,7 +134,7 @@
                   %i.icon-plus
 
             %td.tolerance.group-order-input{style: ('display:none' if @order.stockit?)}
-              - if (@ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit] != 1 || (order_article.price.minimum_order_quantity.presence || 0) > order_article.price.group_order_granularity)
+              - if (@ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit] != order_article.price.group_order_granularity || (order_article.price.minimum_order_quantity.presence || 0) > order_article.price.group_order_granularity)
                 %span.used= @ordering_data[:order_articles][order_article.id][:used_tolerance]
                 +
                 %span.unused= @ordering_data[:order_articles][order_article.id][:tolerance] - @ordering_data[:order_articles][order_article.id][:used_tolerance]
