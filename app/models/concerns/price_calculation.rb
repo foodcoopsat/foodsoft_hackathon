@@ -27,7 +27,7 @@ module PriceCalculation
     ratio = self.article_unit_ratios.find_by_unit(unit)
     return ratio.quantity unless ratio.nil?
 
-    related_ratio = self.article_unit_ratios.detect { |ratio| ArticleUnits.units[ratio.unit][:baseUnit] == ArticleUnits.units[unit][:baseUnit] }
+    related_ratio = self.article_unit_ratios.detect { |current_ratio| ArticleUnits.units[current_ratio.unit][:baseUnit] == ArticleUnits.units[unit][:baseUnit] }
     unless related_ratio.nil?
       return related_ratio.quantity / ArticleUnits.units[unit][:conversionFactor] * ArticleUnits.units[related_ratio.unit][:conversionFactor]
     end
