@@ -55,10 +55,10 @@
     }
 
     updateDelta(input) {
-      var units = $(input).val();
-      var expected = $(input).data('units-expected');
-      var delta = Math.round((units-expected)*100)/100.0;
-      var html;
+      const units = $(input).val().replace(',', '.');
+      const expected = $(input).data('units-expected');
+      const delta = round(units-expected);
+      let html;
 
       if (units.replace(/\s/g,"")=="") {
         // no value

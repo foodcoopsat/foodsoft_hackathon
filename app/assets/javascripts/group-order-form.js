@@ -219,11 +219,3 @@ class GroupOrderForm {
   }
 }
 
-
-function round(num, precision) {
-  if (precision === undefined) {
-    precision = 3;
-  }
-  const factor = precision * Math.pow(10, precision);
-  return Math.round((num + Number.EPSILON) * factor) / factor;
-}

@@ -47,6 +47,11 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.remove :unit_quantity
     end
 
+    change_table :order_articles do |t|
+      t.change :units_to_order, :float, null: false
+      t.change :tolerance, :float, null: false
+    end
+
     change_table :group_order_articles do |t|
       t.change :quantity, :float, null: false
       t.change :tolerance, :float, null: false
@@ -86,6 +91,11 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
     end
 
     drop_table :article_unit_ratios
+
+    change_table :order_articles do |t|
+      t.change :units_to_order, :integer, null: false
+      t.change :tolerance, :integer, null: false
+    end
 
     change_table :group_order_articles do |t|
       t.change :quantity, :integer, null: false

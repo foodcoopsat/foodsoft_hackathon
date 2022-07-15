@@ -141,7 +141,7 @@
                 .btn-group
                   %a.btn.btn-ordering.decrease
                     %i.icon-minus
-                  %input.goa-tolerance{type: "number", name: "group_order[group_order_articles_attributes][#{order_article.id}][tolerance]", data: quantity_data, value: @ordering_data[:order_articles][order_article.id][:tolerance], autocomplete: 'off', class: 'input-mini numeric', min: 0, step: order_article.price.group_order_granularity, max: @ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit]}
+                  %input.goa-tolerance{type: "number", name: "group_order[group_order_articles_attributes][#{order_article.id}][tolerance]", data: quantity_data, value: @ordering_data[:order_articles][order_article.id][:tolerance], autocomplete: 'off', class: 'input-mini numeric', min: 0, step: order_article.price.group_order_granularity, max: [@ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit], @ordering_data[:order_articles][order_article.id][:minimum_order_quantity].presence || 0].max}
                   %a.btn.btn-ordering.increase
                     %i.icon-plus
 

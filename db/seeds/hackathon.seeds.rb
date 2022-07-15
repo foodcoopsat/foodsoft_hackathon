@@ -32,7 +32,7 @@ Article.create!({ name: "Carrots", supplier_id: 1, article_category_id: 3, unit:
 Article.create!({ name: "Pumpkin", supplier_id: 1, article_category_id: 3, unit: nil, price: 1.5, tax: 7.0, deposit: "0.0", quantity: 0, supplier_order_unit: "XPP", price_unit: "KGM", billing_unit: "KGM", group_order_unit: "XPP", :article_unit_ratios => [ArticleUnitRatio.new({ :sort => 1, :quantity => 1.3, :unit => 'KGM' })] })
 Article.create!({ name: "Bread", supplier_id: 1, article_category_id: 5, unit: nil, price: 2.1, tax: 7.0, deposit: "0.0", quantity: 0, supplier_order_unit: "XPP", price_unit: "KGM", billing_unit: "KGM", group_order_unit: "XPP", group_order_granularity: 0.5,
                   :article_unit_ratios => [ArticleUnitRatio.new({ :sort => 1, :quantity => 700, :unit => 'GRM' })] })
-Article.create!({ name: "Bread rolls", supplier_id: 1, article_category_id: 5, unit: nil, price: 4, tax: 7.0, deposit: "0.0", quantity: 0, supplier_order_unit: "XPP", price_unit: "KGM", billing_unit: "KGM", group_order_unit: "XPP", minimum_order_quantity: 5,
+Article.create!({ name: "Bread rolls", supplier_id: 1, article_category_id: 5, unit: nil, price: 1, tax: 7.0, deposit: "0.0", quantity: 0, supplier_order_unit: "XPP", price_unit: "KGM", billing_unit: "XPP", group_order_unit: "XPP", minimum_order_quantity: 5,
                   :article_unit_ratios => [ArticleUnitRatio.new({ :sort => 1, :quantity => 350, :unit => 'GRM' })] })
 Article.create!({ name: "Muesli", supplier_id: 1, article_category_id: 13, unit: nil, price: 2.5, tax: 7.0, deposit: "0.0", quantity: 0, supplier_order_unit: "XPP", price_unit: "XPP", billing_unit: "XPP", group_order_unit: "XPP",
                   :article_unit_ratios => [ArticleUnitRatio.new({ :sort => 1, :quantity => 500, :unit => 'GRM' })] })
@@ -82,6 +82,10 @@ Membership.create!(:group_id => 7, :user_id => 5)
 Membership.create!(:group_id => 3, :user_id => 5)
 Membership.create!(:group_id => 4, :user_id => 5)
 
+## Orders & OrderArticles
+
+seed_order(supplier_id: 1, starts: 2.days.ago, ends: 5.days.from_now)
+
 ## Finances
 
 FinancialTransactionType.create!(:id => 1, :name => "Foodcoop", :financial_transaction_class_id => 1)
@@ -91,3 +95,5 @@ FinancialTransaction.create!(:id => 3, :ordergroup_id => 6, :amount => -0.35E2, 
 FinancialTransaction.create!(:id => 4, :ordergroup_id => 7, :amount => -0.35E2, :note => "Membership fee for ordergroup", :user_id => 1, :created_on => 'Mon, 27 Jan 2014 16:22:14 UTC +00:00', :financial_transaction_type_id => 1)
 FinancialTransaction.create!(:id => 5, :ordergroup_id => 5, :amount => 0.35E2, :note => "payment", :user_id => 2, :created_on => 'Wed, 05 Feb 2014 16:49:24 UTC +00:00', :financial_transaction_type_id => 1)
 FinancialTransaction.create!(:id => 6, :ordergroup_id => 8, :amount => 0.90E2, :note => "Bank transfer", :user_id => 2, :created_on => 'Mon, 17 Feb 2014 16:19:34 UTC +00:00', :financial_transaction_type_id => 1)
+
+FoodsoftConfig[:minimum_balance] = '-10000'

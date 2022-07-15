@@ -33,7 +33,7 @@ module OrdersHelper
       [:units_to_order, :units_billed, :units_received].map do |unit|
         if n = order_article.send(unit)
           converted_quantity = price.convert_quantity(n, price.supplier_order_unit, price.billing_unit.presence || price.supplier_order_unit)
-          line = converted_quantity.to_s + ' '
+          line = converted_quantity.round(3).to_s + ' '
           line += pkg_helper(price, options) + ' ' unless n == 0
           line += OrderArticle.human_attribute_name("#{unit}_short", count: n)
           units_info << line

@@ -390,7 +390,7 @@ class ArticleForm {
     inputs$.each((_, input) => {
       const input$ = $(input);
       const convertedValue = this.getUnitRatio(input$.val(), fromUnit, toUnit);
-      input$.val(convertedValue);
+      input$.val(round(convertedValue));
     });
   }
 
@@ -446,7 +446,7 @@ class ArticleForm {
 }
 
 
-
+// TODO: Move those functions to some global js utils file:
 function mergeJQueryObjects(array_of_jquery_objects) {
   return $($.map(array_of_jquery_objects, function (el) {
     return el.get();
@@ -457,6 +457,6 @@ function round(num, precision) {
   if (precision === undefined) {
     precision = 3;
   }
-  const factor = precision * Math.pow(10, precision);
+  const factor = Math.pow(10, precision);
   return Math.round((num + Number.EPSILON) * factor) / factor;
 }
