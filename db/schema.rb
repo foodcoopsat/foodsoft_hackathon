@@ -179,8 +179,8 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
 
   create_table "group_order_article_quantities", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
     t.integer "group_order_article_id", default: 0, null: false
-    t.integer "quantity", default: 0
-    t.integer "tolerance", default: 0
+    t.float "quantity", default: 0.0, null: false
+    t.float "tolerance", default: 0.0, null: false
     t.datetime "created_on", null: false
     t.index ["group_order_article_id"], name: "index_group_order_article_quantities_on_group_order_article_id"
   end
