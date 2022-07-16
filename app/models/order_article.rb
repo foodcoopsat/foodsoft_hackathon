@@ -86,7 +86,7 @@ class OrderArticle < ApplicationRecord
     end
 
     unit_size = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
-    units = quantity / unit_size
+    units = (quantity / unit_size).floor
     remainder = quantity % unit_size
     units += ((remainder > 0) && (remainder + tolerance >= unit_size) ? 1 : 0)
   end

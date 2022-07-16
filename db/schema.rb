@@ -348,7 +348,7 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
   create_table "order_articles", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
     t.integer "order_id", default: 0, null: false
     t.integer "article_id", default: 0, null: false
-    t.integer "quantity", default: 0, null: false
+    t.float "quantity", default: 0.0, null: false
     t.float "tolerance", default: 0.0, null: false
     t.float "units_to_order", default: 0.0, null: false
     t.integer "lock_version", default: 0, null: false
