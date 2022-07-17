@@ -32,7 +32,7 @@
     }
 
     convertFieldUnit(field$, fromUnit, toUnit) {
-      const units = parseFloat(field$.val());
+      const units = parseFloat(field$.val().replace(',', '.'));
       if (isNaN(units)) {
         return;
       }
@@ -45,7 +45,7 @@
     }
 
     convertToBillingUnit(field$) {
-      field$.val(this.convertFieldUnit(field$, field$.data('supplier-order-unit'), field$.data('billing-unit')));
+      field$.val(round(this.convertFieldUnit(field$, field$.data('supplier-order-unit'), field$.data('billing-unit'))));
     }
 
     convertFromBillingUnit(field$) {

@@ -184,8 +184,8 @@ class OrdersController < ApplicationController
         if oa.units_received_changed?
           counts[0] += 1
           unless oa.units_received.blank?
-            cunits[0] += oa.units_received * oa.article.unit_quantity
-            oacounts = oa.redistribute oa.units_received * oa.price.unit_quantity, rest_to
+            cunits[0] += oa.units_received
+            oacounts = oa.redistribute oa.units_received, rest_to
             oacounts.each_with_index { |c, i| cunits[i + 1] += c; counts[i + 1] += 1 if c > 0 }
           end
         end
