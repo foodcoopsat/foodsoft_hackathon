@@ -45,7 +45,8 @@
     }
 
     convertToBillingUnit(field$) {
-      field$.val(round(this.convertFieldUnit(field$, field$.data('supplier-order-unit'), field$.data('billing-unit'))));
+      const val = this.convertFieldUnit(field$, field$.data('supplier-order-unit'), field$.data('billing-unit'));
+      field$.val(val === undefined ? '' : round(val));
     }
 
     convertFromBillingUnit(field$) {
