@@ -39,8 +39,9 @@ module PriceCalculation
     quantity / self.get_unit_ratio_quantity(input_unit) * self.get_unit_ratio_quantity(output_unit)
   end
 
-  def get_price(output_unit)
-    self.price / self.get_unit_ratio_quantity(output_unit) * self.get_unit_ratio_quantity(self.price_unit)
+  def get_price(output_unit, type = :net)
+    price_value = (type == :gross ? self.gross_price : self.price)
+    price_value / self.get_unit_ratio_quantity(output_unit) * self.get_unit_ratio_quantity(self.price_unit)
   end
 
   private
