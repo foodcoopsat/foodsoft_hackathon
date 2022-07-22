@@ -46,13 +46,12 @@ module OrdersHelper
   def ordered_quantities_different_from_group_orders?(order_article, ordered_mark = "!", billed_mark = "?", received_mark = "?")
     price = order_article.price
     group_orders_sum_quantity = order_article.group_orders_sum[:quantity]
-    converted_quantity = price.convert_quantity(1, price.supplier_order_unit, price.billing_unit).round(3)
     if !order_article.units_received.nil?
-      (order_article.units_received * converted_quantity) == group_orders_sum_quantity ? false : received_mark
+      (price.convert_quantity(order_article.units_received, price.supplier_order_unit, price.billing_unit).round(3)) == group_orders_sum_quantity ? false : received_mark
     elsif !order_article.units_billed.nil?
-      (order_article.units_billed * converted_quantity) == group_orders_sum_quantity ? false : billed_mark
+      order_article.units_billed == group_orders_sum_quantity ? false : billed_mark
     elsif !order_article.units_to_order.nil?
-      (order_article.units_to_order * converted_quantity) == group_orders_sum_quantity ? false : ordered_mark
+      (price.convert_quantity(order_article.units_to_order, price.supplier_order_unit, price.billing_unit).round(3)) == group_orders_sum_quantity ? false : ordered_mark
     end
   end
 
