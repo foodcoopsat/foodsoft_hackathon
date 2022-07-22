@@ -203,7 +203,7 @@ class GroupOrderForm {
 
   calcMissingItems(packSize, quantity, tolerance, minimumOrderQuantity) {
     if (quantity + tolerance < minimumOrderQuantity) {
-      return minimumOrderQuantity - quantity + tolerance;
+      return minimumOrderQuantity - quantity - tolerance;
     }
 
     var remainder = quantity % packSize
