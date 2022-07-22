@@ -21,6 +21,7 @@ module PriceCalculation
     add_percent(gross_price, FoodsoftConfig[:price_markup])
   end
 
+  # get the unit ratio quantity in reference to the supplier_order_unit
   def get_unit_ratio_quantity(unit)
     return 1 if unit == self.supplier_order_unit
 
@@ -32,7 +33,7 @@ module PriceCalculation
       return related_ratio.quantity / ArticleUnits.units[unit][:conversionFactor] * ArticleUnits.units[related_ratio.unit][:conversionFactor]
     end
 
-    1 / ArticleUnits.units[unit][:conversionFactor]
+    ArticleUnits.units[self.supplier_order_unit][:conversionFactor] / ArticleUnits.units[unit][:conversionFactor]
   end
 
   def convert_quantity(quantity, input_unit, output_unit)

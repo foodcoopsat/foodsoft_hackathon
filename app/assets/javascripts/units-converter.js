@@ -22,7 +22,8 @@ class UnitsConverter {
       return relatedRatio.quantity / unit.conversionFactor * relatedUnit.conversionFactor;
     }
 
-    return 1 / unit.conversionFactor;
+    const supplierOrderUnitConversionFactor = this.units[this.supplierOrderUnit].conversionFactor;
+    return supplierOrderUnitConversionFactor / unit.conversionFactor;
   }
 
   getUnitRatio(quantity, inputUnit, outputUnit) {
