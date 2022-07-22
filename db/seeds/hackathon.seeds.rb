@@ -44,7 +44,7 @@ Article.create!({ name: "Detergent", supplier_id: 1, article_category_id: 1, uni
                   :article_unit_ratios => [ArticleUnitRatio.new({ :sort => 2, :quantity => 20, :unit => 'LTR' }), ArticleUnitRatio.new({ :sort => 2, :quantity => 25, :unit => 'KGM' })] })
 Article.create!({ name: "Rice", supplier_id: 1, article_category_id: 12, unit: nil, price: 2.25, tax: 7.0, deposit: "0.0", quantity: 0, supplier_order_unit: "XPP", price_unit: "KGM", billing_unit: "KGM", group_order_unit: "KGM", group_order_granularity: 0.05,
                   :article_unit_ratios => [ArticleUnitRatio.new({ :sort => 1, :quantity => 25, :unit => 'KGM' })] })
-Article.create!({ name: "Potatoes", supplier_id: 1, article_category_id: 3, unit: nil, price: 2.25, tax: 7.0, deposit: "0.0", quantity: 0, supplier_order_unit: "KGM", price_unit: "KGM", billing_unit: "KGM", group_order_unit: "GRM" })
+Article.create!({ name: "Potatoes", supplier_id: 1, article_category_id: 3, unit: nil, price: 0.01, tax: 7.0, deposit: "0.0", quantity: 0, supplier_order_unit: "KGM", price_unit: "KGM", billing_unit: "KGM", group_order_unit: "GRM" })
 Article.create!({ name: "Wheat", supplier_id: 1, article_category_id: 12, unit: nil, price: 2.25, tax: 7.0, deposit: "0.0", quantity: 0, supplier_order_unit: "XPP", price_unit: "KGM", billing_unit: "KGM", group_order_unit: "KGM", group_order_granularity: 0.05,
                   :article_unit_ratios => [ArticleUnitRatio.new({ :sort => 1, :quantity => 25, :unit => 'KGM' })] })
 Article.create!({ name: "Oranges", supplier_id: 1, article_category_id: 2, unit: nil, price: 2.25, tax: 7.0, deposit: "0.0", quantity: 0, supplier_order_unit: "XPP", price_unit: "KGM", billing_unit: "KGM", group_order_unit: "KGM", group_order_granularity: 0.05,
