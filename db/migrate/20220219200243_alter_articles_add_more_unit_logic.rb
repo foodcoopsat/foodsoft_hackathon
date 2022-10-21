@@ -5,7 +5,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.column :price_unit, :string, length: 3
       t.column :billing_unit, :string, length: 3
       t.column :group_order_unit, :string, length: 3
-      t.column :group_order_granularity, :float, null: false, default: 1
+      t.column :group_order_granularity, :decimal, precision: 8, scale: 3, null: false, default: 1
       t.column :minimum_order_quantity, :float
       t.change :unit, :string, null: true, default: nil
     end
@@ -15,8 +15,8 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.column :price_unit, :string, length: 3
       t.column :billing_unit, :string, length: 3
       t.column :group_order_unit, :string, length: 3
-      t.column :group_order_granularity, :float, null: false, default: 1
-      t.column :minimum_order_quantity, :float
+      t.column :group_order_granularity, :decimal, precision: 8, scale: 3, null: false, default: 1
+      t.column :minimum_order_quantity, :decimal, precision: 8, scale: 3
       t.column :unit, :string, null: true, default: nil
     end
 
@@ -25,7 +25,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.references :article_price, null: true
 
       t.column :sort, :integer, null: false, index: true
-      t.column :quantity, :float, null: false
+      t.column :quantity, :decimal, precision: 8, scale: 3, null: false
       t.column :unit, :string, length: 3
     end
 
@@ -48,18 +48,18 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
     end
 
     change_table :order_articles do |t|
-      t.change :quantity, :float, null: false
-      t.change :tolerance, :float, null: false
+      t.change :quantity, :decimal, precision: 8, scale: 3, null: false
+      t.change :tolerance, :decimal, precision: 8, scale: 3, null: false
     end
 
     change_table :group_order_articles do |t|
-      t.change :quantity, :float, null: false
-      t.change :tolerance, :float, null: false
+      t.change :quantity, :decimal, precision: 8, scale: 3, null: false
+      t.change :tolerance, :decimal, precision: 8, scale: 3, null: false
     end
 
     change_table :group_order_article_quantities do |t|
-      t.change :quantity, :float, null: false
-      t.change :tolerance, :float, null: false
+      t.change :quantity, :decimal, precision: 8, scale: 3, null: false
+      t.change :tolerance, :decimal, precision: 8, scale: 3, null: false
     end
   end
 

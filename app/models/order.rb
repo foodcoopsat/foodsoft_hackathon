@@ -207,11 +207,11 @@ class Order < ApplicationRecord
         quantity = oa.units * oa.price.convert_quantity(1, oa.price.supplier_order_unit, oa.price.group_order_unit)
         case type
         when :net
-          total += quantity * oa.price.price
+          total += quantity * oa.price.group_order_price
         when :gross
-          total += quantity * oa.price.gross_price
+          total += quantity * oa.price.gross_group_order_price
         when :fc
-          total += quantity * oa.price.fc_price
+          total += quantity * oa.price.fc_group_order_price
         end
       end
     elsif type == :groups || type == :groups_without_markup
@@ -219,9 +219,9 @@ class Order < ApplicationRecord
         for goa in go.group_order_articles
           case type
           when :groups
-            total += goa.result * goa.order_article.price.fc_price
+            total += goa.result * goa.order_article.price.fc_group_order_price
           when :groups_without_markup
-            total += goa.result * goa.order_article.price.gross_price
+            total += goa.result * goa.order_article.price.gross_group_order_price
           end
         end
       end

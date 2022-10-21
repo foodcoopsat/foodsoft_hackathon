@@ -22,8 +22,8 @@
         - net_price = article.price
         - gross_price = article.gross_price
         - units = order_article.units
-        - total_net += units * article.get_price(article.supplier_order_unit)
-        - total_gross += units * article.get_price(article.supplier_order_unit, :gross)
+        - total_net += units * article.price
+        - total_gross += units * article.gross_price
         %tr{:class => cycle('even', 'odd', :name => 'articles') + ' ' + order_article_class(order_article)}
           %td.name=h order_article.article.name
           %td= order_article.article.unit

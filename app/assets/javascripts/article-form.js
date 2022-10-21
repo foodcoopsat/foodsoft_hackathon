@@ -87,9 +87,9 @@ class ArticleForm {
 
   undoPriceConversion() {
     const relativePrice = this.price$.val();
-    const ratio = this.getUnitRatio(1, this.priceUnit$.val(), this.groupOrderUnit$.val());
-    const groupOrderUnitPrice = relativePrice / ratio;
-    const hiddenPriceField$ = $(`<input type="hidden" name="${this.price$.attr('name')}" value="${groupOrderUnitPrice}" />`);
+    const ratio = this.getUnitRatio(1, this.priceUnit$.val(), this.supplierUnitSelect$.val());
+    const supplierUnitPrice = relativePrice / ratio;
+    const hiddenPriceField$ = $(`<input type="hidden" name="${this.price$.attr('name')}" value="${supplierUnitPrice}" />`);
     this.articleForm$.append(hiddenPriceField$);
   }
 
@@ -357,9 +357,9 @@ class ArticleForm {
   }
 
   convertPriceToPriceUnit() {
-    const groupOrderUnitPrice = this.price$.val();
-    const ratio = this.getUnitRatio(1, this.priceUnit$.val(), this.groupOrderUnit$.val());
-    const relativePrice = round(groupOrderUnitPrice * ratio);
+    const supplierUnitPrice = this.price$.val();
+    const ratio = this.getUnitRatio(1, this.priceUnit$.val(), this.supplierUnitSelect$.val());
+    const relativePrice = round(supplierUnitPrice * ratio);
     this.price$.val(relativePrice);
   }
 

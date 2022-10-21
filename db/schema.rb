@@ -49,8 +49,8 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
     t.string "price_unit"
     t.string "billing_unit"
     t.string "group_order_unit"
-    t.float "group_order_granularity", default: 1.0, null: false
-    t.float "minimum_order_quantity"
+    t.decimal "group_order_granularity", precision: 8, scale: 3, default: "1.0", null: false
+    t.decimal "minimum_order_quantity", precision: 8, scale: 3
     t.string "unit"
     t.index ["article_id"], name: "index_article_prices_on_article_id"
   end
@@ -59,7 +59,7 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
     t.bigint "article_id"
     t.bigint "article_price_id"
     t.integer "sort", null: false
-    t.float "quantity", null: false
+    t.decimal "quantity", precision: 8, scale: 3, null: false
     t.string "unit"
     t.index ["article_id"], name: "index_article_unit_ratios_on_article_id"
     t.index ["article_price_id"], name: "index_article_unit_ratios_on_article_price_id"
@@ -89,7 +89,7 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
     t.string "price_unit"
     t.string "billing_unit"
     t.string "group_order_unit"
-    t.float "group_order_granularity", default: 1.0, null: false
+    t.decimal "group_order_granularity", precision: 8, scale: 3, default: "1.0", null: false
     t.float "minimum_order_quantity"
     t.index ["article_category_id"], name: "index_articles_on_article_category_id"
     t.index ["name", "supplier_id"], name: "index_articles_on_name_and_supplier_id"
@@ -179,8 +179,8 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
 
   create_table "group_order_article_quantities", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
     t.integer "group_order_article_id", default: 0, null: false
-    t.float "quantity", default: 0.0, null: false
-    t.float "tolerance", default: 0.0, null: false
+    t.decimal "quantity", precision: 8, scale: 3, default: "0.0", null: false
+    t.decimal "tolerance", precision: 8, scale: 3, default: "0.0", null: false
     t.datetime "created_on", null: false
     t.index ["group_order_article_id"], name: "index_group_order_article_quantities_on_group_order_article_id"
   end
@@ -188,8 +188,8 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
   create_table "group_order_articles", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
     t.integer "group_order_id", default: 0, null: false
     t.integer "order_article_id", default: 0, null: false
-    t.float "quantity", default: 0.0, null: false
-    t.float "tolerance", default: 0.0, null: false
+    t.decimal "quantity", precision: 8, scale: 3, default: "0.0", null: false
+    t.decimal "tolerance", precision: 8, scale: 3, default: "0.0", null: false
     t.datetime "updated_on", null: false
     t.decimal "result", precision: 8, scale: 3
     t.decimal "result_computed", precision: 8, scale: 3
@@ -348,8 +348,8 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
   create_table "order_articles", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
     t.integer "order_id", default: 0, null: false
     t.integer "article_id", default: 0, null: false
-    t.float "quantity", default: 0.0, null: false
-    t.float "tolerance", default: 0.0, null: false
+    t.decimal "quantity", precision: 8, scale: 3, default: "0.0", null: false
+    t.decimal "tolerance", precision: 8, scale: 3, default: "0.0", null: false
     t.float "units_to_order", default: 0.0, null: false
     t.integer "lock_version", default: 0, null: false
     t.integer "article_price_id"

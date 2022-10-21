@@ -46,7 +46,7 @@ class OrderArticle < ApplicationRecord
   # In balancing this can differ from ordered (by supplier) quantity for this article.
   def group_orders_sum
     quantity = group_order_articles.collect(&:result).sum
-    { :quantity => quantity, :price => quantity * price.fc_price }
+    { :quantity => quantity, :price => quantity * price.fc_group_order_price }
   end
 
   # Update quantity/tolerance/units_to_order from group_order_articles
@@ -93,12 +93,12 @@ class OrderArticle < ApplicationRecord
 
   # Calculate price for ordered quantity.
   def total_price
-    units * price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit) * price.price
+    units * price.price
   end
 
   # Calculate gross price for ordered qunatity.
   def total_gross_price
-    units * price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit) * price.gross_price
+    units * price.gross_price
   end
 
   # redistribute articles over ordergroups

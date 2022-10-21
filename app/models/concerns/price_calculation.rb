@@ -40,9 +40,17 @@ module PriceCalculation
     quantity / self.get_unit_ratio_quantity(input_unit) * self.get_unit_ratio_quantity(output_unit)
   end
 
-  def get_price(output_unit, type = :net)
-    price_value = (type == :gross ? self.gross_price : self.price)
-    price_value / self.get_unit_ratio_quantity(output_unit) * self.get_unit_ratio_quantity(self.price_unit)
+  def group_order_price(value = nil)
+    value ||= price
+    value / convert_quantity(1, supplier_order_unit, group_order_unit)
+  end
+
+  def gross_group_order_price
+    group_order_price(gross_price)
+  end
+
+  def fc_group_order_price
+    group_order_price(fc_price)
   end
 
   private

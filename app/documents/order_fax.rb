@@ -74,7 +74,7 @@ class OrderFax < OrderPdf
     total = 0
     data = [I18n.t('documents.order_fax.rows')]
     each_order_article do |oa|
-      price = oa.price.get_price(oa.price.supplier_order_unit)
+      price = oa.price.price
       subtotal = oa.units_to_order * price
       total += subtotal
       data << [oa.article.order_number,
