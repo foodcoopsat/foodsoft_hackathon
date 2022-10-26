@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_19_200243) do
+ActiveRecord::Schema.define(version: 2022_10_26_102301) do
 
   create_table "active_storage_attachments", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
     t.string "name", null: false
@@ -39,34 +39,18 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
     t.index ["name"], name: "index_article_categories_on_name", unique: true
   end
 
-  create_table "article_prices", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
-    t.integer "article_id", null: false
-    t.decimal "price", precision: 8, scale: 2, default: "0.0", null: false
-    t.decimal "tax", precision: 8, scale: 2, default: "0.0", null: false
-    t.decimal "deposit", precision: 8, scale: 2, default: "0.0", null: false
-    t.datetime "created_at"
-    t.string "supplier_order_unit"
-    t.string "price_unit"
-    t.string "billing_unit"
-    t.string "group_order_unit"
-    t.decimal "group_order_granularity", precision: 8, scale: 3, default: "1.0", null: false
-    t.decimal "minimum_order_quantity", precision: 8, scale: 3
-    t.string "unit"
-    t.index ["article_id"], name: "index_article_prices_on_article_id"
-  end
-
   create_table "article_unit_ratios", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
     t.bigint "article_id"
-    t.bigint "article_price_id"
     t.integer "sort", null: false
     t.decimal "quantity", precision: 8, scale: 3, null: false
     t.string "unit"
     t.index ["article_id"], name: "index_article_unit_ratios_on_article_id"
-    t.index ["article_price_id"], name: "index_article_unit_ratios_on_article_price_id"
     t.index ["sort"], name: "index_article_unit_ratios_on_sort"
   end
 
   create_table "articles", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
+    t.string "uuid", null: false
+    t.integer "version", default: 0, null: false
     t.string "name", default: "", null: false
     t.integer "supplier_id", default: 0, null: false
     t.integer "article_category_id", default: 0, null: false
@@ -95,6 +79,9 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
     t.index ["name", "supplier_id"], name: "index_articles_on_name_and_supplier_id"
     t.index ["supplier_id"], name: "index_articles_on_supplier_id"
     t.index ["type"], name: "index_articles_on_type"
+    t.index ["uuid", "version"], name: "index_articles_on_uuid_and_version", unique: true
+    t.index ["uuid"], name: "index_articles_on_uuid"
+    t.index ["version"], name: "index_articles_on_version"
   end
 
   create_table "assignments", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
@@ -352,7 +339,6 @@ ActiveRecord::Schema.define(version: 2022_02_19_200243) do
     t.decimal "tolerance", precision: 8, scale: 3, default: "0.0", null: false
     t.float "units_to_order", default: 0.0, null: false
     t.integer "lock_version", default: 0, null: false
-    t.integer "article_price_id"
     t.decimal "units_billed", precision: 8, scale: 3
     t.decimal "units_received", precision: 8, scale: 3
     t.index ["order_id", "article_id"], name: "index_order_articles_on_order_id_and_article_id", unique: true
