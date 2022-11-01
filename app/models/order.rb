@@ -172,7 +172,7 @@ class Order < ApplicationRecord
   # e.g: [["drugs",[teethpaste, toiletpaper]], ["fruits" => [apple, banana, lemon]]]
   def articles_grouped_by_category
     @articles_grouped_by_category ||= order_articles
-                                      .includes([:article_price, :group_order_articles, :article => :article_category])
+                                      .includes([:article_version, :group_order_articles, :article => :article_category])
                                       .order('articles.name')
                                       .group_by { |a| a.article.article_category.name }
                                       .sort { |a, b| a[0] <=> b[0] }
@@ -203,25 +203,25 @@ class Order < ApplicationRecord
   def sum(type = :gross)
     total = 0
     if type == :net || type == :gross || type == :fc
-      for oa in order_articles.ordered.includes(:article, :article_price)
-        quantity = oa.units * oa.price.convert_quantity(1, oa.price.supplier_order_unit, oa.price.group_order_unit)
+      for oa in order_articles.ordered.includes(:article, :article_version)
+        quantity = oa.units * oa.article_version.convert_quantity(1, oa.article_version.supplier_order_unit, oa.article_version.group_order_unit)
         case type
         when :net
-          total += quantity * oa.price.group_order_price
+          total += quantity * oa.article_version.group_order_price
         when :gross
-          total += quantity * oa.price.gross_group_order_price
+          total += quantity * oa.article_version.gross_group_order_price
         when :fc
-          total += quantity * oa.price.fc_group_order_price
+          total += quantity * oa.article_version.fc_group_order_price
         end
       end
     elsif type == :groups || type == :groups_without_markup
-      for go in group_orders.includes(group_order_articles: { order_article: [:article, :article_price] })
+      for go in group_orders.includes(group_order_articles: { order_article: [:article, :article_version] })
         for goa in go.group_order_articles
           case type
           when :groups
-            total += goa.result * goa.order_article.price.fc_group_order_price
+            total += goa.result * goa.order_article.article_version.fc_group_order_price
           when :groups_without_markup
-            total += goa.result * goa.order_article.price.gross_group_order_price
+            total += goa.result * goa.order_article.article_version.gross_group_order_price
           end
         end
       end
@@ -237,11 +237,12 @@ class Order < ApplicationRecord
         # set new order state (needed by notify_order_finished)
         update_attributes!(:state => 'finished', :ends => Time.now, :updated_by => user)
 
-        # Update order_articles. Save the current article_price to keep price consistency
+        # Update order_articles. Save the current article_version to keep price consistency
         # Also save results for each group_order_result
         # Clean up
+        # TODO-article-version: Change this to work with article_versions:
         order_articles.includes(:article).each do |oa|
-          oa.update_attribute(:article_price, oa.article.article_prices.first)
+          oa.update_attribute(:article_version, oa.article.article_versions.first)
           oa.group_order_articles.each do |goa|
             goa.save_results!
             # Delete no longer required order-history (group_order_article_quantities) and
@@ -353,6 +354,7 @@ class Order < ApplicationRecord
     (articles_list - articles).each { |article| order_articles.create(:article => article) }
     # delete old order_articles
     articles.reject { |article| articles_list.include?(article) }.each do |article|
+      # TODO-article-version
       order_articles.detect { |order_article| order_article.article_id == article.id }.destroy
     end
   end

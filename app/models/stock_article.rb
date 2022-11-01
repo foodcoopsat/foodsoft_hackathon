@@ -1,6 +1,7 @@
 class StockArticle < Article
   has_many :stock_changes
 
+  # TODO-article-version
   scope :available, -> { undeleted.where('quantity > 0') }
 
   validates :quantity, presence: true, numericality: { greater_than_or_equal_to: 0 }
@@ -24,6 +25,7 @@ class StockArticle < Article
 
   # Check for unclosed orders and substract its ordered quantity
   def quantity_available
+    # TODO-article-version
     quantity - quantity_ordered
   end
 

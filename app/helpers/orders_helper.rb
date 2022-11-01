@@ -29,7 +29,7 @@ module OrdersHelper
       nil
     else
       units_info = []
-      price = order_article.price
+      price = order_article.article_version
       [:units_to_order, :units_billed, :units_received].map do |unit|
         if n = order_article.send(unit)
           converted_quantity = price.convert_quantity(n, price.supplier_order_unit, price.billing_unit.presence || price.supplier_order_unit)
@@ -44,7 +44,7 @@ module OrdersHelper
   end
 
   def ordered_quantities_different_from_group_orders?(order_article, ordered_mark = "!", billed_mark = "?", received_mark = "?")
-    price = order_article.price
+    price = order_article.article_version
     group_orders_sum_quantity = order_article.group_orders_sum[:quantity]
     if !order_article.units_received.nil?
       (price.convert_quantity(order_article.units_received, price.supplier_order_unit, price.billing_unit).round(3)) == group_orders_sum_quantity ? false : received_mark
@@ -92,20 +92,20 @@ module OrdersHelper
     content_tag(options[:tag], c, class: "package #{options[:class]}").html_safe
   end
 
-  def article_price_change_hint(order_article, gross = false)
-    return nil if order_article.article.price == order_article.price.price
+  def article_version_change_hint(order_article, gross = false)
+    return nil if order_article.article_version.price == order_article.article_version.price
 
-    title = "#{t('helpers.orders.old_price')}: #{number_to_currency order_article.article.price}"
-    title += " / #{number_to_currency order_article.article.gross_price}" if gross
+    title = "#{t('helpers.orders.old_price')}: #{number_to_currency order_article.article_version.price}"
+    title += " / #{number_to_currency order_article.article_version.gross_price}" if gross
     content_tag(:i, nil, class: 'icon-asterisk', title: j(title)).html_safe
   end
 
   def receive_input_field(form)
     order_article = form.object
-    price = order_article.article_price
+    price = order_article.article_version
     quantity = order_article.units_billed || order_article.units_to_order
     # units_expected = (order_article.units_billed || order_article.units_to_order) *
-    #                  1.0 * order_article.article.unit_quantity / order_article.article_price.unit_quantity
+    #                  1.0 * order_article.article_version.unit_quantity / order_article.article_version.unit_quantity
     units_expected = price.convert_quantity(quantity, price.supplier_order_unit, price.billing_unit)
 
     input_classes = 'input input-nano units_received'
@@ -130,10 +130,10 @@ module OrdersHelper
 
   def ratio_quantity_data(order_article, default_unit = nil)
     data = {}
-    data["supplier-order-unit"] = order_article.price.supplier_order_unit
+    data["supplier-order-unit"] = order_article.article_version.supplier_order_unit
     data["default-unit"] = default_unit
-    data["custom-unit"] = order_article.price.unit
-    order_article.price.article_unit_ratios.all.each_with_index do |ratio, index|
+    data["custom-unit"] = order_article.article_version.unit
+    order_article.article_version.article_unit_ratios.all.each_with_index do |ratio, index|
       data["ratio-quantity-#{index}"] = ratio.quantity
       data["ratio-unit-#{index}"] = ratio.unit
     end

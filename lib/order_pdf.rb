@@ -46,12 +46,12 @@ class OrderPdf < RenderPDF
   # @param article [OrderArticle]
   # @return [Number] Price to show
   # @see https://github.com/foodcoops/foodsoft/issues/445
-  def order_article_price(order_article)
-    order_article.price.fc_price
+  def order_article_version(order_article)
+    order_article.article_version.fc_price
   end
 
-  def order_article_price_per_unit(order_article)
-    "#{number_to_currency(order_article_price(order_article))} / #{order_article.article.unit}"
+  def order_article_version_per_unit(order_article)
+    "#{number_to_currency(order_article_version(order_article))} / #{order_article.article_version.unit}"
   end
 
   def group_order_article_quantity_with_tolerance(goa)
@@ -75,7 +75,7 @@ class OrderPdf < RenderPDF
       .includes(group_order_articles: { group_order: :ordergroup })
       .where(order: @orders)
       .order('suppliers.name, articles.name, groups.name')
-      .preload(:article_price)
+      .preload(:article_version)
   end
 
   def ordergroups(offset = nil, limit = nil)
@@ -136,7 +136,7 @@ class OrderPdf < RenderPDF
     group_order_articles(ordergroup)
       .includes(order_article: { article: [:supplier] })
       .order('suppliers.name, articles.name')
-      .preload(order_article: [:article_price, :order])
+      .preload(order_article: [:article_version, :order])
       .each(&block)
   end
 

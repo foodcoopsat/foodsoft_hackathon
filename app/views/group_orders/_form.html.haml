@@ -103,10 +103,10 @@
           %td{colspan: "9"}
         - order_articles.each do |order_article|
           %tr{class: "#{cycle('even', 'odd', name: 'articles')} order-article #{get_missing_units_css_class(@ordering_data[:order_articles][order_article.id][:missing_units])}", valign: "top"}
-            %td.name= order_article.article.name
+            %td.name= order_article.article_version.name
             - if @order.stockit?
-              %td= truncate order_article.article.supplier.name, length: 15
-            %td= h order_article.article.origin
+              %td= truncate order_article.article_version.supplier.name, length: 15
+            %td= h order_article.article_version.origin
             %td= number_to_currency(@ordering_data[:order_articles][order_article.id][:price])
             %td= format_group_order_unit(order_article.article)
             %td
@@ -115,7 +115,7 @@
               - else
                 %span.missing-units= @ordering_data[:order_articles][order_article.id][:missing_units]
 
-            - quantity_data = ratio_quantity_data(order_article, order_article.price.group_order_unit)
+            - quantity_data = ratio_quantity_data(order_article, order_article.article_version.group_order_unit)
             - quantity_data['ratio-group-order-unit-supplier-unit'] = @ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit]
             - quantity_data['others_quantity'] = @ordering_data[:order_articles][order_article.id][:others_quantity]
             - quantity_data['others_tolerance'] = @ordering_data[:order_articles][order_article.id][:others_tolerance]
@@ -129,26 +129,26 @@
               .btn-group
                 %a.btn.btn-ordering.decrease
                   %i.icon-minus
-                %input.goa-quantity{type: "number", name: "group_order[group_order_articles_attributes][#{order_article.id}][quantity]", value: @ordering_data[:order_articles][order_article.id][:quantity], data: quantity_data, autocomplete: 'off', class: 'input-mini numeric', min: 0, step: order_article.price.group_order_granularity}
+                %input.goa-quantity{type: "number", name: "group_order[group_order_articles_attributes][#{order_article.id}][quantity]", value: @ordering_data[:order_articles][order_article.id][:quantity], data: quantity_data, autocomplete: 'off', class: 'input-mini numeric', min: 0, step: order_article.article_version.group_order_granularity}
                 %a.btn.btn-ordering.increase
                   %i.icon-plus
 
             %td.tolerance.group-order-input{style: ('display:none' if @order.stockit?)}
-              - if (@ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit] != order_article.price.group_order_granularity || (order_article.price.minimum_order_quantity.presence || 0) > order_article.price.group_order_granularity)
+              - if (@ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit] != order_article.article_version.group_order_granularity || (order_article.article_version.minimum_order_quantity.presence || 0) > order_article.article_version.group_order_granularity)
                 %span.used= @ordering_data[:order_articles][order_article.id][:used_tolerance]
                 +
                 %span.unused= @ordering_data[:order_articles][order_article.id][:tolerance] - @ordering_data[:order_articles][order_article.id][:used_tolerance]
                 .btn-group
                   %a.btn.btn-ordering.decrease
                     %i.icon-minus
-                  %input.goa-tolerance{type: "number", name: "group_order[group_order_articles_attributes][#{order_article.id}][tolerance]", data: quantity_data, value: @ordering_data[:order_articles][order_article.id][:tolerance], autocomplete: 'off', class: 'input-mini numeric', min: 0, step: order_article.price.group_order_granularity, max: [@ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit], @ordering_data[:order_articles][order_article.id][:minimum_order_quantity].presence || 0].max}
+                  %input.goa-tolerance{type: "number", name: "group_order[group_order_articles_attributes][#{order_article.id}][tolerance]", data: quantity_data, value: @ordering_data[:order_articles][order_article.id][:tolerance], autocomplete: 'off', class: 'input-mini numeric', min: 0, step: order_article.article_version.group_order_granularity, max: [@ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit], @ordering_data[:order_articles][order_article.id][:minimum_order_quantity].presence || 0].max}
                   %a.btn.btn-ordering.increase
                     %i.icon-plus
 
             %td{id: "td_price_#{order_article.id}", style: "text-align:right; padding-right:10px; width:4em"}
               %span{id: "price_#{order_article.id}_display", data: {price: @ordering_data[:order_articles][order_article.id][:total_price]}}= number_to_currency(@ordering_data[:order_articles][order_article.id][:total_price])
               .article-info
-                .article-name= order_article.article.name
+                .article-name= order_article.article_version.name
                 .pull-right
                   = t('.units_full') + ':'
                   %span{id: "units_#{order_article.id}"}= order_article.units_to_order
@@ -160,11 +160,11 @@
                   %span{id: "t_total_#{order_article.id}"}= @ordering_data[:order_articles][order_article.id][:tolerance] + @ordering_data[:order_articles][order_article.id][:others_tolerance]
                   %br/
                 .pull-left
-                  #{heading_helper Article, :manufacturer}: #{order_article.article.manufacturer}
+                  #{heading_helper Article, :manufacturer}: #{order_article.article_version.manufacturer}
                   %br/
-                  #{heading_helper Article, :units}: #{@order.stockit? ? order_article.article.quantity_available : @ordering_data[:order_articles][order_article.id][:unit]} * #{format_group_order_unit(order_article.article)}
+                  #{heading_helper Article, :units}: #{@order.stockit? ? order_article.article_version.quantity_available : @ordering_data[:order_articles][order_article.id][:unit]} * #{format_group_order_unit(order_article.article)}
                   %br/
-                  #{heading_helper Article, :note}: #{order_article.article.note}
+                  #{heading_helper Article, :note}: #{order_article.article_version.note}
                   %br/
   #order-footer
     #info-box

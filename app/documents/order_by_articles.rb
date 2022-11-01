@@ -27,7 +27,7 @@ class OrderByArticles < OrderPdf
       end
       next unless rows.length > 1
 
-      name = "#{order_article.article.name} (#{order_article.article.unit} | #{order_article.price.unit_quantity} | #{number_to_currency(order_article.price.fc_price)})"
+      name = "#{order_article.article_version.name} (#{order_article.article_version.unit} | #{order_article.article_version.unit_quantity} | #{number_to_currency(order_article.article_version.fc_price)})"
       name += " #{order_article.order.name}" if @options[:show_supplier]
       nice_table name, rows, dimrows do |table|
         table.column(0).width = bounds.width / 2

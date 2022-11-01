@@ -2,7 +2,7 @@ class Supplier < ApplicationRecord
   include MarkAsDeletedWithName
   include CustomFields
 
-  has_many :articles, -> { where(:type => nil).includes(:article_category).order('article_categories.name', 'articles.name') }
+  has_many :articles, -> { joins(:article_versions).merge(ArticleVersion.latest) }
   has_many :stock_articles, -> { includes(:article_category).order('article_categories.name', 'articles.name') }
   has_many :orders
   has_many :deliveries

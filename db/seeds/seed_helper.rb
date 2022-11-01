@@ -10,7 +10,7 @@ def seed_group_orders
       go = og.group_orders.create!(order: order, updated_by_user_id: 1)
       (3 + rand(10)).times do
         goa = go.group_order_articles.find_or_create_by!(order_article: order.order_articles.offset(rand(noas)).first)
-        unit_quantity = goa.order_article.price.unit_quantity
+        unit_quantity = goa.order_article.article_version.unit_quantity
         goa.update_quantities rand([4, 2 * unit_quantity + 2].max), rand(unit_quantity)
       end
     end

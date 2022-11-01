@@ -15,7 +15,7 @@ module StockitHelper
     end
   end
 
-  def stock_article_price_hint(stock_article)
+  def stock_article_version_hint(stock_article)
     t('simple_form.hints.stock_article.edit_stock_article.price',
       :stock_article_copy_link => link_to(t('stockit.form.copy_stock_article'),
                                           stock_article_copy_path(stock_article),

@@ -11,8 +11,8 @@
       var el_price = $('.price', el_goa);
       var old_price = el_price.data('value');
       if (el_price.length) {
-        el_price.text(I18n.l('currency', e.group_order_article_price));
-        el_price.data('value', e.group_order_article_price);
+        el_price.text(I18n.l('currency', e.group_order_article_version));
+        el_price.data('value', e.group_order_article_version);
       }
 
       // group_order_article is greyed when result==0
@@ -23,14 +23,14 @@
       var el_price_sum = $('.price_sum', el_sum);
       if (el_price_sum.length) {
         var old_price_sum = el_price_sum.data('value');
-        var new_price_sum = old_price_sum - old_price + e.group_order_article_price;
+        var new_price_sum = old_price_sum - old_price + e.group_order_article_version;
         el_price_sum.text(I18n.l('currency', new_price_sum));
         el_price_sum.data('value', new_price_sum);
       }
       var el_total = $('.total', el_sum);
       if (el_total.length) {
         var old_total = el_total.data('value');
-        var new_total = old_total - old_price + e.group_order_article_price;
+        var new_total = old_total - old_price + e.group_order_article_version;
         el_total.text(I18n.l('currency', new_total));
         el_total.data('value', new_total);
       }

@@ -19,29 +19,28 @@ class Article < ApplicationRecord
   #   @see http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
   # @!attribute price
   #   @return [Number] Net price
-  #   @see ArticlePrice#price
+  #   @see ArticleVersion#price
   # @!attribute tax
   #   @return [Number] VAT percentage (10 is 10%).
-  #   @see ArticlePrice#tax
+  #   @see ArticleVersion#tax
   # @!attribute deposit
   #   @return [Number] Deposit
-  #   @see ArticlePrice#deposit
+  #   @see ArticleVersion#deposit
   # @!attribute unit_quantity
   #   @return [Number] Number of units in wholesale package (box).
-  #   @see ArticlePrice#unit_quantity
+  #   @see ArticleVersion#unit_quantity
   # @!attribute order_number
   # Order number, this can be used by the supplier to identify articles.
   # This is required when using the shared database functionality.
   #   @return [String] Order number.
   # @!attribute article_category
   #   @return [ArticleCategory] Category this article is in.
-  belongs_to :article_category
   # @!attribute supplier
   #   @return [Supplier] Supplier this article belongs to.
   belongs_to :supplier
-  # @!attribute article_prices
-  #   @return [Array<ArticlePrice>] Price history (current price first).
-  has_many :article_prices, -> { order("created_at DESC") }
+  # @!attribute article_versions
+  #   @return [Array<ArticleVersion>] Price history (current price first).
+  has_many :article_versions, -> { order("created_at DESC") }
   # @!attribute order_articles
   #   @return [Array<OrderArticle>] Order articles for this article.
   has_many :order_articles
@@ -51,42 +50,31 @@ class Article < ApplicationRecord
 
   has_many :article_unit_ratios, after_add: :on_article_unit_ratios_change, after_remove: :on_article_unit_ratios_change
 
+  has_one :latest_version, -> { merge(ArticleVersion.latest) }, foreign_key: :article_id, class_name: :ArticleVersion
+
   # Replace numeric seperator with database format
   localize_input_of :price, :tax, :deposit
   # Get rid of unwanted whitespace. {Unit#new} may even bork on whitespace.
   normalize_attributes :name, :unit, :note, :manufacturer, :origin, :order_number
 
   scope :undeleted, -> { where(deleted_at: nil) }
+  # TODO-article-version:
   scope :available, -> { undeleted.where(availability: true) }
   scope :not_in_stock, -> { where(type: nil) }
 
-  # Validations
-  validates_presence_of :name, :price, :tax, :deposit, :supplier_id, :article_category
-  validates_length_of :name, :in => 4..60
-  validates_length_of :unit, :in => 1..15, :unless => :supplier_order_unit
-  validates_presence_of :supplier_order_unit, :unless => :unit
-  validates_length_of :note, :maximum => 255
-  validates_length_of :origin, :maximum => 255
-  validates_length_of :manufacturer, :maximum => 255
-  validates_length_of :order_number, :maximum => 255
-  validates_numericality_of :price, :greater_than_or_equal_to => 0
-  validates_numericality_of :deposit, :tax
-  # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type], if: Proc.new {|a| a.supplier.shared_sync_method.blank? or a.supplier.shared_sync_method == 'import' }
-  # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type, :unit, :unit_quantity]
-  validate :uniqueness_of_name
-  validate :only_one_unit_type
-
   # Callbacks
-  before_save :update_price_history
+  # TODO-article-version:
+  # before_save :update_price_history
+
   before_destroy :check_article_in_use
 
-  accepts_nested_attributes_for :article_unit_ratios, allow_destroy: true
-
   def self.ransackable_attributes(auth_object = nil)
+    # TODO-article-version
     %w(id name supplier_id article_category_id unit note manufacturer origin unit_quantity order_number)
   end
 
   def self.ransackable_associations(auth_object = nil)
+    # TODO-article-version
     %w(article_category supplier order_articles orders)
   end
 
@@ -99,6 +87,7 @@ class Article < ApplicationRecord
   def in_open_order
     @in_open_order ||= begin
       order_articles = OrderArticle.where(order_id: Order.open.collect(&:id))
+      # TODO-article-version:
       order_article = order_articles.detect { |oa| oa.article_id == id }
       order_article ? order_article.order : nil
     end
@@ -222,47 +211,6 @@ class Article < ApplicationRecord
     update_column :deleted_at, Time.now
   end
 
-  # TODO: Maybe use the nilify blanks gem instead of the following five methods?:
-  def unit=(value)
-    if value.blank?
-      self[:unit] = nil
-    else
-      super
-    end
-  end
-
-  def supplier_order_unit=(value)
-    if value.blank?
-      self[:supplier_order_unit] = nil
-    else
-      super
-    end
-  end
-
-  def group_order_unit=(value)
-    if value.blank?
-      self[:group_order_unit] = nil
-    else
-      super
-    end
-  end
-
-  def price_unit=(value)
-    if value.blank?
-      self[:price_unit] = nil
-    else
-      super
-    end
-  end
-
-  def billing_unit=(value)
-    if value.blank?
-      self[:billing_unit] = nil
-    else
-      super
-    end
-  end
-
   protected
 
   # Checks if the article is in use before it will deleted
@@ -270,10 +218,10 @@ class Article < ApplicationRecord
     raise I18n.t('articles.model.error_in_use', :article => self.name.to_s) if self.in_open_order
   end
 
-  # Create an ArticlePrice, when the price-attr are changed.
+  # Create an ArticleVersion, when the price-attr are changed.
   def update_price_history
     if price_changed?
-      article_price = article_prices.build(
+      article_version = article_versions.build(
         :price => price,
         :tax => tax,
         :deposit => deposit,
@@ -289,7 +237,7 @@ class Article < ApplicationRecord
       article_unit_ratios.each do |ratio|
         ratio = ratio.dup
         ratio.article_id = nil
-        article_price.article_unit_ratios << ratio
+        article_version.article_unit_ratios << ratio
       end
     end
 
@@ -304,25 +252,5 @@ class Article < ApplicationRecord
     changed.any? { |attr| attr == 'price' || 'tax' || 'deposit' || 'supplier_order_unit' || 'unit' || 'price_unit' || 'billing_unit' || 'group_order_unit' || 'group_order_granularity' || 'minimum_order_quantity' || 'article_unit_ratios' } \
       || @article_unit_ratios_changed \
       || article_unit_ratios.any?(&:changed?)
-  end
-
-  # We used have the name unique per supplier+deleted_at+type. With the addition of shared_sync_method all,
-  # this came in the way, and we now allow duplicate names for the 'all' methods - expecting foodcoops to
-  # make their own choice among products with different units by making articles available/unavailable.
-  def uniqueness_of_name
-    matches = Article.where(name: name, supplier_id: supplier_id, deleted_at: deleted_at, type: type)
-    matches = matches.where.not(id: id) unless new_record?
-    # supplier should always be there - except, perhaps, on initialization (on seeding)
-    if supplier && (supplier.shared_sync_method.blank? || supplier.shared_sync_method == 'import')
-      errors.add :name, :taken if matches.any?
-    else
-      errors.add :name, :taken_with_unit if matches.where(unit: unit, unit_quantity: unit_quantity).any?
-    end
-  end
-
-  def only_one_unit_type
-    unless unit.blank? || supplier_order_unit.blank?
-      errors.add :unit # not specifying a specific error message as this should be prevented by js
-    end
   end
 end
