@@ -49,8 +49,9 @@ class Article < ApplicationRecord
   has_many :orders, through: :order_articles
 
   has_many :article_unit_ratios, after_add: :on_article_unit_ratios_change, after_remove: :on_article_unit_ratios_change
+  has_many :article_versions
 
-  has_one :latest_version, -> { merge(ArticleVersion.latest) }, foreign_key: :article_id, class_name: :ArticleVersion
+  has_one :latest_article_version, -> { merge(ArticleVersion.latest) }, foreign_key: :article_id, class_name: :ArticleVersion
 
   # Replace numeric seperator with database format
   localize_input_of :price, :tax, :deposit
@@ -61,6 +62,8 @@ class Article < ApplicationRecord
   # TODO-article-version:
   scope :available, -> { undeleted.where(availability: true) }
   scope :not_in_stock, -> { where(type: nil) }
+
+  scope :with_latest_versions_and_categories, -> { joins(article_versions: [:article_category]).joins(ArticleVersion.latest_outer_join_sql("articles.id")).where(later_article_versions: { id: nil }) }
 
   # Callbacks
   # TODO-article-version:
@@ -80,7 +83,7 @@ class Article < ApplicationRecord
 
   # Returns true if article has been updated at least 2 days ago
   def recently_updated
-    updated_at > 2.days.ago
+    latest_article_version.updated_at > 2.days.ago
   end
 
   # If the article is used in an open Order, the Order will be returned.

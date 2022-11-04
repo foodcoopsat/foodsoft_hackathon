@@ -5,13 +5,12 @@ class OrderArticle < ApplicationRecord
   attr_reader :update_global_price
 
   belongs_to :order
-  belongs_to :article
   belongs_to :article_version, optional: true
   has_many :group_order_articles, :dependent => :destroy
 
-  validates_presence_of :order_id, :article_id
+  validates_presence_of :order_id, :article_version_id
   validate :article_and_price_exist
-  validates_uniqueness_of :article_id, scope: :order_id
+  validates_uniqueness_of :article_version_id, scope: :order_id
 
   _ordered_sql = "order_articles.units_to_order > 0 OR order_articles.units_billed > 0 OR order_articles.units_received > 0"
   scope :ordered, -> { where(_ordered_sql) }

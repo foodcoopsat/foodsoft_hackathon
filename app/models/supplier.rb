@@ -2,8 +2,12 @@ class Supplier < ApplicationRecord
   include MarkAsDeletedWithName
   include CustomFields
 
-  has_many :articles, -> { joins(:article_versions).merge(ArticleVersion.latest) }
-  has_many :stock_articles, -> { includes(:article_category).order('article_categories.name', 'articles.name') }
+  has_many :articles
+  # TODO-article-version:
+  # , -> { includes(latest_article_version: [:article_category]).order('article_categories.name', 'latest_article_versions.name') }
+  has_many :stock_articles
+  # TODO-article-version:
+  # , -> { includes(latest_article_version: [:article_category]).order('article_categories.name', 'latest_article_versions.name') }
   has_many :orders
   has_many :deliveries
   has_many :invoices

@@ -3,7 +3,7 @@ class Order < ApplicationRecord
 
   # Associations
   has_many :order_articles, :dependent => :destroy
-  has_many :articles, :through => :order_articles
+  has_many :article_versions, :through => :order_articles
   has_many :group_orders, :dependent => :destroy
   has_many :ordergroups, :through => :group_orders
   has_many :users_ordered, :through => :ordergroups, :source => :users
@@ -351,11 +351,11 @@ class Order < ApplicationRecord
     # fetch selected articles
     articles_list = Article.find(article_ids)
     # create new order_articles
-    (articles_list - articles).each { |article| order_articles.create(:article => article) }
+    articles = article_versions.map(&:article)
+    (articles_list - articles).each { |article| order_articles.create(:article_version => article.latest_article_version) }
     # delete old order_articles
     articles.reject { |article| articles_list.include?(article) }.each do |article|
-      # TODO-article-version
-      order_articles.detect { |order_article| order_article.article_id == article.id }.destroy
+      order_articles.detect { |order_article| order_article.article_version.article_id == article.id }.destroy
     end
   end
 

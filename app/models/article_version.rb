@@ -27,7 +27,7 @@ class ArticleVersion < ApplicationRecord
   localize_input_of :price, :tax, :deposit
 
   # Validations
-  validates_presence_of :name, :price, :tax, :deposit, :supplier_id, :article_category
+  validates_presence_of :name, :price, :tax, :deposit, :article_category
   validates_length_of :name, :in => 4..60
   validates_length_of :unit, :in => 1..15, :unless => :supplier_order_unit
   validates_presence_of :supplier_order_unit, :unless => :unit
@@ -45,12 +45,24 @@ class ArticleVersion < ApplicationRecord
   accepts_nested_attributes_for :article_unit_ratios, allow_destroy: true
 
   scope :latest, lambda {
-    ArticleVersion.joins(%{
-      JOIN (#{ArticleVersion.latest_version_fields.to_sql}) AS latest_article_versions
-      ON latest_article_versions.article_id = article_versions.article_id
-        AND latest_article_versions.max_created_at = article_versions.created_at
-    }).includes(:article_category).order('article_categories.name', 'article_versions.name')
+    ArticleVersion.joins(ArticleVersion.latest_subselect_sql("article_versions.article_id"))
   }
+
+  def self.latest_subselect_sql(article_id_sql)
+    %{
+      JOIN (#{ArticleVersion.latest_version_fields.to_sql}) AS latest_article_versions
+      ON latest_article_versions.article_id = #{article_id_sql}
+        AND latest_article_versions.max_created_at = article_versions.created_at
+    }
+  end
+
+  def self.latest_outer_join_sql(article_id_sql)
+    %{
+      left outer join article_versions later_article_versions
+      on later_article_versions.article_id = #{article_id_sql}
+        and later_article_versions.created_at > article_versions.created_at
+    }
+  end
 
   def self.latest_version_fields
     self.select("article_id, MAX(created_at) AS max_created_at").group("article_id")

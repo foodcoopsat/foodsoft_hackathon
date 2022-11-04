@@ -8,20 +8,20 @@ module ArticlesHelper
 
   def row_classes(article)
     classes = []
-    classes << "unavailable" if !article.availability
-    classes << "just-updated" if article.recently_updated && article.availability
+    classes << "unavailable" if !article.latest_article_version.availability
+    classes << "just-updated" if article.recently_updated && article.latest_article_version.availability
     classes.join(" ")
   end
 
-  def format_supplier_article_unit(article)
-    return ArticleUnits.as_options.invert[article.supplier_order_unit] unless article.supplier_order_unit.nil?
+  def format_supplier_article_unit(article_version)
+    return ArticleUnits.as_options.invert[article_version.supplier_order_unit] unless article_version.supplier_order_unit.nil?
 
-    article.unit
+    article_version.unit
   end
 
-  def format_group_order_unit(article)
-    return ArticleUnits.as_options.invert[article.group_order_unit] unless article.group_order_unit.nil?
+  def format_group_order_unit(article_version)
+    return ArticleUnits.as_options.invert[article_version.group_order_unit] unless article_version.group_order_unit.nil?
 
-    article.unit
+    article_version.unit
   end
 end
