@@ -42,30 +42,23 @@ class ArticleVersion < ApplicationRecord
   validate :uniqueness_of_name
   validate :only_one_unit_type
 
+  # Replace numeric seperator with database format
+  localize_input_of :price, :tax, :deposit
+  # Get rid of unwanted whitespace. {Unit#new} may even bork on whitespace.
+  normalize_attributes :name, :unit, :note, :manufacturer, :origin, :order_number
+
   accepts_nested_attributes_for :article_unit_ratios, allow_destroy: true
 
   scope :latest, lambda {
-    ArticleVersion.joins(ArticleVersion.latest_subselect_sql("article_versions.article_id"))
+    joins(latest_outer_join_sql("#{table_name}.article_id")).where(later_article_versions: { id: nil })
   }
 
-  def self.latest_subselect_sql(article_id_sql)
+  def self.latest_outer_join_sql(article_field_name)
     %{
-      JOIN (#{ArticleVersion.latest_version_fields.to_sql}) AS latest_article_versions
-      ON latest_article_versions.article_id = #{article_id_sql}
-        AND latest_article_versions.max_created_at = article_versions.created_at
+      LEFT OUTER JOIN article_versions later_article_versions
+      ON later_article_versions.article_id = #{article_field_name}
+        AND later_article_versions.created_at > article_versions.created_at
     }
-  end
-
-  def self.latest_outer_join_sql(article_id_sql)
-    %{
-      left outer join article_versions later_article_versions
-      on later_article_versions.article_id = #{article_id_sql}
-        and later_article_versions.created_at > article_versions.created_at
-    }
-  end
-
-  def self.latest_version_fields
-    self.select("article_id, MAX(created_at) AS max_created_at").group("article_id")
   end
 
   # TODO: Maybe use the nilify blanks gem instead of the following five methods?:

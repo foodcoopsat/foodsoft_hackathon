@@ -49,21 +49,26 @@ class Article < ApplicationRecord
   has_many :orders, through: :order_articles
 
   has_many :article_unit_ratios, after_add: :on_article_unit_ratios_change, after_remove: :on_article_unit_ratios_change
-  has_many :article_versions
 
   has_one :latest_article_version, -> { merge(ArticleVersion.latest) }, foreign_key: :article_id, class_name: :ArticleVersion
-
-  # Replace numeric seperator with database format
-  localize_input_of :price, :tax, :deposit
-  # Get rid of unwanted whitespace. {Unit#new} may even bork on whitespace.
-  normalize_attributes :name, :unit, :note, :manufacturer, :origin, :order_number
 
   scope :undeleted, -> { where(deleted_at: nil) }
   # TODO-article-version:
   scope :available, -> { undeleted.where(availability: true) }
   scope :not_in_stock, -> { where(type: nil) }
 
-  scope :with_latest_versions_and_categories, -> { joins(article_versions: [:article_category]).joins(ArticleVersion.latest_outer_join_sql("articles.id")).where(later_article_versions: { id: nil }) }
+  scope :with_latest_versions_and_categories, lambda {
+                                                includes(:latest_article_version)
+                                                  .joins(article_versions: [:article_category])
+                                                  .joins(ArticleVersion.latest_outer_join_sql("#{table_name}.#{primary_key}"))
+                                                  .where(later_article_versions: { id: nil })
+                                              }
+
+  ArticleVersion.column_names.each do |column_name|
+    next if column_name == ArticleVersion.primary_key
+
+    delegate column_name, to: :latest_article_version, allow_nil: true
+  end
 
   # Callbacks
   # TODO-article-version:
