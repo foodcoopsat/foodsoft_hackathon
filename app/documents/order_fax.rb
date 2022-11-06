@@ -74,14 +74,14 @@ class OrderFax < OrderPdf
     total = 0
     data = [I18n.t('documents.order_fax.rows')]
     each_order_article do |oa|
-      price = oa.price.price
+      price = oa.article_version.price
       subtotal = oa.units_to_order * price
       total += subtotal
-      data << [oa.article.order_number,
+      data << [oa.article_version.order_number,
                oa.units_to_order,
-               oa.article.name,
+               oa.article_version.name,
                # TODO-article-units: Why should we show the supplier the group order unit quantity?:
-               oa.price.convert_quantity(1, oa.price.supplier_order_unit, oa.price.group_order_unit),
+               oa.article_version.convert_quantity(1, oa.article_version.supplier_order_unit, oa.article_version.group_order_unit),
                format_supplier_article_unit(oa.price),
                number_to_currency(price),
                number_to_currency(subtotal)]
@@ -110,7 +110,7 @@ class OrderFax < OrderPdf
     order.order_articles.ordered
          .joins(:article)
          .order('articles.order_number').order('articles.name')
-         .preload(:article, :article_price)
+         .preload(:article, :article_version)
   end
 
   def each_order_article

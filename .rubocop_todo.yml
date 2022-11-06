@@ -830,7 +830,7 @@ Rails/HasManyOrHasOneDependent:
   Exclude:
     - 'app/models/article.rb'
     - 'app/models/article_category.rb'
-    - 'app/models/article_price.rb'
+    - 'app/models/article_version.rb'
     - 'app/models/financial_link.rb'
     - 'app/models/financial_transaction.rb'
     - 'app/models/group_order.rb'

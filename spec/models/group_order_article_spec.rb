@@ -32,7 +32,7 @@ describe GroupOrderArticle do
     it 'has a proper total price' do
       quantity = rand(1..99)
       goa.update_quantities(quantity, 0)
-      expect(goa.total_price).to eq(quantity * goa.order_article.price.fc_price)
+      expect(goa.total_price).to eq(quantity * goa.order_article.article_version.fc_price)
     end
 
     it 'can unorder a product' do

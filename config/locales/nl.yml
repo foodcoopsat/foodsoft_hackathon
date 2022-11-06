@@ -28,7 +28,7 @@ nl:
       article_category:
         description: Import namen
         name: Naam
-      article_price:
+      article_version:
         deposit: Statiegeld
         price: Netto prijs
         tax: BTW

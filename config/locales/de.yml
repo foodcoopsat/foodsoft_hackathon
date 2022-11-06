@@ -28,7 +28,7 @@ de:
       article_category:
         description: Beschreibung
         name: Name
-      article_price:
+      article_version:
         deposit: Pfand
         price: Nettopreis
         tax: MwSt

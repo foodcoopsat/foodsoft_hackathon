@@ -15,7 +15,7 @@ class OrderMatrix < OrderPdf
     order_articles_data = [[
       OrderArticle.human_attribute_name(:article),
       Article.human_attribute_name(:supplier),
-      ArticlePrice.human_attribute_name(:unit_quantity),
+      ArticleVersion.human_attribute_name(:unit_quantity),
       OrderArticle.human_attribute_name(:units_received),
       Article.human_attribute_name(:fc_price_short)
     ]]
@@ -23,7 +23,7 @@ class OrderMatrix < OrderPdf
     each_order_article do |a|
       order_articles_data << [a.article.name,
                               a.article.supplier.name,
-                              a.price.unit_quantity,
+                              a.article_version.unit_quantity,
                               a.units,
                               order_article_price_per_unit(a)]
     end
@@ -68,7 +68,7 @@ class OrderMatrix < OrderPdf
       last_supplier_id = -1
 
       each_order_article do |order_article|
-        supplier = order_article.article.supplier
+        supplier = order_article.article_version.article.supplier
         if @options[:show_supplier] && last_supplier_id != supplier.id
           row = [make_cell(supplier.name, colspan: 2, font_style: :bold)]
           batch_groups.each { row << nil }
@@ -76,7 +76,7 @@ class OrderMatrix < OrderPdf
           last_supplier_id = supplier.id
         end
 
-        row = [order_article.article.name, order_article_price_per_unit(order_article)]
+        row = [order_article.article_version.name, order_article_price_per_unit(order_article)]
         row += batch_results[order_article.id] if batch_results[order_article.id]
         rows << row
       end

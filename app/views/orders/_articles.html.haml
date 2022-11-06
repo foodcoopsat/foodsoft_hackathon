@@ -25,8 +25,8 @@
         - total_net += units * article.price
         - total_gross += units * article.gross_price
         %tr{:class => cycle('even', 'odd', :name => 'articles') + ' ' + order_article_class(order_article)}
-          %td.name=h order_article.article.name
-          %td= order_article.article.unit
+          %td.name=h order_article.article_version.name
+          %td= order_article.article_version.unit
           %td= "#{number_to_currency(net_price)} / #{number_to_currency(gross_price)}"
           - if order.stockit?
             %td= units

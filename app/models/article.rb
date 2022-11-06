@@ -19,16 +19,16 @@ class Article < ApplicationRecord
   #   @see http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
   # @!attribute price
   #   @return [Number] Net price
-  #   @see ArticlePrice#price
+  #   @see ArticleVersion#price
   # @!attribute tax
   #   @return [Number] VAT percentage (10 is 10%).
-  #   @see ArticlePrice#tax
+  #   @see ArticleVersion#tax
   # @!attribute deposit
   #   @return [Number] Deposit
-  #   @see ArticlePrice#deposit
+  #   @see ArticleVersion#deposit
   # @!attribute unit_quantity
   #   @return [Number] Number of units in wholesale package (box).
-  #   @see ArticlePrice#unit_quantity
+  #   @see ArticleVersion#unit_quantity
   # @!attribute order_number
   # Order number, this can be used by the supplier to identify articles.
   # This is required when using the shared database functionality.
@@ -39,9 +39,9 @@ class Article < ApplicationRecord
   # @!attribute supplier
   #   @return [Supplier] Supplier this article belongs to.
   belongs_to :supplier
-  # @!attribute article_prices
-  #   @return [Array<ArticlePrice>] Price history (current price first).
-  has_many :article_prices, -> { order("created_at DESC") }
+  # @!attribute article_versions
+  #   @return [Array<ArticleVersion>] Price history (current price first).
+  has_many :article_versions, -> { order("created_at DESC") }
   # @!attribute order_articles
   #   @return [Array<OrderArticle>] Order articles for this article.
   has_many :order_articles
@@ -99,7 +99,7 @@ class Article < ApplicationRecord
   def in_open_order
     @in_open_order ||= begin
       order_articles = OrderArticle.where(order_id: Order.open.collect(&:id))
-      order_article = order_articles.detect { |oa| oa.article_id == id }
+      order_article = order_articles.detect { |oa| oa.article_version.article_id == id }
       order_article ? order_article.order : nil
     end
   end
@@ -270,10 +270,10 @@ class Article < ApplicationRecord
     raise I18n.t('articles.model.error_in_use', :article => self.name.to_s) if self.in_open_order
   end
 
-  # Create an ArticlePrice, when the price-attr are changed.
+  # Create an ArticleVersion, when the price-attr are changed.
   def update_price_history
     if price_changed?
-      article_price = article_prices.build(
+      article_version = article_versions.build(
         :price => price,
         :tax => tax,
         :deposit => deposit,
@@ -289,7 +289,7 @@ class Article < ApplicationRecord
       article_unit_ratios.each do |ratio|
         ratio = ratio.dup
         ratio.article_id = nil
-        article_price.article_unit_ratios << ratio
+        article_version.article_unit_ratios << ratio
       end
     end
 

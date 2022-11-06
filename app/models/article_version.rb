@@ -1,4 +1,4 @@
-class ArticlePrice < ApplicationRecord
+class ArticleVersion < ApplicationRecord
   include PriceCalculation
 
   # @!attribute price

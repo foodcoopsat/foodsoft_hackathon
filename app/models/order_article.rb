@@ -6,7 +6,7 @@ class OrderArticle < ApplicationRecord
 
   belongs_to :order
   belongs_to :article
-  belongs_to :article_price, optional: true
+  belongs_to :article_version, optional: true
   has_many :group_order_articles, :dependent => :destroy
 
   validates_presence_of :order_id, :article_id
@@ -28,10 +28,10 @@ class OrderArticle < ApplicationRecord
     %w(order article)
   end
 
-  # This method returns either the ArticlePrice or the Article
+  # This method returns either the ArticleVersion or the Article
   # The first will be set, when the the order is finished
   def price
-    article_price || article
+    article_version || article
   end
 
   # latest information on available units
@@ -156,16 +156,16 @@ class OrderArticle < ApplicationRecord
       # Updates article
       article.update_attributes!(article_attributes)
 
-      # Updates article_price belonging to current order article
+      # Updates article_version belonging to current order article
       if price_attributes.present?
-        article_price.attributes = price_attributes
-        if article_price.changed?
+        article_version.attributes = price_attributes
+        if article_version.changed?
           # Updates also price attributes of article if update_global_price is selected
           if update_global_price
             article.update_attributes!(price_attributes)
-            self.article_price = article.article_prices.first and save # Assign new created article price to order article
+            self.article_version = article.article_versions.first and save # Assign new created article price to order article
           else
-            # Creates a new article_price if neccessary
+            # Creates a new article_version if neccessary
             # Set created_at timestamp to order ends, to make sure the current article price isn't changed
             price_attributes = price_attributes.merge(article_id: article_id, created_at: order.ends)
             create_article_price!(price_attributes) and save
@@ -213,7 +213,7 @@ class OrderArticle < ApplicationRecord
   # Associate with current article price if created in a finished order
   def init_from_balancing
     if order.present? && order.finished?
-      self.article_price = article.article_prices.first
+      self.article_version = article.article_versions.first
     end
   end
 

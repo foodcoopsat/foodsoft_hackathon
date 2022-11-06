@@ -29,7 +29,7 @@ class OrderArticlesController < ApplicationController
 
   def update
     # begin
-    price_params = params.require(:article_price).permit(:id, :unit, :supplier_order_unit, :minimum_order_quantity, :billing_unit, :group_order_granularity, :group_order_unit, :price, :price_unit, :tax, :deposit, article_unit_ratios_attributes: [:sort, :quantity, :unit, :_destroy])
+    price_params = params.require(:article_version).permit(:id, :unit, :supplier_order_unit, :minimum_order_quantity, :billing_unit, :group_order_granularity, :group_order_unit, :price, :price_unit, :tax, :deposit, article_unit_ratios_attributes: [:sort, :quantity, :unit, :_destroy])
     @order_article.update_article_and_price!(params[:order_article], params[:article], price_params)
     # rescue
     #   render action: :edit
@@ -73,7 +73,7 @@ class OrderArticlesController < ApplicationController
 
   def new_empty_article_ratio
     @empty_article_unit_ratio = ArticleUnitRatio.new
-    @empty_article_unit_ratio.article_price = @order_article.price
+    @empty_article_unit_ratio.article_version = @order_article.price
     @empty_article_unit_ratio.sort = -1
   end
 end
