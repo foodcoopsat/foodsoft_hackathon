@@ -3,7 +3,7 @@ class Order < ApplicationRecord
 
   # Associations
   has_many :order_articles, :dependent => :destroy
-  has_many :articles, :through => :order_articles
+  has_many :article_versions, :through => :order_articles
   has_many :group_orders, :dependent => :destroy
   has_many :ordergroups, :through => :group_orders
   has_many :users_ordered, :through => :ordergroups, :source => :users
@@ -172,9 +172,9 @@ class Order < ApplicationRecord
   # e.g: [["drugs",[teethpaste, toiletpaper]], ["fruits" => [apple, banana, lemon]]]
   def articles_grouped_by_category
     @articles_grouped_by_category ||= order_articles
-                                      .includes([:article_version, :group_order_articles, :article => :article_category])
-                                      .order('articles.name')
-                                      .group_by { |a| a.article.article_category.name }
+                                      .includes([:article_version, :group_order_articles, article_version: :article_category])
+                                      .order('article_versions.name')
+                                      .group_by { |oa| oa.article_version.article_category.name }
                                       .sort { |a, b| a[0] <=> b[0] }
   end
 
@@ -240,8 +240,9 @@ class Order < ApplicationRecord
         # Update order_articles. Save the current article_version to keep price consistency
         # Also save results for each group_order_result
         # Clean up
+        # TODO-article-version: Change this to work with article_versions:
         order_articles.includes(:article).each do |oa|
-          oa.update_attribute(:article_version, oa.article_version.article_versions.first)
+          oa.update_attribute(:article_version, oa.article.article_versions.first)
           oa.group_order_articles.each do |goa|
             goa.save_results!
             # Delete no longer required order-history (group_order_article_quantities) and
@@ -350,10 +351,11 @@ class Order < ApplicationRecord
     # fetch selected articles
     articles_list = Article.find(article_ids)
     # create new order_articles
-    (articles_list - articles).each { |article| order_articles.create(:article => article) }
+    articles = article_versions.map(&:article)
+    (articles_list - articles).each { |article| order_articles.create(:article_version => article.latest_article_version) }
     # delete old order_articles
     articles.reject { |article| articles_list.include?(article) }.each do |article|
-      order_articles.detect { |order_article| order_article.article_id == article.id }.destroy
+      order_articles.detect { |order_article| order_article.article_version.article_id == article.id }.destroy
     end
   end
 

@@ -35,7 +35,6 @@ class Article < ApplicationRecord
   #   @return [String] Order number.
   # @!attribute article_category
   #   @return [ArticleCategory] Category this article is in.
-  belongs_to :article_category
   # @!attribute supplier
   #   @return [Supplier] Supplier this article belongs to.
   belongs_to :supplier
@@ -49,57 +48,57 @@ class Article < ApplicationRecord
   #   @return [Array<Order>] Orders this article appears in.
   has_many :orders, through: :order_articles
 
-  has_many :article_unit_ratios, after_add: :on_article_unit_ratios_change, after_remove: :on_article_unit_ratios_change
-
-  # Replace numeric seperator with database format
-  localize_input_of :price, :tax, :deposit
-  # Get rid of unwanted whitespace. {Unit#new} may even bork on whitespace.
-  normalize_attributes :name, :unit, :note, :manufacturer, :origin, :order_number
+  has_one :latest_article_version, -> { merge(ArticleVersion.latest) }, foreign_key: :article_id, class_name: :ArticleVersion
 
   scope :undeleted, -> { where(deleted_at: nil) }
-  scope :available, -> { undeleted.where(availability: true) }
+  scope :available, -> { undeleted.with_latest_versions_and_categories.where(article_versions: { availability: true }) }
   scope :not_in_stock, -> { where(type: nil) }
 
-  # Validations
-  validates_presence_of :name, :price, :tax, :deposit, :supplier_id, :article_category
-  validates_length_of :name, :in => 4..60
-  validates_length_of :unit, :in => 1..15, :unless => :supplier_order_unit
-  validates_presence_of :supplier_order_unit, :unless => :unit
-  validates_length_of :note, :maximum => 255
-  validates_length_of :origin, :maximum => 255
-  validates_length_of :manufacturer, :maximum => 255
-  validates_length_of :order_number, :maximum => 255
-  validates_numericality_of :price, :greater_than_or_equal_to => 0
-  validates_numericality_of :deposit, :tax
-  # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type], if: Proc.new {|a| a.supplier.shared_sync_method.blank? or a.supplier.shared_sync_method == 'import' }
-  # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type, :unit, :unit_quantity]
-  validate :uniqueness_of_name
-  validate :only_one_unit_type
+  scope :with_latest_versions_and_categories, lambda {
+                                                includes(:latest_article_version)
+                                                  .joins(article_versions: [:article_category])
+                                                  .joins(ArticleVersion.latest_outer_join_sql("#{table_name}.#{primary_key}"))
+                                                  .where(later_article_versions: { id: nil })
+                                              }
+
+  accepts_nested_attributes_for :latest_article_version
+
+  # TODO-article-version: Discuss if these delegates aren't actually a code smell:
+  ArticleVersion.column_names.each do |column_name|
+    next if column_name == ArticleVersion.primary_key
+
+    delegate column_name, to: :latest_article_version, allow_nil: true
+  end
+
+  delegate :article_category, to: :latest_article_version, allow_nil: true
+  delegate :article_unit_ratios, to: :latest_article_version, allow_nil: true
 
   # Callbacks
-  before_save :update_price_history
+  before_save :update_or_create_article_version
+
   before_destroy :check_article_in_use
 
-  accepts_nested_attributes_for :article_unit_ratios, allow_destroy: true
-
   def self.ransackable_attributes(auth_object = nil)
+    # TODO-article-version
     %w(id name supplier_id article_category_id unit note manufacturer origin unit_quantity order_number)
   end
 
   def self.ransackable_associations(auth_object = nil)
+    # TODO-article-version
     %w(article_category supplier order_articles orders)
   end
 
   # Returns true if article has been updated at least 2 days ago
   def recently_updated
-    updated_at > 2.days.ago
+    latest_article_version.updated_at > 2.days.ago
   end
 
   # If the article is used in an open Order, the Order will be returned.
   def in_open_order
     @in_open_order ||= begin
       order_articles = OrderArticle.where(order_id: Order.open.collect(&:id))
-      order_article = order_articles.detect { |oa| oa.article_version.article_id == id }
+      # TODO-article-version:
+      order_article = order_articles.detect { |oa| oa.article_id == id }
       order_article ? order_article.order : nil
     end
   end
@@ -222,47 +221,6 @@ class Article < ApplicationRecord
     update_column :deleted_at, Time.now
   end
 
-  # TODO: Maybe use the nilify blanks gem instead of the following five methods?:
-  def unit=(value)
-    if value.blank?
-      self[:unit] = nil
-    else
-      super
-    end
-  end
-
-  def supplier_order_unit=(value)
-    if value.blank?
-      self[:supplier_order_unit] = nil
-    else
-      super
-    end
-  end
-
-  def group_order_unit=(value)
-    if value.blank?
-      self[:group_order_unit] = nil
-    else
-      super
-    end
-  end
-
-  def price_unit=(value)
-    if value.blank?
-      self[:price_unit] = nil
-    else
-      super
-    end
-  end
-
-  def billing_unit=(value)
-    if value.blank?
-      self[:billing_unit] = nil
-    else
-      super
-    end
-  end
-
   protected
 
   # Checks if the article is in use before it will deleted
@@ -271,58 +229,23 @@ class Article < ApplicationRecord
   end
 
   # Create an ArticleVersion, when the price-attr are changed.
-  def update_price_history
-    if price_changed?
-      article_version = article_versions.build(
-        :price => price,
-        :tax => tax,
-        :deposit => deposit,
-        :supplier_order_unit => supplier_order_unit,
-        :unit => unit,
-        :price_unit => price_unit,
-        :billing_unit => billing_unit,
-        :group_order_unit => group_order_unit,
-        :group_order_granularity => group_order_granularity,
-        :minimum_order_quantity => minimum_order_quantity
-      )
+  def update_or_create_article_version
+    if version_dup_required?
+      duplicate = latest_article_version.dup
+      self.article_versions << duplicate
 
-      article_unit_ratios.each do |ratio|
+      duplicate.article_unit_ratios.each do |ratio|
         ratio = ratio.dup
-        ratio.article_id = nil
-        article_version.article_unit_ratios << ratio
+        ratio.article_version_id = nil
+        duplicate.article_unit_ratios << ratio
       end
     end
-
-    @article_unit_ratios_changed = false
   end
 
-  def on_article_unit_ratios_change(some_change)
-    @article_unit_ratios_changed = true
-  end
+  def version_dup_required?
+    return false if latest_article_version.nil?
+    return false unless latest_article_version.self_or_ratios_changed?
 
-  def price_changed?
-    changed.any? { |attr| attr == 'price' || 'tax' || 'deposit' || 'supplier_order_unit' || 'unit' || 'price_unit' || 'billing_unit' || 'group_order_unit' || 'group_order_granularity' || 'minimum_order_quantity' || 'article_unit_ratios' } \
-      || @article_unit_ratios_changed \
-      || article_unit_ratios.any?(&:changed?)
-  end
-
-  # We used have the name unique per supplier+deleted_at+type. With the addition of shared_sync_method all,
-  # this came in the way, and we now allow duplicate names for the 'all' methods - expecting foodcoops to
-  # make their own choice among products with different units by making articles available/unavailable.
-  def uniqueness_of_name
-    matches = Article.where(name: name, supplier_id: supplier_id, deleted_at: deleted_at, type: type)
-    matches = matches.where.not(id: id) unless new_record?
-    # supplier should always be there - except, perhaps, on initialization (on seeding)
-    if supplier && (supplier.shared_sync_method.blank? || supplier.shared_sync_method == 'import')
-      errors.add :name, :taken if matches.any?
-    else
-      errors.add :name, :taken_with_unit if matches.where(unit: unit, unit_quantity: unit_quantity).any?
-    end
-  end
-
-  def only_one_unit_type
-    unless unit.blank? || supplier_order_unit.blank?
-      errors.add :unit # not specifying a specific error message as this should be prevented by js
-    end
+    OrderArticle.exists?(article_version_id: latest_article_version.id)
   end
 end

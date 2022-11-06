@@ -1,5 +1,5 @@
 class ArticleForm {
-  constructor(articleUnitRatioTemplate$, articleForm$, units, priceMarkup, fieldNamePrefix = 'article') {
+  constructor(articleUnitRatioTemplate$, articleForm$, units, priceMarkup, fieldNamePrefix = 'article_version') {
     try {
       this.units = units;
       this.priceMarkup = priceMarkup;

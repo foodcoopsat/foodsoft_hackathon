@@ -13,7 +13,8 @@
       = "Unit ratios"
     %table#fc_base_price{:class => "controls"}
       %tbody
-        = render :partial => 'shared/article_unit_ratio', :as => 'article_unit_ratio', :collection => article.article_unit_ratios, locals: {f: f}
+        - ratios = article.article_unit_ratios
+        = render :partial => 'shared/article_unit_ratio', :as => 'article_unit_ratio', :collection => ratios, locals: {f: f}
       %tfoot
         %td{:colspan => 6}
           = link_to t('.add_ratio'), '#', 'data-add-ratio' => true, class: 'btn', title: "add ratio"

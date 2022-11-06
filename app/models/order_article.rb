@@ -5,13 +5,12 @@ class OrderArticle < ApplicationRecord
   attr_reader :update_global_price
 
   belongs_to :order
-  belongs_to :article
-  belongs_to :article_version, optional: true
+  belongs_to :article_version
   has_many :group_order_articles, :dependent => :destroy
 
-  validates_presence_of :order_id, :article_id
-  validate :article_and_price_exist
-  validates_uniqueness_of :article_id, scope: :order_id
+  validates_presence_of :order_id, :article_version_id
+  validate :article_version_and_price_exist
+  validates_uniqueness_of :article_version_id, scope: :order_id
 
   _ordered_sql = "order_articles.units_to_order > 0 OR order_articles.units_billed > 0 OR order_articles.units_received > 0"
   scope :ordered, -> { where(_ordered_sql) }
@@ -204,10 +203,10 @@ class OrderArticle < ApplicationRecord
 
   private
 
-  def article_and_price_exist
-    errors.add(:article, I18n.t('model.order_article.error_price')) if !(article = Article.find(article_id)) || article.fc_price.nil?
+  def article_version_and_price_exist
+    errors.add(:article_version, I18n.t('model.order_article.error_price')) if !(article_version = ArticleVersion.find(article_version_id)) || article_version.fc_price.nil?
   rescue
-    errors.add(:article, I18n.t('model.order_article.error_price'))
+    errors.add(:article_version, I18n.t('model.order_article.error_price'))
   end
 
   # Associate with current article price if created in a finished order
