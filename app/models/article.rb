@@ -75,8 +75,8 @@ class Article < ApplicationRecord
 
   # Callbacks
   before_save :update_or_create_article_version
-
   before_destroy :check_article_in_use
+  after_save :reload_article_on_version_change
 
   def self.ransackable_attributes(auth_object = nil)
     # TODO-article-version
@@ -230,22 +230,35 @@ class Article < ApplicationRecord
 
   # Create an ArticleVersion, when the price-attr are changed.
   def update_or_create_article_version
-    if version_dup_required?
-      duplicate = latest_article_version.dup
-      self.article_versions << duplicate
+    @version_changed_before_save = false
+    return unless self.version_dup_required?
 
-      duplicate.article_unit_ratios.each do |ratio|
-        ratio = ratio.dup
-        ratio.article_version_id = nil
-        duplicate.article_unit_ratios << ratio
-      end
+    old_version = self.latest_article_version
+    new_version = old_version.dup
+    self.article_versions << new_version
+
+    self.article_unit_ratios.each do |ratio|
+      ratio = ratio.dup
+      ratio.article_version_id = nil
+      new_version.article_unit_ratios << ratio
     end
+    OrderArticle.belonging_to_open_order.where(article_version_id: self.id).update_all(article_version_id: new_version.id)
+
+    # reload old version to avoid updating it too (would automatically happen after before_save):
+    old_version.reload
+
+    @version_changed_before_save = true
+  end
+
+  def reload_article_on_version_change
+    self.reload if @version_changed_before_save
+    @version_changed_before_save = false
   end
 
   def version_dup_required?
     return false if latest_article_version.nil?
     return false unless latest_article_version.self_or_ratios_changed?
 
-    OrderArticle.exists?(article_version_id: latest_article_version.id)
+    OrderArticle.belonging_to_finished_order.exists?(article_version_id: latest_article_version.id)
   end
 end

@@ -65,7 +65,7 @@ class ArticlesController < ApplicationController
 
   # Updates one Article and highlights the line if succeded
   def update
-    if @article.update_attributes(latest_article_version_attributes: params[:article_version])
+    if @article.update_attributes(created_at: Time.now - 1.day, latest_article_version_attributes: params[:article_version])
       render :layout => false
     else
       Rails.logger.info @article.errors.to_yaml.to_s
