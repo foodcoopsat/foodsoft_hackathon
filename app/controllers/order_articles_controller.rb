@@ -16,7 +16,7 @@ class OrderArticlesController < ApplicationController
     # The article may be ordered with zero units - in that case do not complain.
     #   If order_article is ordered and a new order_article is created, an error message will be
     #   given mentioning that the article already exists, which is desired.
-    @order_article = @order.order_articles.where(:article_id => params[:order_article][:article_id]).first
+    @order_article = @order.order_articles.joins(:article_version).where(article_versions: { :article_id => params[:order_article][:article_version][:article_id] }).first
     unless @order_article && @order_article.units_to_order == 0
       @order_article = @order.order_articles.build(params[:order_article])
     end
@@ -29,8 +29,9 @@ class OrderArticlesController < ApplicationController
 
   def update
     # begin
-    price_params = params.require(:article_version).permit(:id, :unit, :supplier_order_unit, :minimum_order_quantity, :billing_unit, :group_order_granularity, :group_order_unit, :price, :price_unit, :tax, :deposit, article_unit_ratios_attributes: [:sort, :quantity, :unit, :_destroy])
-    @order_article.update_article_and_price!(params[:order_article], params[:article], price_params)
+    version_params = params.require(:article_version).permit(:id, :unit, :supplier_order_unit, :minimum_order_quantity, :billing_unit, :group_order_granularity, :group_order_unit, :price, :price_unit, :tax, :deposit, article_unit_ratios_attributes: [:id, :sort, :quantity, :unit, :_destroy])
+    @order_article.update_handling_versioning!(params[:order_article], version_params)
+    # TODO-article-version
     # rescue
     #   render action: :edit
     # end
@@ -64,7 +65,7 @@ class OrderArticlesController < ApplicationController
   end
 
   def load_order_article
-    @order_article = OrderArticle.includes(article: [:article_unit_ratios]).find(params[:id])
+    @order_article = OrderArticle.includes(article_version: :article_unit_ratios).find(params[:id])
   end
 
   def load_article_units

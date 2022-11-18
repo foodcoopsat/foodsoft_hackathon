@@ -106,6 +106,17 @@ class ArticleVersion < ApplicationRecord
     changed? || @article_unit_ratios_changed || article_unit_ratios.any?(&:changed?)
   end
 
+  def duplicate_including_article_unit_ratios
+    new_version = self.dup
+    self.article_unit_ratios.each do |ratio|
+      ratio = ratio.dup
+      ratio.article_version_id = nil
+      new_version.article_unit_ratios << ratio
+    end
+
+    new_version
+  end
+
   protected
 
   # We used have the name unique per supplier+deleted_at+type. With the addition of shared_sync_method all,

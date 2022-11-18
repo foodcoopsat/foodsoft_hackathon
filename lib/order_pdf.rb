@@ -71,10 +71,10 @@ class OrderPdf < RenderPDF
   def order_articles
     OrderArticle
       .ordered
-      .includes(article: :supplier)
+      .includes(article_version: { article: :supplier })
       .includes(group_order_articles: { group_order: :ordergroup })
       .where(order: @orders)
-      .order('suppliers.name, articles.name, groups.name')
+      .order('suppliers.name, article_versions.name, groups.name')
       .preload(:article_version)
   end
 
@@ -134,8 +134,8 @@ class OrderPdf < RenderPDF
 
   def each_group_order_article_for_ordergroup(ordergroup, &block)
     group_order_articles(ordergroup)
-      .includes(order_article: { article: [:supplier] })
-      .order('suppliers.name, articles.name')
+      .includes(order_article: { article_version: { article: :supplier } })
+      .order('suppliers.name, article_versions.name')
       .preload(order_article: [:article_version, :order])
       .each(&block)
   end

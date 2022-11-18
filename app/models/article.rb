@@ -234,14 +234,9 @@ class Article < ApplicationRecord
     return unless self.version_dup_required?
 
     old_version = self.latest_article_version
-    new_version = old_version.dup
+    new_version = old_version.duplicate_including_article_unit_ratios
     self.article_versions << new_version
 
-    self.article_unit_ratios.each do |ratio|
-      ratio = ratio.dup
-      ratio.article_version_id = nil
-      new_version.article_unit_ratios << ratio
-    end
     OrderArticle.belonging_to_open_order.where(article_version_id: self.id).update_all(article_version_id: new_version.id)
 
     # reload old version to avoid updating it too (would automatically happen after before_save):

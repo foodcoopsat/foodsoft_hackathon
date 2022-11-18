@@ -20,12 +20,12 @@ class OrderMatrix < OrderPdf
       Article.human_attribute_name(:fc_price_short)
     ]]
 
-    each_order_article do |a|
-      order_articles_data << [a.article.name,
-                              a.article.supplier.name,
-                              a.article_version.unit_quantity,
-                              a.units,
-                              order_article_price_per_unit(a)]
+    each_order_article do |oa|
+      order_articles_data << [oa.article_version.name,
+                              oa.article_version.article.supplier.name,
+                              oa.article_version.unit_quantity,
+                              oa.units,
+                              order_article_price_per_unit(oa)]
     end
 
     order_articles_data.each { |row| row.delete_at 1 } unless @options[:show_supplier]

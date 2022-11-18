@@ -108,9 +108,9 @@ class OrderFax < OrderPdf
 
   def order_articles
     order.order_articles.ordered
-         .joins(:article)
-         .order('articles.order_number').order('articles.name')
-         .preload(:article, :article_version)
+         .joins(:article_version)
+         .order('article_versions.order_number').order('article_versions.name')
+         .preload(article_version: :article)
   end
 
   def each_order_article

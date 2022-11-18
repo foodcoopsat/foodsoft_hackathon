@@ -4,6 +4,7 @@ class Order < ApplicationRecord
   # Associations
   has_many :order_articles, :dependent => :destroy
   has_many :article_versions, :through => :order_articles
+  has_many :articles, through: :article_versions
   has_many :group_orders, :dependent => :destroy
   has_many :ordergroups, :through => :group_orders
   has_many :users_ordered, :through => :ordergroups, :source => :users
@@ -92,7 +93,7 @@ class Order < ApplicationRecord
   end
 
   def article_ids
-    @article_ids ||= order_articles.map { |a| a.article_id.to_s }
+    @article_ids ||= order_articles.map { |oa| oa.article_version.article_id.to_s }
   end
 
   # Returns an array of article ids that lead to a validation error.
@@ -203,7 +204,7 @@ class Order < ApplicationRecord
   def sum(type = :gross)
     total = 0
     if type == :net || type == :gross || type == :fc
-      for oa in order_articles.ordered.includes(:article, :article_version)
+      for oa in order_articles.ordered.includes(:article_version)
         quantity = oa.units * oa.article_version.convert_quantity(1, oa.article_version.supplier_order_unit, oa.article_version.group_order_unit)
         case type
         when :net
@@ -215,7 +216,7 @@ class Order < ApplicationRecord
         end
       end
     elsif type == :groups || type == :groups_without_markup
-      for go in group_orders.includes(group_order_articles: { order_article: [:article, :article_version] })
+      for go in group_orders.includes(group_order_articles: { order_article: :article_version })
         for goa in go.group_order_articles
           case type
           when :groups
@@ -240,17 +241,9 @@ class Order < ApplicationRecord
         # Update order_articles. Save the current article_version to keep price consistency
         # Also save results for each group_order_result
         # Clean up
-        # TODO-article-version: Change this to work with article_versions:
-        order_articles.includes(:article).each do |oa|
-          oa.update_attribute(:article_version, oa.article.article_versions.first)
+        order_articles.each do |oa|
           oa.group_order_articles.each do |goa|
             goa.save_results!
-            # Delete no longer required order-history (group_order_article_quantities) and
-            # TODO: Do we need articles, which aren't ordered? (units_to_order == 0 ?)
-            #    A: Yes, we do - for redistributing articles when the number of articles
-            #       delivered changes, and for statistics on popular articles. Records
-            #       with both tolerance and quantity zero can be deleted.
-            # goa.group_order_article_quantities.clear
           end
         end
 
@@ -338,12 +331,12 @@ class Order < ApplicationRecord
   end
 
   def keep_ordered_articles
-    chosen_order_articles = order_articles.where(article_id: article_ids)
+    chosen_order_articles = order_articles.joins(:article_version).where(article_versions: { article_id: article_ids })
     to_be_removed = order_articles - chosen_order_articles
     to_be_removed_but_ordered = to_be_removed.select { |a| a.quantity > 0 || a.tolerance > 0 }
     unless to_be_removed_but_ordered.empty? || ignore_warnings
       errors.add(:articles, I18n.t(stockit? ? 'orders.model.warning_ordered_stock' : 'orders.model.warning_ordered'))
-      @erroneous_article_ids = to_be_removed_but_ordered.map { |a| a.article_id }
+      @erroneous_article_ids = to_be_removed_but_ordered.map { |oa| oa.article_version.article_id }
     end
   end
 
