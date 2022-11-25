@@ -37,6 +37,8 @@ class ArticleVersion < ApplicationRecord
   validates_length_of :order_number, :maximum => 255
   validates_numericality_of :price, :greater_than_or_equal_to => 0
   validates_numericality_of :deposit, :tax
+  validates_numericality_of :minimum_order_quantity, allow_nil: true, only_integer: false, if: :supplier_order_unit_is_si_convertible
+  validates_numericality_of :minimum_order_quantity, allow_nil: true, only_integer: true, unless: :supplier_order_unit_is_si_convertible
   # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type], if: Proc.new {|a| a.supplier.shared_sync_method.blank? or a.supplier.shared_sync_method == 'import' }
   # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type, :unit, :unit_quantity]
   validate :uniqueness_of_name
@@ -61,7 +63,11 @@ class ArticleVersion < ApplicationRecord
     }
   end
 
-  # TODO: Maybe use the nilify blanks gem instead of the following five methods?:
+  def supplier_order_unit_is_si_convertible
+    !ArticleUnits.units[self.supplier_order_unit]&.dig(:conversionFactor).nil?
+  end
+
+  # TODO: Maybe use the nilify blanks gem instead of the following six methods?:
   def unit=(value)
     if value.blank?
       self[:unit] = nil
@@ -97,6 +103,14 @@ class ArticleVersion < ApplicationRecord
   def billing_unit=(value)
     if value.blank?
       self[:billing_unit] = nil
+    else
+      super
+    end
+  end
+
+  def minimum_order_quantity=(value)
+    if value.blank?
+      self[:minimum_order_quantity] = nil
     else
       super
     end

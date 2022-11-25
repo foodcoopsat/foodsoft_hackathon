@@ -80,8 +80,12 @@ class ArticleForm {
     });
   }
 
+  getUnitsConverter() {
+    return new UnitsConverter(this.units, this.ratios, this.supplierUnitSelect$.val());
+  }
+
   getUnitRatio(quantity, inputUnit, outputUnit) {
-    const converter = new UnitsConverter(this.units, this.ratios, this.supplierUnitSelect$.val());
+    const converter = this.getUnitsConverter();
     return converter.getUnitRatio(quantity, inputUnit, outputUnit);
   }
 
@@ -138,6 +142,13 @@ class ArticleForm {
       .parents('.input-append')
       .find('.add-on')
       .text(chosenOptionLabel !== undefined ? chosenOptionLabel : unitVal);
+
+    const converter = this.getUnitsConverter();
+    if (converter.isUnitSiConversible(this.supplierUnitSelect$.val())) {
+      this.minimumOrderQuantity$.removeAttr('step');
+    } else {
+      this.minimumOrderQuantity$.attr('step', 1);
+    }
   }
 
   bindAddRatioButton() {

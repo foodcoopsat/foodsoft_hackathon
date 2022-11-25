@@ -29,4 +29,12 @@ class UnitsConverter {
   getUnitRatio(quantity, inputUnit, outputUnit) {
     return quantity / this.getUnitQuantity(inputUnit) * this.getUnitQuantity(outputUnit);
   }
+
+  isUnitSiConversible(unitId) {
+    const unit = this.units[unitId];
+    if (unit === undefined) {
+      return false;
+    }
+    return !!unit.conversionFactor;
+  }
 }

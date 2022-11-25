@@ -131,7 +131,11 @@ class GroupOrderForm {
     if (isNaN(tolerance)) {
       tolerance = 0;
     }
-    const packSize = parseFloat(quantity$.data('ratio-group-order-unit-supplier-unit'));
+    const supplierOrderUnit = quantity$.data('supplier-order-unit');
+    const converter = quantity$.unitConversionField('getConverter');
+    const packSizeDeterminedBySupplierOrderUnit = converter && !converter.isUnitSiConversible(supplierOrderUnit);
+
+    const packSize = packSizeDeterminedBySupplierOrderUnit ? parseFloat(quantity$.data('ratio-group-order-unit-supplier-unit')) : 0.001;
     const othersQuantity = parseFloat(quantity$.data('others-quantity'));
     const othersTolerance = parseFloat(quantity$.data('others-tolerance'));
     const usedQuantity = parseFloat(quantity$.data('used-quantity'));
