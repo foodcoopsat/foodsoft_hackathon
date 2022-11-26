@@ -17,8 +17,8 @@ class OrderTxt
     text += "****** " + I18n.t('orders.fax.articles') + "\n\n"
     text += "%8s %8s   %s\n" % [I18n.t('orders.fax.number'), I18n.t('orders.fax.amount'), I18n.t('orders.fax.name')]
     # now display all ordered articles
-    @order.order_articles.ordered.includes([:article, :article_price]).each do |oa|
-      text += "%8s %8d   %s\n" % [oa.article.order_number, oa.units_to_order.to_i, oa.article.name]
+    @order.order_articles.ordered.includes(:article_version).each do |oa|
+      text += "%8s %8d   %s\n" % [oa.article_version.order_number, oa.units_to_order.to_i, oa.article_version.name]
     end
     text
   end

@@ -3,9 +3,9 @@
     %tr.list-heading
       %th{:colspan => "4"}>
         %h4.name.pull-left
-          = order_article.article.name
+          = order_article.article_version.name
           %small
-            = "(#{format_group_order_unit(order_article.article)}, #{number_to_currency order_article.price.fc_price}"
+            = "(#{format_group_order_unit(order_article.article_version)}, #{number_to_currency order_article.article_version.fc_price}"
             - pkg_info = pkg_helper(order_article.price)
             = ", #{pkg_info}".html_safe unless pkg_info.blank?
             )

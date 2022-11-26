@@ -120,13 +120,13 @@ class GroupOrderArticle < ApplicationRecord
 
     # Get total
     if not total.nil?
-      logger.debug "<#{order_article.article.name}> => #{total} (given)"
-    elsif order_article.article.is_a?(StockArticle)
-      total = order_article.article.quantity
-      logger.debug "<#{order_article.article.name}> (stock) => #{total}"
+      logger.debug "<#{order_article.article_version.name}> => #{total} (given)"
+    elsif order_article.article_version.is_a?(StockArticle)
+      total = order_article.article_version.quantity
+      logger.debug "<#{order_article.article_version.name}> (stock) => #{total}"
     else
-      total = order_article.price.convert_quantity(order_article.units_to_order, order_article.article.supplier_order_unit, order_article.article.group_order_unit)
-      logger.debug "<#{order_article.article.name}> units_to_order #{order_article.units_to_order} => #{total}"
+      total = order_article.article_version.convert_quantity(order_article.units_to_order, order_article.article_version.supplier_order_unit, order_article.article_version.group_order_unit)
+      logger.debug "<#{order_article.article_version.name}> units_to_order #{order_article.units_to_order} => #{total}"
     end
 
     if total > 0
@@ -192,7 +192,7 @@ class GroupOrderArticle < ApplicationRecord
   # the minimum price depending on configuration. When the order is finished it
   # will be the value depending of the article results.
   def total_price(order_article = self.order_article)
-    group_order_price = order_article.price.fc_group_order_price
+    group_order_price = order_article.article_version.fc_group_order_price
     if order_article.order.open?
       if FoodsoftConfig[:tolerance_is_costly]
         group_order_price * (quantity + tolerance)

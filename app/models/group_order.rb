@@ -44,8 +44,8 @@ class GroupOrder < ApplicationRecord
 
         # Build hash with relevant data
         data[:order_articles][order_article.id] = {
-          :price => order_article.price.fc_group_order_price,
-          :unit => order_article.article.unit_quantity,
+          :price => order_article.article_version.fc_group_order_price,
+          :unit => order_article.article_version.unit_quantity,
           :quantity => (goa ? goa.quantity : 0),
           :others_quantity => order_article.quantity - (goa ? goa.quantity : 0),
           :used_quantity => (goa ? goa.result(:quantity) : 0),
@@ -54,9 +54,9 @@ class GroupOrder < ApplicationRecord
           :used_tolerance => (goa ? goa.result(:tolerance) : 0),
           :total_price => (goa ? goa.total_price : 0),
           :missing_units => order_article.missing_units,
-          :ratio_group_order_unit_supplier_unit => order_article.article.convert_quantity(1, order_article.article.supplier_order_unit, order_article.article.group_order_unit),
-          :quantity_available => (order.stockit? ? order_article.article.quantity_available : 0),
-          :minimum_order_quantity => order_article.price.minimum_order_quantity ? order_article.price.convert_quantity(order_article.price.minimum_order_quantity, order_article.article.supplier_order_unit, order_article.article.group_order_unit) : nil
+          :ratio_group_order_unit_supplier_unit => order_article.article_version.convert_quantity(1, order_article.article_version.supplier_order_unit, order_article.article_version.group_order_unit),
+          :quantity_available => (order.stockit? ? order_article.article_version.quantity_available : 0),
+          :minimum_order_quantity => order_article.article_version.minimum_order_quantity ? order_article.article_version.convert_quantity(order_article.article_version.minimum_order_quantity, order_article.article_version.supplier_order_unit, order_article.article_version.group_order_unit) : nil
         }
       end
     end
@@ -85,7 +85,7 @@ class GroupOrder < ApplicationRecord
 
   # Updates the "price" attribute.
   def update_price!
-    total = group_order_articles.includes(:order_article => [:article, :article_price]).to_a.sum(&:total_price)
+    total = group_order_articles.includes(order_article: :article_version).to_a.sum(&:total_price)
     update_attribute(:price, total)
   end
 

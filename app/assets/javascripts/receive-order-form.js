@@ -115,7 +115,7 @@
         $.ajax({
           url: this.newOrderArticlePath,
           type: 'post',
-          data: JSON.stringify({order_article: {article_id: selectedArticleId}}),
+          data: JSON.stringify({order_article: {article_version: {article_id: selectedArticleId}}}),
           contentType: 'application/json; charset=UTF-8'
         });
 

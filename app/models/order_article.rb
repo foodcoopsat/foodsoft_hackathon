@@ -5,17 +5,18 @@ class OrderArticle < ApplicationRecord
   attr_reader :update_global_price
 
   belongs_to :order
-  belongs_to :article
-  belongs_to :article_price, optional: true
+  belongs_to :article_version
   has_many :group_order_articles, :dependent => :destroy
 
-  validates_presence_of :order_id, :article_id
-  validate :article_and_price_exist
-  validates_uniqueness_of :article_id, scope: :order_id
+  validates_presence_of :order_id, :article_version_id
+  validate :article_version_and_price_exist
+  validates_uniqueness_of :article_version_id, scope: :order_id
 
   _ordered_sql = "order_articles.units_to_order > 0 OR order_articles.units_billed > 0 OR order_articles.units_received > 0"
   scope :ordered, -> { where(_ordered_sql) }
   scope :ordered_or_member, -> { includes(:group_order_articles).where("#{_ordered_sql} OR order_articles.quantity > 0 OR group_order_articles.result > 0") }
+  scope :belonging_to_open_order, -> { joins(:order).merge(Order.open) }
+  scope :belonging_to_finished_order, -> { joins(:order).merge(Order.finished) }
 
   before_create :init_from_balancing
   after_destroy :update_ordergroup_prices
@@ -28,10 +29,10 @@ class OrderArticle < ApplicationRecord
     %w(order article)
   end
 
-  # This method returns either the ArticlePrice or the Article
+  # This method returns either the ArticleVersion or the Article
   # The first will be set, when the the order is finished
   def price
-    article_price || article
+    article_version || article
   end
 
   # latest information on available units
@@ -148,32 +149,19 @@ class OrderArticle < ApplicationRecord
   end
 
   # Updates order_article and belongings during balancing process
-  def update_article_and_price!(order_article_attributes, article_attributes, price_attributes = nil)
+  def update_handling_versioning!(order_article_attributes, version_attributes)
     OrderArticle.transaction do
       # Updates self
       self.update_attributes!(order_article_attributes)
 
-      # Updates article
-      article.update_attributes!(article_attributes)
+      # Updates article_version belonging to current order article
+      original_article_version = self.article_version.duplicate_including_article_unit_ratios
+      self.article_version.assign_attributes(version_attributes)
+      if self.article_version.changed?
+        update_or_create_article_version(version_attributes, original_article_version)
 
-      # Updates article_price belonging to current order article
-      if price_attributes.present?
-        article_price.attributes = price_attributes
-        if article_price.changed?
-          # Updates also price attributes of article if update_global_price is selected
-          if update_global_price
-            article.update_attributes!(price_attributes)
-            self.article_price = article.article_prices.first and save # Assign new created article price to order article
-          else
-            # Creates a new article_price if neccessary
-            # Set created_at timestamp to order ends, to make sure the current article price isn't changed
-            price_attributes = price_attributes.merge(article_id: article_id, created_at: order.ends)
-            create_article_price!(price_attributes) and save
-          end
-
-          # Updates ordergroup values
-          update_ordergroup_prices
-        end
+        # Updates ordergroup values
+        update_ordergroup_prices
       end
     end
   end
@@ -204,16 +192,47 @@ class OrderArticle < ApplicationRecord
 
   private
 
-  def article_and_price_exist
-    errors.add(:article, I18n.t('model.order_article.error_price')) if !(article = Article.find(article_id)) || article.fc_price.nil?
+  def article_version_and_price_exist
+    errors.add(:article_version, I18n.t('model.order_article.error_price')) if !(article_version = ArticleVersion.find(article_version_id)) || article_version.fc_price.nil?
   rescue
-    errors.add(:article, I18n.t('model.order_article.error_price'))
+    errors.add(:article_version, I18n.t('model.order_article.error_price'))
   end
 
   # Associate with current article price if created in a finished order
   def init_from_balancing
     if order.present? && order.finished?
-      self.article_price = article.article_prices.first
+      self.article_version = article.article_versions.first
+    end
+  end
+
+  def update_or_create_article_version(version_attributes, original_article_version)
+    version_attributes = version_attributes.merge(article_id: article_version.article_id)
+
+    modifying_earlier_version = self.article_version.article.latest_article_version.id != self.article_version_id
+    finished_order_article_using_same_version = OrderArticle.belonging_to_finished_order.where(article_version_id: self.article_version_id).where.not(id: self.id)
+
+    require 'byebug'
+    byebug
+    if (!update_global_price && modifying_earlier_version && !finished_order_article_using_same_version.exists?) ||
+       (update_global_price && !modifying_earlier_version)
+      # update in place:
+      self.article_version.save
+    else
+      # create new version:
+      original_version_id = self.article_version.id
+      self.article_version = self.article_version.duplicate_including_article_unit_ratios
+      self.article_version.save
+      self.update_attribute(:article_version_id, self.article_version.id)
+
+      if update_global_price
+        # update open order articles:
+        OrderArticle.belonging_to_open_order.where(article_version_id: original_version_id).update_all(article_version_id: self.article_version.id)
+      else
+        # create yet *another* version, wich contains the old data, so new orders will continue using that data:
+        # (The checkbox "Also update the price of future orders" not being checked implies that)
+        original_article_version.created_at = self.article_version.created_at + 1.second
+        original_article_version.save
+      end
     end
   end
 

@@ -8,22 +8,22 @@ class ArticlesController < ApplicationController
   def index
     if params['sort']
       sort = case params['sort']
-             when "name" then "articles.name"
-             when "unit" then "articles.unit"
+             when "name" then "article_versions.name"
+             when "unit" then "article_versions.unit"
              when "article_category" then "article_categories.name"
-             when "note" then "articles.note"
-             when "availability" then "articles.availability"
-             when "name_reverse" then "articles.name DESC"
-             when "unit_reverse" then "articles.unit DESC"
+             when "note" then "article_versions.note"
+             when "availability" then "article_versions.availability"
+             when "name_reverse" then "article_versions.name DESC"
+             when "unit_reverse" then "article_versions.unit DESC"
              when "article_category_reverse" then "article_categories.name DESC"
-             when "note_reverse" then "articles.note DESC"
-             when "availability_reverse" then "articles.availability DESC"
+             when "note_reverse" then "article_versions.note DESC"
+             when "availability_reverse" then "article_versions.availability DESC"
              end
     else
-      sort = "article_categories.name, articles.name"
+      sort = "article_categories.name, article_versions.name"
     end
 
-    @articles = Article.undeleted.where(supplier_id: @supplier, :type => nil).includes(:article_category).order(sort)
+    @articles = Article.with_latest_versions_and_categories.order(sort).undeleted.where(supplier_id: @supplier, :type => nil)
 
     if request.format.csv?
       send_data ArticlesCsv.new(@articles, encoding: 'utf-8').to_csv, filename: 'articles.csv', type: 'text/csv'
@@ -65,7 +65,7 @@ class ArticlesController < ApplicationController
 
   # Updates one Article and highlights the line if succeded
   def update
-    if @article.update_attributes(params[:article])
+    if @article.update_attributes(created_at: Time.now - 1.day, latest_article_version_attributes: params[:article_version])
       render :layout => false
     else
       Rails.logger.info @article.errors.to_yaml.to_s
@@ -238,7 +238,10 @@ class ArticlesController < ApplicationController
   private
 
   def load_article
-    @article = Article.includes(:article_unit_ratios).find(params[:id])
+    @article = Article
+               .with_latest_versions_and_categories
+               .includes(latest_article_version: [:article_unit_ratios])
+               .find(params[:id])
   end
 
   def load_article_units
@@ -247,7 +250,7 @@ class ArticlesController < ApplicationController
 
   def new_empty_article_ratio
     @empty_article_unit_ratio = ArticleUnitRatio.new
-    @empty_article_unit_ratio.article = @article unless @article.nil?
+    @empty_article_unit_ratio.article_version = @article.latest_article_version unless @article.nil?
     @empty_article_unit_ratio.sort = -1
   end
 

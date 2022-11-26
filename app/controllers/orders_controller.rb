@@ -113,8 +113,9 @@ class OrdersController < ApplicationController
     order = Order.find(params[:id])
     order.finish!(@current_user)
     redirect_to order, notice: I18n.t('orders.finish.notice')
-  rescue => error
-    redirect_to orders_url, alert: I18n.t('errors.general_msg', :msg => error.message)
+    # TODO-article-version
+    # rescue => error
+    #   redirect_to orders_url, alert: I18n.t('errors.general_msg', :msg => error.message)
   end
 
   # Send a order to the supplier.
@@ -122,14 +123,15 @@ class OrdersController < ApplicationController
     order = Order.find(params[:id])
     order.send_to_supplier!(@current_user)
     redirect_to order, notice: I18n.t('orders.send_to_supplier.notice')
-  rescue => error
-    redirect_to order, alert: I18n.t('errors.general_msg', :msg => error.message)
+    # TODO-article-version
+    # rescue => error
+    #   redirect_to order, alert: I18n.t('errors.general_msg', :msg => error.message)
   end
 
   def receive
     @order = Order.find(params[:id])
     unless request.post?
-      @order_articles = @order.order_articles.ordered_or_member.includes(:article).order('articles.order_number, articles.name')
+      @order_articles = @order.order_articles.ordered_or_member.includes(:article_version).order('article_versions.order_number, article_versions.name')
     else
       Order.transaction do
         s = update_order_amounts
@@ -184,7 +186,7 @@ class OrdersController < ApplicationController
         if oa.units_received_changed?
           counts[0] += 1
           unless oa.units_received.blank?
-            units_received = oa.price.convert_quantity(oa.units_received, oa.price.supplier_order_unit, oa.price.billing_unit)
+            units_received = oa.article_version.convert_quantity(oa.units_received, oa.article_version.supplier_order_unit, oa.article_version.billing_unit)
             cunits[0] += units_received
             oacounts = oa.redistribute units_received, rest_to
             oacounts.each_with_index { |c, i| cunits[i + 1] += c; counts[i + 1] += 1 if c > 0 }

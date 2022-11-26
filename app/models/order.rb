@@ -3,7 +3,8 @@ class Order < ApplicationRecord
 
   # Associations
   has_many :order_articles, :dependent => :destroy
-  has_many :articles, :through => :order_articles
+  has_many :article_versions, :through => :order_articles
+  has_many :articles, through: :article_versions
   has_many :group_orders, :dependent => :destroy
   has_many :ordergroups, :through => :group_orders
   has_many :users_ordered, :through => :ordergroups, :source => :users
@@ -92,7 +93,7 @@ class Order < ApplicationRecord
   end
 
   def article_ids
-    @article_ids ||= order_articles.map { |a| a.article_id.to_s }
+    @article_ids ||= order_articles.map { |oa| oa.article_version.article_id.to_s }
   end
 
   # Returns an array of article ids that lead to a validation error.
@@ -172,9 +173,9 @@ class Order < ApplicationRecord
   # e.g: [["drugs",[teethpaste, toiletpaper]], ["fruits" => [apple, banana, lemon]]]
   def articles_grouped_by_category
     @articles_grouped_by_category ||= order_articles
-                                      .includes([:article_price, :group_order_articles, :article => :article_category])
-                                      .order('articles.name')
-                                      .group_by { |a| a.article.article_category.name }
+                                      .includes([:article_version, :group_order_articles, article_version: :article_category])
+                                      .order('article_versions.name')
+                                      .group_by { |oa| oa.article_version.article_category.name }
                                       .sort { |a, b| a[0] <=> b[0] }
   end
 
@@ -203,25 +204,25 @@ class Order < ApplicationRecord
   def sum(type = :gross)
     total = 0
     if type == :net || type == :gross || type == :fc
-      for oa in order_articles.ordered.includes(:article, :article_price)
-        quantity = oa.units * oa.price.convert_quantity(1, oa.price.supplier_order_unit, oa.price.group_order_unit)
+      for oa in order_articles.ordered.includes(:article_version)
+        quantity = oa.units * oa.article_version.convert_quantity(1, oa.article_version.supplier_order_unit, oa.article_version.group_order_unit)
         case type
         when :net
-          total += quantity * oa.price.group_order_price
+          total += quantity * oa.article_version.group_order_price
         when :gross
-          total += quantity * oa.price.gross_group_order_price
+          total += quantity * oa.article_version.gross_group_order_price
         when :fc
-          total += quantity * oa.price.fc_group_order_price
+          total += quantity * oa.article_version.fc_group_order_price
         end
       end
     elsif type == :groups || type == :groups_without_markup
-      for go in group_orders.includes(group_order_articles: { order_article: [:article, :article_price] })
+      for go in group_orders.includes(group_order_articles: { order_article: :article_version })
         for goa in go.group_order_articles
           case type
           when :groups
-            total += goa.result * goa.order_article.price.fc_group_order_price
+            total += goa.result * goa.order_article.article_version.fc_group_order_price
           when :groups_without_markup
-            total += goa.result * goa.order_article.price.gross_group_order_price
+            total += goa.result * goa.order_article.article_version.gross_group_order_price
           end
         end
       end
@@ -237,19 +238,12 @@ class Order < ApplicationRecord
         # set new order state (needed by notify_order_finished)
         update_attributes!(:state => 'finished', :ends => Time.now, :updated_by => user)
 
-        # Update order_articles. Save the current article_price to keep price consistency
+        # Update order_articles. Save the current article_version to keep price consistency
         # Also save results for each group_order_result
         # Clean up
-        order_articles.includes(:article).each do |oa|
-          oa.update_attribute(:article_price, oa.article.article_prices.first)
+        order_articles.each do |oa|
           oa.group_order_articles.each do |goa|
             goa.save_results!
-            # Delete no longer required order-history (group_order_article_quantities) and
-            # TODO: Do we need articles, which aren't ordered? (units_to_order == 0 ?)
-            #    A: Yes, we do - for redistributing articles when the number of articles
-            #       delivered changes, and for statistics on popular articles. Records
-            #       with both tolerance and quantity zero can be deleted.
-            # goa.group_order_article_quantities.clear
           end
         end
 
@@ -277,7 +271,7 @@ class Order < ApplicationRecord
       if stockit?                                         # Decreases the quantity of stock_articles
         for oa in order_articles.includes(:article)
           oa.update_results!                              # Update units_to_order of order_article
-          stock_changes.create! :stock_article => oa.article, :quantity => oa.units_to_order * -1
+          stock_changes.create! :stock_article => oa.article_version, :quantity => oa.units_to_order * -1
         end
       end
 
@@ -337,12 +331,12 @@ class Order < ApplicationRecord
   end
 
   def keep_ordered_articles
-    chosen_order_articles = order_articles.where(article_id: article_ids)
+    chosen_order_articles = order_articles.joins(:article_version).where(article_versions: { article_id: article_ids })
     to_be_removed = order_articles - chosen_order_articles
     to_be_removed_but_ordered = to_be_removed.select { |a| a.quantity > 0 || a.tolerance > 0 }
     unless to_be_removed_but_ordered.empty? || ignore_warnings
       errors.add(:articles, I18n.t(stockit? ? 'orders.model.warning_ordered_stock' : 'orders.model.warning_ordered'))
-      @erroneous_article_ids = to_be_removed_but_ordered.map { |a| a.article_id }
+      @erroneous_article_ids = to_be_removed_but_ordered.map { |oa| oa.article_version.article_id }
     end
   end
 
@@ -350,10 +344,11 @@ class Order < ApplicationRecord
     # fetch selected articles
     articles_list = Article.find(article_ids)
     # create new order_articles
-    (articles_list - articles).each { |article| order_articles.create(:article => article) }
+    articles = article_versions.map(&:article)
+    (articles_list - articles).each { |article| order_articles.create(:article_version => article.latest_article_version) }
     # delete old order_articles
     articles.reject { |article| articles_list.include?(article) }.each do |article|
-      order_articles.detect { |order_article| order_article.article_id == article.id }.destroy
+      order_articles.detect { |order_article| order_article.article_version.article_id == article.id }.destroy
     end
   end
 

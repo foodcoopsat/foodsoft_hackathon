@@ -22,7 +22,7 @@ feature ArticlesController do
         fill_in 'article_name', :with => article.name
         fill_in 'article_unit', :with => article.unit
         select article.article_category.name, :from => 'article_article_category_id'
-        fill_in 'article_price', :with => article.price
+        fill_in 'article_version', :with => article.price
         fill_in 'article_unit_quantity', :with => article.unit_quantity
         fill_in 'article_tax', :with => article.tax
         fill_in 'article_deposit', :with => article.deposit

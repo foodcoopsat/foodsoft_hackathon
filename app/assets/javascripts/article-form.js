@@ -1,9 +1,9 @@
 class ArticleForm {
-  constructor(articleUnitRatioTemplate$, articleForm$, units, priceMarkup, fieldNamePrefix = 'article') {
+  constructor(articleUnitRatioTemplate$, articleForm$, units, priceMarkup) {
     try {
       this.units = units;
       this.priceMarkup = priceMarkup;
-      this.unitFieldsPrefix = fieldNamePrefix;
+      this.unitFieldsPrefix = 'article_version';
       this.articleUnitRatioTemplate$ = articleUnitRatioTemplate$;
       this.articleForm$ = articleForm$;
       this.unitConversionPopoverTemplate$ = this.articleForm$.find('#unit_conversion_popover_content_template');
