@@ -41,7 +41,8 @@ class ArticlesController < ApplicationController
   end
 
   def new
-    @article = @supplier.articles.build(:tax => FoodsoftConfig[:tax_default])
+    @article = @supplier.articles.build
+    @article.latest_article_version = @article.article_versions.build
     render :layout => false
   end
 
@@ -51,7 +52,12 @@ class ArticlesController < ApplicationController
   end
 
   def create
-    @article = Article.new(params[:article])
+    Article.transaction do
+      @article = Article.create(supplier_id: @supplier.id)
+      @article.attributes = { latest_article_version_attributes: params[:article_version] }
+      @article.save
+    end
+
     if @article.valid? && @article.save
       render :layout => false
     else
@@ -65,7 +71,7 @@ class ArticlesController < ApplicationController
 
   # Updates one Article and highlights the line if succeded
   def update
-    if @article.update_attributes(created_at: Time.now - 1.day, latest_article_version_attributes: params[:article_version])
+    if @article.update_attributes(latest_article_version_attributes: params[:article_version])
       render :layout => false
     else
       Rails.logger.info @article.errors.to_yaml.to_s

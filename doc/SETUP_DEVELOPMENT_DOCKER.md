@@ -75,7 +75,9 @@ Open a rails console
 Setup the test database
 
     docker-compose-dev run --rm mariadb mariadb --host=mariadb --password=secret --execute="CREATE DATABASE test"
+    docker-compose-dev run --rm mariadb mariadb --host=mariadb --password=secret --execute="CREATE DATABASE db_shared"
     docker-compose-dev run --rm foodsoft bundle exec rake db:schema:load RAILS_ENV=test DATABASE_URL=mysql2://root:secret@mariadb/test?encoding=utf8mb4
+    docker-compose-dev run --rm foodsoft bundle exec rake shared:db:schema:load RAILS_ENV=test DATABASE_URL=mysql2://root:secret@mariadb/db_shared?encoding=utf8mb4
 
 Run the tests
 

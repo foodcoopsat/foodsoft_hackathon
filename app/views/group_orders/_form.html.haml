@@ -162,7 +162,7 @@
                 .pull-left
                   #{heading_helper Article, :manufacturer}: #{order_article.article_version.manufacturer}
                   %br/
-                  #{heading_helper Article, :units}: #{@order.stockit? ? order_article.article_version.quantity_available : @ordering_data[:order_articles][order_article.id][:unit]} * #{format_group_order_unit(order_article.article_version)}
+                  #{heading_helper Article, :units}: #{@order.stockit? ? order_article.article_version.article.quantity_available : @ordering_data[:order_articles][order_article.id][:unit]} * #{format_group_order_unit(order_article.article_version)}
                   %br/
                   #{heading_helper Article, :note}: #{order_article.article_version.note}
                   %br/

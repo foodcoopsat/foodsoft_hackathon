@@ -19,7 +19,7 @@ module DeliveriesHelper
   end
 
   def articles_for_table(articles)
-    articles.undeleted.reorder('articles.name ASC')
+    articles.undeleted.reorder('article_versions.name ASC')
   end
 
   def stock_change_remove_link(stock_change_form)

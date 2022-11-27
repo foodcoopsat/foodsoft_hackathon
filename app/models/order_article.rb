@@ -55,6 +55,8 @@ class OrderArticle < ApplicationRecord
     if order.open?
       self.quantity = group_order_articles.collect(&:quantity).sum
       self.tolerance = group_order_articles.collect(&:tolerance).sum
+      require 'byebug'
+      byebug
       self.units_to_order = calculate_units_to_order(quantity, tolerance)
       enforce_boxfill if order.boxfill?
       save!
@@ -201,7 +203,7 @@ class OrderArticle < ApplicationRecord
   # Associate with current article price if created in a finished order
   def init_from_balancing
     if order.present? && order.finished?
-      self.article_version = article.article_versions.first
+      self.article_version = article_version.article.article_versions.first
     end
   end
 

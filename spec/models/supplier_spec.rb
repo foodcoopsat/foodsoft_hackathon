@@ -25,17 +25,37 @@ describe Supplier do
     let!(:removed_article) { create :article, supplier: supplier, order_number: '10001-ABC' }
     let!(:updated_article) do
       updated_shared_article.build_new_article(supplier).tap do |article|
-        article.article_category = create :article_category
-        article.origin = "FubarX1"
+        article_version = article.latest_article_version
+
+        # remove version before save - required to make validation pass (can't validate article_version without existing article_id):
+        article.article_versions = []
+        article.latest_article_version = nil
+
         article.shared_updated_on = 1.day.ago
         article.save!
+
+        article_version.article_category = create :article_category
+        article_version.unit = '200g'
+        article_version.origin = "FubarX1"
+        article.article_versions << article_version
+        article.reload
       end
     end
     let!(:synced_article) do
       synced_shared_article.build_new_article(supplier).tap do |article|
-        article.article_category = create :article_category
+        article_version = article.latest_article_version
+
+        # remove version before save - required to make validation pass (can't validate article_version without existing article_id):
+        article.article_versions = []
+        article.latest_article_version = nil
+
         article.shared_updated_on = 1.day.ago
         article.save!
+
+        article_version.article_category = create :article_category
+        article_version.unit = '200g'
+        article.article_versions << article_version
+        article.reload
       end
     end
 
@@ -46,8 +66,10 @@ describe Supplier do
         updated_article_pairs, outlisted_articles, new_articles = supplier.sync_all
 
         expect(updated_article_pairs).to_not be_empty
-        expect(updated_article_pairs[0][0].id).to eq updated_article.id
-        expect(updated_article_pairs[0][1].keys).to include :origin
+
+        index = updated_article_pairs.index { |pair| pair[0].id == updated_article.id }
+        expect(index).to_not be_nil
+        expect(updated_article_pairs[index][1].keys).to include :origin
 
         expect(outlisted_articles).to eq [removed_article]
 
@@ -61,15 +83,15 @@ describe Supplier do
       it 'returns the expected articles' do
         updated_article_pairs, outlisted_articles, new_articles = supplier.sync_all
 
-        expect(updated_article_pairs).to_not be_empty
-        expect(updated_article_pairs[0][0].id).to eq updated_article.id
-        expect(updated_article_pairs[0][1].keys).to include :origin
+        index = updated_article_pairs.index { |pair| pair[0].id == updated_article.id }
+        expect(index).to_not be_nil
+        expect(updated_article_pairs[index][1].keys).to include :origin
 
         expect(outlisted_articles).to eq [removed_article]
 
         expect(new_articles).to_not be_empty
         expect(new_articles[0].order_number).to eq new_shared_article.number
-        expect(new_articles[0].availability?).to be true
+        expect(new_articles[0].availability).to be true
       end
     end
 
@@ -79,15 +101,15 @@ describe Supplier do
       it 'returns the expected articles' do
         updated_article_pairs, outlisted_articles, new_articles = supplier.sync_all
 
-        expect(updated_article_pairs).to_not be_empty
-        expect(updated_article_pairs[0][0].id).to eq updated_article.id
-        expect(updated_article_pairs[0][1].keys).to include :origin
+        index = updated_article_pairs.index { |pair| pair[0].id == updated_article.id }
+        expect(index).to_not be_nil
+        expect(updated_article_pairs[index][1].keys).to include :origin
 
         expect(outlisted_articles).to eq [removed_article]
 
         expect(new_articles).to_not be_empty
         expect(new_articles[0].order_number).to eq new_shared_article.number
-        expect(new_articles[0].availability?).to be false
+        expect(new_articles[0].availability).to be false
       end
     end
   end

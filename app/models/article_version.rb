@@ -131,21 +131,40 @@ class ArticleVersion < ApplicationRecord
     new_version
   end
 
+  # Compare attributes from two different articles.
+  #
+  # This is used for auto-synchronization
+  # @param attributes [Hash<Symbol, Array>] Attributes with old and new values
+  # @return [Hash<Symbol, Object>] Changed attributes with new values
+  def self.compare_attributes(attributes)
+    unequal_attributes = attributes.select { |_name, values| values[0] != values[1] && !(values[0].blank? && values[1].blank?) }
+    unequal_hash = unequal_attributes.to_a.map { |a| [a[0], a[1].last] }.to_h
+
+    unit_quantity_val = unequal_hash[:unit_quantity]
+    unless unit_quantity_val.nil?
+      unequal_hash.delete :unit_quantity
+      unequal_hash[:article_unit_ratios_attributes] = [
+        { sort: 1, unit: 'XPP', quantity: unit_quantity_val }
+      ]
+    end
+
+    unequal_hash
+  end
+
   protected
 
   # We used have the name unique per supplier+deleted_at+type. With the addition of shared_sync_method all,
   # this came in the way, and we now allow duplicate names for the 'all' methods - expecting foodcoops to
   # make their own choice among products with different units by making articles available/unavailable.
   def uniqueness_of_name
-    # TODO-article-version
-    # matches = Article.where(name: name, supplier_id: supplier_id, deleted_at: deleted_at, type: type)
-    # matches = matches.where.not(id: id) unless new_record?
-    # # supplier should always be there - except, perhaps, on initialization (on seeding)
-    # if supplier && (supplier.shared_sync_method.blank? || supplier.shared_sync_method == 'import')
-    #   errors.add :name, :taken if matches.any?
-    # else
-    #   errors.add :name, :taken_with_unit if matches.where(unit: unit, unit_quantity: unit_quantity).any?
-    # end
+    matches = Article.includes(latest_article_version: :article_unit_ratios).where(article_versions: { name: name }, supplier_id: article.supplier_id, deleted_at: article.deleted_at, type: article.type)
+    matches = matches.where.not(id: article.id) unless article.new_record?
+    # supplier should always be there - except, perhaps, on initialization (on seeding)
+    if article.supplier && (article.supplier.shared_sync_method.blank? || article.supplier.shared_sync_method == 'import')
+      errors.add :name, :taken if matches.any?
+    elsif matches.where(article_versions: { unit: unit, supplier_order_unit: nil, article_unit_ratios: { quantity: unit_quantity, unit: 'XPP' } }).any?
+      errors.add :name, :taken_with_unit
+    end
   end
 
   def only_one_unit_type

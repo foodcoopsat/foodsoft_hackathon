@@ -45,7 +45,11 @@ class Supplier < ApplicationRecord
         existing_articles.add(shared_article.id)
         unequal_attributes = article.shared_article_changed?(self)
         unless unequal_attributes.blank? # skip if shared_article has not been changed
-          article.attributes = unequal_attributes
+          if unequal_attributes.key?(:article_unit_ratios_attributes)
+            article.latest_article_version.article_unit_ratios.each(&:delete)
+          end
+          article.latest_article_version.reload
+          article.latest_article_version.attributes = unequal_attributes
           updated_article_pairs << [article, unequal_attributes]
         end
       # Articles with no order number can be used to put non-shared articles
@@ -64,7 +68,7 @@ class Supplier < ApplicationRecord
         .find_each { |new_shared_article| new_articles << new_shared_article.build_new_article(self) }
       # make them unavailable when desired
       if shared_sync_method == 'all_unavailable'
-        new_articles.each { |new_article| new_article.availability = false }
+        new_articles.each { |new_article| new_article.latest_article_version.availability = false }
       end
     end
     return [updated_article_pairs, outlisted_articles, new_articles]

@@ -70,8 +70,8 @@ class Order < ApplicationRecord
     if stockit?
       # make sure to include those articles which are no longer available
       # but which have already been ordered in this stock order
-      StockArticle.available.includes(:article_category)
-                  .order('article_categories.name', 'articles.name').reject { |a|
+      StockArticle.available.includes(latest_article_version: :article_category)
+                  .order('article_categories.name', 'article_versions.name').reject { |a|
         a.quantity_available <= 0 && !a.ordered_in_order?(self)
       }.group_by { |a| a.article_category.name }
     else
@@ -269,9 +269,9 @@ class Order < ApplicationRecord
       charge_group_orders!(user, transaction_type)
 
       if stockit?                                         # Decreases the quantity of stock_articles
-        for oa in order_articles.includes(:article)
+        for oa in order_articles.includes(article_version: :article)
           oa.update_results!                              # Update units_to_order of order_article
-          stock_changes.create! :stock_article => oa.article_version, :quantity => oa.units_to_order * -1
+          stock_changes.create! :stock_article => oa.article_version.article, :quantity => oa.units_to_order * -1
         end
       end
 

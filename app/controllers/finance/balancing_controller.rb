@@ -82,8 +82,9 @@ class Finance::BalancingController < Finance::BaseController
     @type = FinancialTransactionType.find_by_id(params.permit(:type)[:type])
     @order.close!(@current_user, @type)
     redirect_to finance_order_index_url, notice: t('finance.balancing.close.notice')
-  rescue => error
-    redirect_to new_finance_order_url(order_id: @order.id), alert: t('finance.balancing.close.alert', message: error.message)
+    # TODO-article-version
+    # rescue => error
+    #   redirect_to new_finance_order_url(order_id: @order.id), alert: t('finance.balancing.close.alert', message: error.message)
   end
 
   # Close the order directly, without automaticly updating ordergroups account balances

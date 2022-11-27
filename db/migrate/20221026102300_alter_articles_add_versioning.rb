@@ -11,10 +11,8 @@ class AlterArticlesAddVersioning < ActiveRecord::Migration[5.2]
       t.boolean :availability, default: true, null: false
       t.string :manufacturer
       t.string :origin
-      t.datetime :shared_updated_on
       t.string :order_number
       t.datetime :updated_at
-      t.integer :quantity, default: 0
     end
 
     # copy all article fields into article_versions
@@ -29,10 +27,8 @@ class AlterArticlesAddVersioning < ActiveRecord::Migration[5.2]
           availability = #{quote article['availability']},
           manufacturer = #{quote article['manufacturer']},
           origin = #{quote article['origin']},
-          shared_updated_on = #{quote article['shared_updated_on']},
           order_number = #{quote article['order_number']},
-          updated_at = #{quote article['updated_at']},
-          quantity = #{quote article['quantity']}
+          updated_at = #{quote article['updated_at']}
         WHERE id = #{quote article['article_version_id']}
       })
     end
@@ -48,10 +44,8 @@ class AlterArticlesAddVersioning < ActiveRecord::Migration[5.2]
       t.remove :availability
       t.remove :manufacturer
       t.remove :origin
-      t.remove :shared_updated_on
       t.remove :order_number
       t.remove :updated_at
-      t.remove :quantity
       t.remove :price
       t.remove :tax
       t.remove :deposit
@@ -76,6 +70,32 @@ class AlterArticlesAddVersioning < ActiveRecord::Migration[5.2]
         WHERE order_articles.article_version_id IS NULL
           AND order_articles.article_id = #{quote article['article_id']}
       })
+    end
+
+    # Remove orphaned order articles (db inconsistencies due to lack of foreign key constraints):
+    delete("DELETE FROM order_articles WHERE order_articles.article_version_id IS NULL")
+
+    # De-duplicate article version (db inconsistencies due to lack of unique key for created_at and article_id):
+    duplicate_article_versions = select_all(%{
+      SELECT article_id, created_at
+      FROM article_versions
+      GROUP BY article_id, created_at
+      HAVING COUNT(*) > 1
+    })
+
+    duplicate_article_versions.each do |duplicate_article_version|
+      article_versions = select_all(%{
+        SELECT id
+        FROM article_versions
+        WHERE article_id = #{quote duplicate_article_version['article_id']}
+          AND created_at = #{quote duplicate_article_version['created_at']}
+      })
+
+      latest_version = article_versions.last
+      article_versions[0..-2].each do |obsolete_version|
+        update("UPDATE order_articles SET article_version_id = #{quote latest_version['id']} WHERE article_version_id = #{quote obsolete_version['id']}")
+        delete("DELETE FROM article_versions WHERE id = #{quote obsolete_version['id']}")
+      end
     end
 
     remove_index :order_articles, [:order_id, :article_id]
@@ -108,10 +128,8 @@ class AlterArticlesAddVersioning < ActiveRecord::Migration[5.2]
       t.boolean :availability, default: true, null: false
       t.string :manufacturer
       t.string :origin
-      t.datetime :shared_updated_on
       t.string :order_number
       t.datetime :updated_at
-      t.integer :quantity, default: 0
       t.decimal :price, precision: 8, scale: 2
       t.float :tax
       t.decimal :deposit, precision: 8, scale: 2, default: "0.0"
@@ -139,11 +157,9 @@ class AlterArticlesAddVersioning < ActiveRecord::Migration[5.2]
           availability = #{quote article_price['availability']},
           manufacturer = #{quote article_price['manufacturer']},
           origin = #{quote article_price['origin']},
-          shared_updated_on = #{quote article_price['shared_updated_on']},
           order_number = #{quote article_price['order_number']},
           updated_at = #{quote article_price['updated_at']},
           type = #{quote article_price['type']},
-          quantity = #{quote article_price['quantity']},
           price = #{quote article_price['price']},
           tax = #{quote article_price['tax']},
           deposit = #{quote article_price['deposit']},
@@ -180,10 +196,8 @@ class AlterArticlesAddVersioning < ActiveRecord::Migration[5.2]
       t.remove :availability
       t.remove :manufacturer
       t.remove :origin
-      t.remove :shared_updated_on
       t.remove :order_number
       t.remove :updated_at
-      t.remove :quantity
     end
 
     change_column_default :articles, :unit_quantity, nil

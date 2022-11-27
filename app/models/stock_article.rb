@@ -1,7 +1,7 @@
 class StockArticle < Article
   has_many :stock_changes
 
-  scope :available, -> { undeleted.with_latest_versions_and_categories.where('article_versions.quantity > 0') }
+  scope :available, -> { undeleted.with_latest_versions_and_categories.where('quantity > 0') }
 
   validates :quantity, presence: true, numericality: { greater_than_or_equal_to: 0 }
 
@@ -24,13 +24,12 @@ class StockArticle < Article
 
   # Check for unclosed orders and substract its ordered quantity
   def quantity_available
-    # TODO-article-version
     quantity - quantity_ordered
   end
 
   def quantity_ordered
-    OrderArticle.where(article_id: id)
-                .joins(:order).where(orders: { state: %w[open finished received] }).sum(:units_to_order)
+    OrderArticle.joins(:order, :article_version).where(article_versions: { article_id: id })
+                .where(orders: { state: %w[open finished received] }).sum(:units_to_order)
   end
 
   def quantity_history

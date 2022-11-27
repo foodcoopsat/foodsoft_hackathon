@@ -41,9 +41,7 @@ class Article < ApplicationRecord
   # @!attribute article_versions
   #   @return [Array<ArticleVersion>] Price history (current price first).
   has_many :article_versions, -> { order("created_at DESC") }
-  # @!attribute order_articles
-  #   @return [Array<OrderArticle>] Order articles for this article.
-  has_many :order_articles
+
   # @!attribute order
   #   @return [Array<Order>] Orders this article appears in.
   has_many :orders, through: :order_articles
@@ -64,10 +62,15 @@ class Article < ApplicationRecord
   accepts_nested_attributes_for :latest_article_version
 
   # TODO-article-version: Discuss if these delegates aren't actually a code smell:
-  ArticleVersion.column_names.each do |column_name|
-    next if column_name == ArticleVersion.primary_key
+  begin
+    ArticleVersion.column_names.each do |column_name|
+      next if column_name == ArticleVersion.primary_key
+      next if column_name == 'article_id'
 
-    delegate column_name, to: :latest_article_version, allow_nil: true
+      delegate column_name, "#{column_name}=", to: :latest_article_version, allow_nil: true
+    end
+  rescue
+    # Ignore if these delegates cannot be created (can happen if table article_versions doesn't yet exist in migrations)
   end
 
   delegate :article_category, to: :latest_article_version, allow_nil: true
@@ -97,15 +100,14 @@ class Article < ApplicationRecord
   def in_open_order
     @in_open_order ||= begin
       order_articles = OrderArticle.where(order_id: Order.open.collect(&:id))
-      # TODO-article-version:
-      order_article = order_articles.detect { |oa| oa.article_id == id }
+      order_article = order_articles.detect { |oa| oa.article_version.article_id == id }
       order_article ? order_article.order : nil
     end
   end
 
   # Returns true if the article has been ordered in the given order at least once
   def ordered_in_order?(order)
-    order.order_articles.where(article_id: id).where('quantity > 0').one?
+    order.order_articles.includes(:article_version).where(article_version: { article_id: id }).where('quantity > 0').one?
   end
 
   # this method checks, if the shared_article has been changed
@@ -146,30 +148,21 @@ class Article < ApplicationRecord
       new_unit = new_article.unit
     end
 
-    return Article.compare_attributes(
+    return ArticleVersion.compare_attributes(
       {
-        :name => [self.name, new_article.name],
-        :manufacturer => [self.manufacturer, new_article.manufacturer.to_s],
-        :origin => [self.origin, new_article.origin],
-        :unit => [self.unit, new_unit],
-        :price => [self.price.to_f.round(2), new_price.to_f.round(2)],
-        :tax => [self.tax, new_article.tax],
-        :deposit => [self.deposit.to_f.round(2), new_article.deposit.to_f.round(2)],
+        :name => [self.latest_article_version.name, new_article.name],
+        :manufacturer => [self.latest_article_version.manufacturer, new_article.manufacturer.to_s],
+        :origin => [self.latest_article_version.origin, new_article.origin],
+        :unit => [self.latest_article_version.unit, new_unit],
+        :supplier_order_unit => [self.latest_article_version.supplier_order_unit, nil],
+        :price => [self.latest_article_version.price.to_f.round(2), new_price.to_f.round(2)],
+        :tax => [self.latest_article_version.tax, new_article.tax],
+        :deposit => [self.latest_article_version.deposit.to_f.round(2), new_article.deposit.to_f.round(2)],
         # take care of different num-objects.
-        :unit_quantity => [self.unit_quantity.to_s.to_f, new_unit_quantity.to_s.to_f],
-        :note => [self.note.to_s, new_article.note.to_s]
+        :unit_quantity => [self.latest_article_version.unit_quantity.to_s.to_f, new_unit_quantity.to_s.to_f],
+        :note => [self.latest_article_version.note.to_s, new_article.note.to_s]
       }
     )
-  end
-
-  # Compare attributes from two different articles.
-  #
-  # This is used for auto-synchronization
-  # @param attributes [Hash<Symbol, Array>] Attributes with old and new values
-  # @return [Hash<Symbol, Object>] Changed attributes with new values
-  def self.compare_attributes(attributes)
-    unequal_attributes = attributes.select { |name, values| values[0] != values[1] && !(values[0].blank? && values[1].blank?) }
-    Hash[unequal_attributes.to_a.map { |a| [a[0], a[1].last] }]
   end
 
   # to get the correspondent shared article
@@ -180,7 +173,7 @@ class Article < ApplicationRecord
 
   # convert units in foodcoop-size
   # uses unit factors in app_config.yml to calc the price/unit_quantity
-  # returns new price and unit_quantity in array, when calc is possible => [price, unit_quanity]
+  # returns new price and unit_quantity in array, when calc is possible => [price, unit_quantity]
   # returns false if units aren't foodsoft-compatible
   # returns nil if units are eqal
   def convert_units(new_article = shared_article)
