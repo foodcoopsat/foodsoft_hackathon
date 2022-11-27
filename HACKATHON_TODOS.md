@@ -4,3 +4,4 @@
   * BE validation of order amount
   * Investigate total_balance hidden field meaning (old issue)
   * Formatting: Alignment breaks with numbers that have more than one digit (old issue; but renewed importance due to floats)
+  * Article (version) Field translations of new / moved fields
