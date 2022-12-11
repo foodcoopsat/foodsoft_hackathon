@@ -230,7 +230,10 @@ class Article < ApplicationRecord
     new_version = old_version.duplicate_including_article_unit_ratios
     self.article_versions << new_version
 
-    OrderArticle.belonging_to_open_order.where(article_version_id: self.id).update_all(article_version_id: new_version.id)
+    OrderArticle.belonging_to_open_order
+                .joins(:article_version)
+                .where(article_versions: { article_id: self.id })
+                .update_all(article_version_id: new_version.id)
 
     # reload old version to avoid updating it too (would automatically happen after before_save):
     old_version.reload
