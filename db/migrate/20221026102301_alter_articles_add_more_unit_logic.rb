@@ -18,7 +18,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.column :unit, :string, length: 3
     end
 
-    article_versions = select_all('SELECT id, unit_quantity FROM article_versions')
+    article_versions = select_all('SELECT id, unit, unit_quantity, price FROM article_versions WHERE unit_quantity > 1')
     article_versions.each do |article_version|
       insert(%{
         INSERT INTO article_unit_ratios (article_version_id, sort, quantity, unit)
@@ -28,6 +28,17 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
           #{quote article_version['unit_quantity']},
           #{quote 'XPP'}
         )
+      })
+
+      compound_unit = "#{article_version['unit_quantity']}x#{article_version['unit']}"
+      update(%{
+        UPDATE article_versions
+        SET unit = #{quote compound_unit},
+          group_order_granularity = #{quote 1},
+          group_order_unit = #{quote 'XPP'},
+          price = #{quote article_version['price'].to_f * article_version['unit_quantity']},
+          price_unit = #{quote 'XPP'}
+        WHERE article_versions.id = #{quote article_version['id']}
       })
     end
 

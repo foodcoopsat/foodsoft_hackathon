@@ -18,12 +18,12 @@
       this.loadArticleUnitRatios();
       this.unitSelectOptions = this.getUnitSelectOptions();
 
+      this.converter = new UnitsConverter(this.units, this.ratios, this.supplierOrderUnit);
+
       // if there's less then two options, don't even bother showing the popover:
       if (this.unitSelectOptions.length < 2) {
         return;
       }
-
-      this.converter = new UnitsConverter(this.units, this.ratios, this.supplierOrderUnit);
 
       this.initializeFocusListener();
     }
