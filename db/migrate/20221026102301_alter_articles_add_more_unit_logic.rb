@@ -18,7 +18,59 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.column :unit, :string, length: 3
     end
 
-    article_versions = select_all('SELECT id, unit, unit_quantity, price FROM article_versions WHERE unit_quantity > 1')
+    latest_article_versions = select_all(%{
+      SELECT article_versions.*
+      FROM article_versions
+      JOIN (
+        SELECT article_id, MAX(created_at) AS max_created_at
+        FROM article_versions
+        GROUP BY article_id
+      ) AS latest_article_versions
+      ON latest_article_versions.article_id = article_versions.article_id
+        AND latest_article_versions.max_created_at = article_versions.created_at
+    })
+    latest_article_versions.each do |latest_article_version|
+      unit_quantity = latest_article_version['unit_quantity'].nil? ? 1.0 : latest_article_version['unit_quantity'].to_f
+      new_unit_data = convert_old_unit(latest_article_version['unit'], unit_quantity)
+      next if new_unit_data.nil?
+
+      new_version_id = insert(%{
+        INSERT INTO article_versions (
+          article_id, price, tax, deposit, created_at, name, article_category_id, note, availability, manufacturer, origin, order_number, updated_at, supplier_order_unit, group_order_granularity, group_order_unit)
+        VALUES(
+          #{quote latest_article_version['article_id']},
+          #{quote latest_article_version['price'].to_f * unit_quantity},
+          #{quote latest_article_version['tax']},
+          #{quote latest_article_version['deposit']},
+          NOW(),
+          #{quote latest_article_version['name']},
+          #{quote latest_article_version['article_category_id']},
+          #{quote latest_article_version['note']},
+          #{quote latest_article_version['availability']},
+          #{quote latest_article_version['manufacturer']},
+          #{quote latest_article_version['origin']},
+          #{quote latest_article_version['order_number']},
+          NOW(),
+          #{quote new_unit_data[:supplier_order_unit]},
+          #{quote new_unit_data[:group_order_granularity]},
+          #{quote new_unit_data[:group_order_unit]}
+        )
+      })
+
+      next if new_unit_data[:first_ratio].nil?
+
+      insert(%{
+        INSERT INTO article_unit_ratios (article_version_id, sort, quantity, unit)
+        VALUES (
+          #{quote new_version_id},
+          #{quote 1},
+          #{quote new_unit_data[:first_ratio][:quantity]},
+          #{quote new_unit_data[:first_ratio][:unit]}
+        )
+      })
+    end
+
+    article_versions = select_all('SELECT id, unit, unit_quantity, price FROM article_versions WHERE unit_quantity > 1 AND NOT unit IS NULL')
     article_versions.each do |article_version|
       insert(%{
         INSERT INTO article_unit_ratios (article_version_id, sort, quantity, unit)
@@ -99,5 +151,84 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.change :quantity, :integer, null: false
       t.change :tolerance, :integer, null: false
     end
+  end
+
+  private
+
+  def convert_old_unit(old_compound_unit_str, unit_quantity)
+    md = old_compound_unit_str.match(%r{^\s*([0-9][0-9,./]*)?\s*([A-Za-z\u00C0-\u017F]+)\s*$})
+    return nil if md.nil?
+
+    unit = get_unit_from_old_str(md[2])
+    return nil if unit.nil?
+
+    quantity = get_quantity_from_old_str(md[1])
+
+    if quantity == 1
+      {
+        supplier_order_unit: unit,
+        first_ratio: nil,
+        group_order_granularity: 1.0,
+        group_order_unit: unit
+      }
+    else
+      {
+        supplier_order_unit: 'XPP',
+        first_ratio: {
+          quantity: quantity * unit_quantity,
+          unit: unit
+        },
+        group_order_granularity: unit_quantity > 1 ? quantity : 1.0,
+        group_order_unit: unit_quantity > 1 ? unit : 'XPP'
+      }
+    end
+  end
+
+  def get_quantity_from_old_str(quantity_str)
+    return 1 if quantity_str.nil?
+
+    quantity_str = quantity_str
+                   .gsub(',', '.')
+                   .gsub(' ', '')
+
+    division_parts = quantity_str.split('/').map(&:to_f)
+
+    if division_parts.length == 2
+      division_parts[0] / division_parts[1]
+    else
+      quantity_str.to_f
+    end
+  end
+
+  def get_unit_from_old_str(old_unit_str)
+    unit_str = old_unit_str.strip.downcase
+    matching_unit_arr = ArticleUnits.units
+                                    .select { |_key, unit| unit[:visible] && (unit[:sign] == unit_str || matches_unit_name(unit, unit_str)) }
+                                    .to_a
+    return nil if matching_unit_arr.empty?
+
+    matching_unit_arr[0][0]
+  end
+
+  # Temporary workaround to
+  # a. map single names to unit specs' name fields (which include multiple names separated by commas)
+  # b. include some German unit names
+  # TODO: Do unit translations and matching properly somehow:
+  def matches_unit_name(unit, unit_str)
+    unit_str = case unit_str
+               when "bund"
+                 "bunch"
+               when "stück", "stk"
+                 "piece"
+               when "glas"
+                 "glass"
+               else
+                 unit_str
+               end
+
+    name = unit[:name].downcase
+    return true if name == unit_str
+
+    name.split(',').map(&:strip).include?(unit_str)
   end
 end
