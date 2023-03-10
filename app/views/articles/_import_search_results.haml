@@ -26,7 +26,7 @@
               %span{style: 'color: grey'} &times; #{article.unit_quantity} #{pkg_helper_icon}
           %td.actions
             - logger.debug "[debug] #{article.attributes.inspect}"
-            - if @supplier.articles.undeleted.where(order_number: article.number).exists?
+            - if @supplier.articles.includes(:latest_article_version).undeleted.where(article_versions: {order_number: article.number}).exists?
               %i.icon-ok= t '.already_imported'
             - else
               = link_to t('.action_import'), import_supplier_articles_path(@supplier, shared_article_id: article.id, direct: true),
