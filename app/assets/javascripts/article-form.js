@@ -1,27 +1,32 @@
 class ArticleForm {
-  constructor(articleUnitRatioTemplate$, articleForm$, units, priceMarkup) {
+  constructor(articleUnitRatioTemplate$, articleForm$, units, priceMarkup, multiForm$, unitFieldsIdPrefix, unitFieldsNamePrefix) {
     try {
       this.units = units;
       this.priceMarkup = priceMarkup;
-      this.unitFieldsPrefix = 'article_version';
+      this.unitFieldsIdPrefix = unitFieldsIdPrefix === undefined ? 'article_version' : unitFieldsIdPrefix;
+      this.unitFieldsNamePrefix = unitFieldsNamePrefix === undefined ? this.unitFieldsIdPrefix : unitFieldsNamePrefix;
       this.articleUnitRatioTemplate$ = articleUnitRatioTemplate$;
       this.articleForm$ = articleForm$;
       this.unitConversionPopoverTemplate$ = this.articleForm$.find('#unit_conversion_popover_content_template');
-      this.unit$ = $(`#${this.unitFieldsPrefix}_unit`, this.articleForm$);
-      this.supplierUnitSelect$ = $(`#${this.unitFieldsPrefix}_supplier_order_unit`, this.articleForm$);
+      this.unit$ = $(`#${this.unitFieldsIdPrefix}_unit`, this.articleForm$);
+      this.supplierUnitSelect$ = $(`#${this.unitFieldsIdPrefix}_supplier_order_unit`, this.articleForm$);
       this.unitRatiosTable$ = $('#fc_base_price', this.articleForm$);
-      this.minimumOrderQuantity$ = $(`#${this.unitFieldsPrefix}_minimum_order_quantity`, this.articleForm$);
-      this.billingUnit$ = $(`#${this.unitFieldsPrefix}_billing_unit`, this.articleForm$);
-      this.groupOrderUnit$ = $(`#${this.unitFieldsPrefix}_group_order_unit`, this.articleForm$);
-      this.price$ = $(`#${this.unitFieldsPrefix}_price`, this.articleForm$);
-      this.priceUnit$ = $(`#${this.unitFieldsPrefix}_price_unit`, this.articleForm$);
-      this.tax$ = $(`#${this.unitFieldsPrefix}_tax`, this.articleForm$);
-      this.deposit$ = $(`#${this.unitFieldsPrefix}_deposit`, this.articleForm$);
-      this.fcPrice$ = $(`#${this.unitFieldsPrefix}_fc_price`, this.articleForm$);
+      this.minimumOrderQuantity$ = $(`#${this.unitFieldsIdPrefix}_minimum_order_quantity`, this.articleForm$);
+      this.billingUnit$ = $(`#${this.unitFieldsIdPrefix}_billing_unit`, this.articleForm$);
+      this.groupOrderUnit$ = $(`#${this.unitFieldsIdPrefix}_group_order_unit`, this.articleForm$);
+      this.price$ = $(`#${this.unitFieldsIdPrefix}_price`, this.articleForm$);
+      this.priceUnit$ = $(`#${this.unitFieldsIdPrefix}_price_unit`, this.articleForm$);
+      this.tax$ = $(`#${this.unitFieldsIdPrefix}_tax`, this.articleForm$);
+      this.deposit$ = $(`#${this.unitFieldsIdPrefix}_deposit`, this.articleForm$);
+      this.fcPrice$ = $(`#${this.unitFieldsIdPrefix}_fc_price`, this.articleForm$);
       this.unitsToOrder$ = $('#order_article_units_to_order', this.articleForm$);
       this.unitsReceived$ = $('#order_article_units_received', this.articleForm$);
+      this.toggleExtraUnitsButton$ = $('.toggle-extra-units', this.articleForm$);
+      this.extraUnits$ = $('.extra-unit-fields', this.articleForm$);
+      this.multiForm$ = multiForm$;
+      const selectContainer$ = this.articleForm$.parents('#modalContainer');
       this.select2Config = {
-        dropdownParent: this.articleForm$.parents('#modalContainer')
+        dropdownParent: selectContainer$.length === 0 ? undefined : selectContainer$
       };
 
       this.loadAvailableUnits();
@@ -39,6 +44,7 @@ class ArticleForm {
       this.initializeOrderedAndReceivedUnits();
       this.convertOrderedAndReceivedUnits(this.supplierUnitSelect$.val(), this.billingUnit$.val());
       this.initializeFormSubmitListener();
+      this.initializeToggleExtraUnitsButton();
     } catch (e) {
       console.log('Could not initialize article form', e);
     }
@@ -72,12 +78,33 @@ class ArticleForm {
   }
 
   initializeFormSubmitListener() {
-    this.articleForm$.submit(() => {
+    (this.multiForm$ === undefined ? this.articleForm$ : this.multiForm$).submit(() => {
       this.undoSequentialRatioDataRepresentation();
       this.loadRatios();
       this.undoPriceConversion();
       this.undoOrderAndReceivedUnitsConversion();
     });
+  }
+
+  initializeToggleExtraUnitsButton() {
+    this.toggleExtraUnitsButton$.on('click', (e) => {
+      this.toggleExtraUnits();
+    });
+  }
+
+  toggleExtraUnits() {
+    $(document).off('mousedown.extra-units');
+    this.extraUnits$.toggleClass('show');
+
+    if (this.extraUnits$.hasClass('show')) {
+      $(document).on('mousedown.extra-units', (e) => {
+        if ($(e.target).parents(this.extraUnits$.selector).length !== 0 || e.target === this.extraUnits$[0] || e.target === this.toggleExtraUnitsButton$[0]) {
+          return;
+        }
+
+        this.toggleExtraUnits();
+      });
+    }
   }
 
   getUnitsConverter() {
@@ -111,7 +138,7 @@ class ArticleForm {
       .filter(([, unit]) => unit.visible)
       .map(([code, unit]) => ({ key: code, label: unit.name, baseUnit: unit.baseUnit }));
 
-    $(`#${this.unitFieldsPrefix}_supplier_order_unit`, this.articleForm$).select2(this.select2Config);
+    $(`#${this.unitFieldsIdPrefix}_supplier_order_unit`, this.articleForm$).select2(this.select2Config);
   }
 
   initializeRegularFormFields() {
@@ -142,7 +169,7 @@ class ArticleForm {
     const chosenOptionLabel = this.supplierUnitSelect$.val() !== ''
       ? $(`option[value="${this.supplierUnitSelect$.val()}"]`, this.supplierUnitSelect$).text()
       : undefined;
-    const unitVal = $(`#${this.unitFieldsPrefix}_unit`).val();
+    const unitVal = $(`#${this.unitFieldsIdPrefix}_unit`).val();
     this.minimumOrderQuantity$
       .parents('.input-append')
       .find('.add-on')
@@ -169,16 +196,16 @@ class ArticleForm {
     const newRow$ = this.articleUnitRatioTemplate$.clone();
     $('tbody', this.unitRatiosTable$).append(newRow$);
 
-    const index = $(`input[name^="${this.unitFieldsPrefix}[article_unit_ratios_attributes]"][name$="[sort]"]`, this.articleForm$).length
-      + $(`input[name^="${this.unitFieldsPrefix}[article_unit_ratios_attributes]"][name$="[_destroy]"]`, this.articleForm$).length;
+    const index = $(`input[name^="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes]"][name$="[sort]"]`, this.articleForm$).length
+      + $(`input[name^="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes]"][name$="[_destroy]"]`, this.articleForm$).length;
 
     const sortField$ = $('[name$="[sort]"]', newRow$);
     sortField$.val(index);
 
-    const ratioAttributeFields$ = $(`[id^="${this.unitFieldsPrefix}_article_unit_ratios_attributes_0_"]`, newRow$);
+    const ratioAttributeFields$ = $(`[id^="${this.unitFieldsIdPrefix}_article_unit_ratios_attributes_0_"]`, newRow$);
     ratioAttributeFields$.each((_, field) => {
       $(field).attr('name', $(field).attr('name').replace('[0]', `[${index}]`));
-      $(field).attr('id', $(field).attr('id').replace(`${this.unitFieldsPrefix}_article_unit_ratios_attributes_0_`, `${this.unitFieldsPrefix}_article_unit_ratios_attributes_${index}_`));
+      $(field).attr('id', $(field).attr('id').replace(`${this.unitFieldsIdPrefix}_article_unit_ratios_attributes_0_`, `${this.unitFieldsIdPrefix}_article_unit_ratios_attributes_${index}_`));
     });
 
     this.setFieldVisibility();
@@ -201,7 +228,7 @@ class ArticleForm {
       .on('click.article_form_ratio_row', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        this.removeRatioRow($(e.target).parents('tr'));
+        this.removeRatioRow($(e.target).closest('tr'));
       });
 
     const select$ = $('select[name$="[unit]"]', row$);
@@ -222,11 +249,11 @@ class ArticleForm {
 
   removeRatioRow(row$) {
     const index = row$.index() + 1;
-    const id = $(`[name="${this.unitFieldsPrefix}[article_unit_ratios_attributes][${index}][id]"]`, this.articleForm$).val();
+    const id = $(`[name="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes][${index}][id]"]`, this.articleForm$).val();
     row$.remove();
 
-    $(this.unitRatiosTable$).after($(`<input type="hidden" name="${this.unitFieldsPrefix}[article_unit_ratios_attributes][${index}][_destroy]" value="true">`));
-    $(this.unitRatiosTable$).after($(`<input type="hidden" name="${this.unitFieldsPrefix}[article_unit_ratios_attributes][${index}][id]" value="${id}">`));
+    $(this.unitRatiosTable$).after($(`<input type="hidden" name="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes][${index}][_destroy]" value="true">`));
+    $(this.unitRatiosTable$).after($(`<input type="hidden" name="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes][${index}][id]" value="${id}">`));
     this.filterAvailableRatioUnits();
     this.updateUnitMultiplierLabels();
     this.setFieldVisibility();
@@ -362,7 +389,7 @@ class ArticleForm {
   }
 
   prepareRatioDataForSequentialRepresentation() {
-    const numberOfRatios = $(`input[name^="${this.unitFieldsPrefix}[article_unit_ratios_attributes]"][name$="[quantity]"]`).length;
+    const numberOfRatios = $(`input[name^="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes]"][name$="[quantity]"]`).length;
 
     for (let i = numberOfRatios; i > 1; i--) {
       const currentField$ = $(`input[name="${this.ratioQuantityFieldNameByIndex(i)}"]`, this.articleForm$);
@@ -435,22 +462,22 @@ class ArticleForm {
     this.ratios = [];
     this.unitRatiosTable$.find('tbody tr').each((_, element) => {
       const tr$ = $(element);
-      const unit = tr$.find(`select[name^="${this.unitFieldsPrefix}[article_unit_ratios_attributes]"][name$="[unit]"]`).val();
-      const quantity = tr$.find(`input[name^="${this.unitFieldsPrefix}[article_unit_ratios_attributes]"][name$="[quantity]"]:last`).val();
+      const unit = tr$.find(`select[name^="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes]"][name$="[unit]"]`).val();
+      const quantity = tr$.find(`input[name^="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes]"][name$="[quantity]"]:last`).val();
       this.ratios.push({ unit, quantity });
     });
   }
 
   undoSequentialRatioDataRepresentation() {
     let previousValue;
-    $(`input[name^="${this.unitFieldsPrefix}[article_unit_ratios_attributes]"][name$="[quantity]"]`).each((_, field) => {
+    $(`input[name^="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes]"][name$="[quantity]"]`).each((_, field) => {
       let currentField$ = $(field);
       let quantity = currentField$.val();
 
       if (previousValue !== undefined) {
-        const td$ = currentField$.parents('td');
+        const td$ = currentField$.closest('td');
         const name = currentField$.attr('name');
-        const ratioNameRegex = new RegExp(`${this.unitFieldsPrefix}\\[article_unit_ratios_attributes\\]\\[([0-9]+)\\]`);
+        const ratioNameRegex = new RegExp(`${this.unitFieldsNamePrefix}\\[article_unit_ratios_attributes\\]\\[([0-9]+)\\]`);
         const index = name.match(ratioNameRegex)[1];
         quantity = quantity * previousValue;
         currentField$ = $(`<input type="hidden" name="${this.ratioQuantityFieldNameByIndex(index)}" value="${quantity}" />`);
@@ -462,7 +489,7 @@ class ArticleForm {
   }
 
   ratioQuantityFieldNameByIndex(i) {
-    return `${this.unitFieldsPrefix}[article_unit_ratios_attributes][${i}][quantity]`;
+    return `${this.unitFieldsIdPrefix}[article_unit_ratios_attributes][${i}][quantity]`;
   }
 }
 

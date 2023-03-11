@@ -202,7 +202,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
 
   def get_unit_from_old_str(old_unit_str)
     unit_str = old_unit_str.strip.downcase
-    matching_unit_arr = ArticleUnits.units
+    matching_unit_arr = ArticleUnits.untranslated_units
                                     .select { |_key, unit| unit[:visible] && (unit[:sign] == unit_str || matches_unit_name(unit, unit_str)) }
                                     .to_a
     return nil if matching_unit_arr.empty?
@@ -213,15 +213,18 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
   # Temporary workaround to
   # a. map single names to unit specs' name fields (which include multiple names separated by commas)
   # b. include some German unit names
-  # TODO: Do unit translations and matching properly somehow:
+  # TODO: Do unit translations and matching properly somehow
+  # see https://github.com/foodcoopsat/foodsoft_hackathon/issues/10
   def matches_unit_name(unit, unit_str)
     unit_str = case unit_str
                when "bund"
                  "bunch"
                when "stück", "stk"
                  "piece"
-               when "glas"
+               when "glas", "gl"
                  "glass"
+               when "pkg", "packung"
+                 "packet"
                else
                  unit_str
                end

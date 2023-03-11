@@ -2,8 +2,8 @@ class ArticlesController < ApplicationController
   before_action :authenticate_article_meta, :find_supplier
 
   before_action :load_article, only: [:edit, :update]
-  before_action :load_article_units, only: [:edit, :update, :new, :create]
-  before_action :new_empty_article_ratio, only: [:edit, :update, :new, :create]
+  before_action :load_article_units, only: [:edit, :update, :new, :create, :parse_upload]
+  before_action :new_empty_article_ratio, only: [:edit, :update, :new, :create, :parse_upload]
 
   def index
     if params['sort']
@@ -51,6 +51,10 @@ class ArticlesController < ApplicationController
     render :layout => false
   end
 
+  def edit
+    render :action => 'new', layout: false
+  end
+
   def create
     Article.transaction do
       @article = Article.create(supplier_id: @supplier.id)
@@ -63,10 +67,6 @@ class ArticlesController < ApplicationController
     else
       render :action => 'new', :layout => false
     end
-  end
-
-  def edit
-    render :action => 'new', layout: false
   end
 
   # Updates one Article and highlights the line if succeded
@@ -164,8 +164,8 @@ class ArticlesController < ApplicationController
       redirect_to supplier_articles_path(@supplier), :notice => I18n.t('articles.controller.parse_upload.notice')
     end
     @ignored_article_count = 0
-  rescue => error
-    redirect_to upload_supplier_articles_path(@supplier), :alert => I18n.t('errors.general_msg', :msg => error.message)
+    # rescue => error
+    #   redirect_to upload_supplier_articles_path(@supplier), :alert => I18n.t('errors.general_msg', :msg => error.message)
   end
 
   # sync all articles with the external database
@@ -187,7 +187,14 @@ class ArticlesController < ApplicationController
     @outlisted_articles = Article.find(params[:outlisted_articles].try(:keys) || [])
     @updated_articles = Article.find(params[:articles].try(:keys) || [])
     @updated_articles.map { |a| a.assign_attributes(params[:articles][a.id.to_s]) }
-    @new_articles = (params[:new_articles] || []).map { |a| @supplier.articles.build(a) }
+    @new_articles = (params[:new_articles].values || []).map do |a|
+      article = @supplier.articles.build
+      article_version = article.article_versions.build(a)
+      article.article_versions << article_version
+      article.latest_article_version = article_version
+      article_version.article = article
+      article
+    end
 
     has_error = false
     Article.transaction do

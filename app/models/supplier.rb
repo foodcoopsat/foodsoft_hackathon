@@ -84,17 +84,22 @@ class Supplier < ApplicationRecord
     all_order_numbers = []
     updated_article_pairs, outlisted_articles, new_articles = [], [], []
     FoodsoftFile::parse file, options do |status, new_attrs, line|
-      article = articles.undeleted.where(order_number: new_attrs[:order_number]).first
+      article = articles.includes(:latest_article_version).undeleted.where(article_versions: { order_number: new_attrs[:order_number] }).first
       new_attrs[:article_category] = ArticleCategory.find_match(new_attrs[:article_category])
       new_attrs[:tax] ||= FoodsoftConfig[:tax_default]
-      new_article = articles.build(new_attrs)
+      new_attrs[:article_unit_ratios] = new_attrs[:article_unit_ratios].map { |ratio_hash| ArticleUnitRatio.new(ratio_hash) }
+      new_article = articles.build
+      new_article_version = new_article.article_versions.build(new_attrs)
+      new_article.article_versions << new_article_version
+      new_article.latest_article_version = new_article_version
 
       if status.nil?
         if article.nil?
           new_articles << new_article
         else
-          unequal_attributes = article.unequal_attributes(new_article, options.slice(:convert_units))
+          unequal_attributes = new_article.unequal_attributes(new_article, options.slice(:convert_units))
           unless unequal_attributes.empty?
+
             article.attributes = unequal_attributes
             updated_article_pairs << [article, unequal_attributes]
           end

@@ -40,15 +40,15 @@ class ArticlesCsv < RenderCSV
         article.tax,
         article.deposit,
         article.quantity,
-        article.supplier_order_unit,
-        article.price_unit,
-        article.group_order_unit,
+        ArticleUnits.get_translated_name_for_code(article.supplier_order_unit),
+        ArticleUnits.get_translated_name_for_code(article.price_unit),
+        ArticleUnits.get_translated_name_for_code(article.group_order_unit),
         article.group_order_granularity,
         article.minimum_order_quantity,
         '',
         '',
         article.article_category.try(:name),
-        article.article_unit_ratios.map { |ratio| "#{ratio.quantity} #{ratio.unit}" }.join(", ")
+        article.article_unit_ratios.map { |ratio| "#{ratio.quantity} #{ArticleUnits.get_translated_name_for_code(ratio.unit)}" }.join(", ")
       ]
     end
   end
