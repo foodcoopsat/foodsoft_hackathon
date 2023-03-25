@@ -1,3 +1,7 @@
+- content_for :javascript do
+  :javascript
+    const units = #{raw(ArticleUnits.units.to_json)};
+    let articleUnitRatioTemplate$ = undefined;
 - if @outlisted_articles.any?
   %h2= t '.outlist.title'
   %p

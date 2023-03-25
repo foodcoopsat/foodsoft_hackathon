@@ -148,13 +148,18 @@ class Article < ApplicationRecord
       new_unit = new_article.unit
     end
 
+
     return ArticleVersion.compare_attributes(
       {
         :name => [self.latest_article_version.name, new_article.name],
         :manufacturer => [self.latest_article_version.manufacturer, new_article.manufacturer.to_s],
         :origin => [self.latest_article_version.origin, new_article.origin],
         :unit => [self.latest_article_version.unit, new_unit],
-        :supplier_order_unit => [self.latest_article_version.supplier_order_unit, nil],
+        :supplier_order_unit => [self.latest_article_version.supplier_order_unit, new_article.supplier_order_unit],
+        :minimum_order_quantity => [self.latest_article_version.minimum_order_quantity, new_article.minimum_order_quantity],
+        :billing_unit => [self.latest_article_version.billing_unit, new_article.billing_unit],
+        :group_order_granularity => [self.latest_article_version.group_order_granularity, new_article.group_order_granularity],
+        :group_order_unit => [self.latest_article_version.group_order_unit, new_article.group_order_unit],
         :price => [self.latest_article_version.price.to_f.round(2), new_price.to_f.round(2)],
         :tax => [self.latest_article_version.tax, new_article.tax],
         :deposit => [self.latest_article_version.deposit.to_f.round(2), new_article.deposit.to_f.round(2)],

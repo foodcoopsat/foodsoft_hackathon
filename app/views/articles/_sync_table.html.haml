@@ -1,7 +1,3 @@
-- content_for :javascript do
-  :javascript
-    const units = #{raw(ArticleUnits.units.to_json)};
-    let articleUnitRatioTemplate$ = undefined;
 - price_markup = FoodsoftConfig[:price_markup].to_f
 %table.table
   %thead
@@ -26,18 +22,18 @@
           %td= article.note
           %td= article.manufacturer
           %td= article.origin
-          %td= article.supplier_order_unit
+          %td= ArticleUnits.get_translated_name_for_code(article.supplier_order_unit)
           %td= number_to_currency article.price
           %td= number_to_percentage article.tax
           %td= number_to_currency article.deposit
           %td= article.article_category.name if article.article_category
-      %tr{:id => "article_row_#{index}"}
+      %tr{:id => "article_row_#{field}_#{index}"}
         = render 'shared/js_templates/unit_conversion_popover_template'
         = simple_fields_for "#{field}[#{index}]", changed_article.latest_article_version do |form|
           - content_for :javascript do
             :javascript
               articleUnitRatioTemplate$ = $($.parseHTML("#{escape_javascript(render(partial: 'shared/article_unit_ratio', locals: {article_unit_ratio: @empty_article_unit_ratio, f: form, article_unit_ratio_counter: -1}))}"));
-              new ArticleForm(articleUnitRatioTemplate$, $('#article_row_#{index}'), units, #{price_markup}, $('#article_row_#{index}').closest('form'), '#{field}_#{index}', '#{field}[#{index}]');
+              new ArticleForm(articleUnitRatioTemplate$, $('#article_row_#{field}_#{index}'), units, #{price_markup}, $('#article_row_#{field}_#{index}').closest('form'), '#{field}_#{index}', '#{field}[#{index}]');
           %td{:style => highlight_new(attrs, :name)}
             = form.text_field 'name', :size => 0
             -# TODO:

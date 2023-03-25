@@ -97,7 +97,7 @@ class Supplier < ApplicationRecord
         if article.nil?
           new_articles << new_article
         else
-          unequal_attributes = new_article.unequal_attributes(new_article, options.slice(:convert_units))
+          unequal_attributes = article.unequal_attributes(new_article, options.slice(:convert_units))
           unless unequal_attributes.empty?
 
             article.attributes = unequal_attributes

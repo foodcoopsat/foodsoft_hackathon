@@ -22,8 +22,9 @@ class FoodsoftFile
                   :group_order_unit => ArticleUnits.get_code_for_translated_name(row[13]),
                   :group_order_granularity => row[14],
                   :minimum_order_quantity => row[15],
-                  :article_category => row[18],
-                  :article_unit_ratios => FoodsoftFile.parse_ratios_cell(row[19]) }
+                  :billing_unit => ArticleUnits.get_code_for_translated_name(row[16]),
+                  :article_category => row[19],
+                  :article_unit_ratios => FoodsoftFile.parse_ratios_cell(row[20]) }
       status = row[0] && row[0].strip.downcase == 'x' ? :outlisted : nil
       yield status, article, row_index
     end
