@@ -1,4 +1,5 @@
-%tr{:class => 'no-indent-left'}
+- changed = defined?(changes) && !changes&.dig(article_unit_ratio_counter).nil?
+%tr{:class => 'no-indent-left', :style => changed ? "background-color: yellow" : ""}
   = f.fields_for(:article_unit_ratios, article_unit_ratio) do |sub_form|
     -# title: unit quantifier
     %td

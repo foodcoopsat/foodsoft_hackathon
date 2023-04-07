@@ -184,10 +184,9 @@ class ArticlesController < ApplicationController
 
   # Updates, deletes articles when upload or sync form is submitted
   def update_synchronized
-    @outlisted_articles = Article.find(params[:outlisted_articles].try(:keys) || [])
-    @updated_articles = Article.find(params[:articles].try(:keys) || [])
-    @updated_articles.map { |a| a.assign_attributes(params[:articles][a.id.to_s]) }
-    @new_articles = (params[:new_articles].values || []).map do |a|
+    @outlisted_articles = Article.includes(:latest_article_version).where(article_versions: { id: params[:outlisted_articles]&.values&.map { |v| v[:id] } || [] })
+    @updated_articles = Article.includes(:latest_article_version).where(article_versions: { id: params[:articles]&.values&.map { |v| v[:id] } || [] })
+    @new_articles = (params[:new_articles]&.values || []).map do |a|
       article = @supplier.articles.build
       article_version = article.article_versions.build(a)
       article.article_versions << article_version
@@ -206,7 +205,10 @@ class ArticlesController < ApplicationController
         has_error = true
       end
       # Update articles
-      @updated_articles.each { |a| a.save or has_error = true }
+      @updated_articles.each do |a|
+        a.assign_attributes(params[:articles][a.id.to_s])
+        a.save
+      end or has_error = true
       # Add new articles
       @new_articles.each { |a| a.save or has_error = true }
 

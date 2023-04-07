@@ -148,8 +148,7 @@ class Article < ApplicationRecord
       new_unit = new_article.unit
     end
 
-
-    return ArticleVersion.compare_attributes(
+    ret = ArticleVersion.compare_attributes(
       {
         :name => [self.latest_article_version.name, new_article.name],
         :manufacturer => [self.latest_article_version.manufacturer, new_article.manufacturer.to_s],
@@ -164,10 +163,23 @@ class Article < ApplicationRecord
         :tax => [self.latest_article_version.tax, new_article.tax],
         :deposit => [self.latest_article_version.deposit.to_f.round(2), new_article.deposit.to_f.round(2)],
         # take care of different num-objects.
-        :unit_quantity => [self.latest_article_version.unit_quantity.to_s.to_f, new_unit_quantity.to_s.to_f],
+        # :article_unit_ratios_attributes => [self.latest_article_version.article_unit_ratios, new_unit_quantity.article_unit_ratios],
         :note => [self.latest_article_version.note.to_s, new_article.note.to_s]
       }
     )
+
+    ratios_differ = self.latest_article_version.article_unit_ratios.length != new_article.article_unit_ratios.length ||
+                    self.latest_article_version.article_unit_ratios.each_with_index.any? do |article_unit_ratio, index|
+                      new_article.article_unit_ratios[index].unit != article_unit_ratio.unit ||
+                        new_article.article_unit_ratios[index].quantity != article_unit_ratio.quantity
+                    end
+
+    if ratios_differ
+      ratio_attribs = new_article.article_unit_ratios.map(&:attributes)
+      ret[:article_unit_ratios_attributes] = ratio_attribs
+    end
+
+    ret
   end
 
   # to get the correspondent shared article

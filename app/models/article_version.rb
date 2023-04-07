@@ -139,14 +139,6 @@ class ArticleVersion < ApplicationRecord
   def self.compare_attributes(attributes)
     unequal_attributes = attributes.select { |_name, values| values[0] != values[1] && !(values[0].blank? && values[1].blank?) }
     unequal_attributes.to_a.map { |a| [a[0], a[1].last] }.to_h
-
-    # unit_quantity_val = unequal_hash[:unit_quantity]
-    # unless unit_quantity_val.nil?
-    #   unequal_hash.delete :unit_quantity
-    #   unequal_hash[:article_unit_ratios_attributes] = [
-    #     { sort: 1, unit: 'XPP', quantity: unit_quantity_val }
-    #   ]
-    # end
   end
 
   protected
