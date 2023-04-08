@@ -22,7 +22,7 @@ class ArticleVersion < ApplicationRecord
   #   @return [Array<OrderArticle>] Order articles this price is associated with.
   has_many :order_articles
 
-  has_many :article_unit_ratios, after_add: :on_article_unit_ratios_change, after_remove: :on_article_unit_ratios_change
+  has_many :article_unit_ratios, after_add: :on_article_unit_ratios_change, after_remove: :on_article_unit_ratios_change, dependent: :destroy
 
   localize_input_of :price, :tax, :deposit
 

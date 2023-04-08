@@ -2,8 +2,8 @@ class ArticlesController < ApplicationController
   before_action :authenticate_article_meta, :find_supplier
 
   before_action :load_article, only: [:edit, :update]
-  before_action :load_article_units, only: [:edit, :update, :new, :create, :parse_upload]
-  before_action :new_empty_article_ratio, only: [:edit, :update, :new, :create, :parse_upload]
+  before_action :load_article_units, only: [:edit, :update, :new, :create, :parse_upload, :sync]
+  before_action :new_empty_article_ratio, only: [:edit, :update, :new, :create, :parse_upload, :sync]
 
   def index
     if params['sort']
@@ -27,6 +27,24 @@ class ArticlesController < ApplicationController
 
     if request.format.csv?
       send_data ArticlesCsv.new(@articles, encoding: 'utf-8').to_csv, filename: 'articles.csv', type: 'text/csv'
+      return
+    end
+
+    # TODO: Move this to API (see discussion in https://github.com/foodcoopsat/foodsoft_hackathon/issues/20)
+    if request.format.json?
+      data = @articles.map do |article|
+        version_attributes = article.latest_article_version.attributes
+        version_attributes.delete_if { |key| key == 'id' || key.end_with?('_id') }
+
+        version_attributes['article_unit_ratios'] = article.latest_article_version.article_unit_ratios.map do |ratio|
+          ratio_attributes = ratio.attributes
+          ratio_attributes.delete_if { |key| key == 'id' || key.end_with?('_id') }
+        end
+
+        version_attributes
+      end
+
+      render json: data
       return
     end
 
@@ -164,27 +182,41 @@ class ArticlesController < ApplicationController
       redirect_to supplier_articles_path(@supplier), :notice => I18n.t('articles.controller.parse_upload.notice')
     end
     @ignored_article_count = 0
-    # rescue => error
-    #   redirect_to upload_supplier_articles_path(@supplier), :alert => I18n.t('errors.general_msg', :msg => error.message)
+  rescue => error
+    redirect_to upload_supplier_articles_path(@supplier), :alert => I18n.t('errors.general_msg', :msg => error.message)
   end
 
   # sync all articles with the external database
   # renders a form with articles, which should be updated
   def sync
     # check if there is an shared_supplier
-    unless @supplier.shared_supplier
-      redirect_to supplier_articles_url(@supplier), :alert => I18n.t('articles.controller.sync.shared_alert', :supplier => @supplier.name)
-    end
-    # sync articles against external database
-    @updated_article_pairs, @outlisted_articles, @new_articles = @supplier.sync_all
+    # unless @supplier.shared_supplier
+    #   redirect_to supplier_articles_url(@supplier), :alert => I18n.t('articles.controller.sync.shared_alert', :supplier => @supplier.name)
+    # end
+    # # sync articles against external database
+    # @updated_article_pairs, @outlisted_articles, @new_articles = @supplier.sync_all
+    # if @updated_article_pairs.empty? && @outlisted_articles.empty? && @new_articles.empty?
+    #   redirect_to supplier_articles_path(@supplier), :notice => I18n.t('articles.controller.sync.notice')
+    # end
+
+    additional_headers = {}
+    # TODO: This is just temporary - use proper API token or whatever instead:
+    additional_headers['Cookie'] = request.headers['Cookie']
+    additional_headers['Referer'] = request.headers['Referer']
+    additional_headers['Host'] = request.headers['Host']
+
+    @updated_article_pairs, @outlisted_articles, @new_articles = @supplier.sync_from_remote(additional_headers: additional_headers)
     if @updated_article_pairs.empty? && @outlisted_articles.empty? && @new_articles.empty?
-      redirect_to supplier_articles_path(@supplier), :notice => I18n.t('articles.controller.sync.notice')
+      redirect_to supplier_articles_path(@supplier), :notice => I18n.t('articles.controller.parse_upload.notice')
     end
+    @ignored_article_count = 0
+    # rescue => error
+    #   redirect_to upload_supplier_articles_path(@supplier), :alert => I18n.t('errors.general_msg', :msg => error.message)
   end
 
   # Updates, deletes articles when upload or sync form is submitted
   def update_synchronized
-    @outlisted_articles = Article.includes(:latest_article_version).where(article_versions: { id: params[:outlisted_articles]&.values&.map { |v| v[:id] } || [] })
+    @outlisted_articles = Article.includes(:latest_article_version).where(article_versions: { id: params[:outlisted_articles]&.values || [] })
     @updated_articles = Article.includes(:latest_article_version).where(article_versions: { id: params[:articles]&.values&.map { |v| v[:id] } || [] })
     @new_articles = (params[:new_articles]&.values || []).map do |a|
       article = @supplier.articles.build
@@ -205,8 +237,12 @@ class ArticlesController < ApplicationController
         has_error = true
       end
       # Update articles
-      @updated_articles.each do |a|
-        a.assign_attributes(params[:articles][a.id.to_s])
+      @updated_articles.each_with_index do |a, index|
+        current_params = params[:articles][index.to_s]
+        current_params.delete(:id)
+
+        a.latest_article_version.article_unit_ratios.clear
+        a.latest_article_version.assign_attributes(current_params)
         a.save
       end or has_error = true
       # Add new articles

@@ -12,9 +12,8 @@
       %th= heading_helper Article, :deposit
       %th= heading_helper Article, :article_category
   %tbody
-    - index = 0
-    - articles.each do |changed_article, attrs|
-      - index += 1
+    - articles.each_with_index do |data, index|
+      - changed_article, attrs = data
       - unless changed_article.new_record?
         - article = Article.find(changed_article.id)
         %tr{:style => 'color:grey'}
@@ -47,8 +46,8 @@
             .d-flex.gap-1
               = form.input :supplier_order_unit, as: :select, collection: @article_units, label: false, value: changed_article.supplier_order_unit, include_blank: t('Custom (avoid if possible!)') + ':', input_html: {class: 'input-medium'}
               = form.input :unit, input_html: {class: 'input-mini ml-1'}, label: false
-              %btn.btn-link.toggle-extra-units
-                %i.icon-cog
+              %div.btn-link.toggle-extra-units
+                %i.icon-cog{:style => highlight_new(attrs, [:article_unit_ratio_attributes, :minimum_order_quantity, :billing_unit, :group_order_unit, :group_order_granularity])}
             %div.extra-unit-fields.form-horizontal
               .fold-line
                 .control-group
@@ -57,7 +56,7 @@
                   %table#fc_base_price{:class => "controls"}
                     %tbody
                       - ratios = changed_article.article_unit_ratios
-                      = render :partial => 'shared/article_unit_ratio', :as => 'article_unit_ratio', :collection => ratios, locals: {f: form, changes: attrs[:article_unit_ratios_attributes]}
+                      = render :partial => 'shared/article_unit_ratio', :as => 'article_unit_ratio', :collection => ratios, locals: {f: form, original_ratios: article&.article_unit_ratios}
                     %tfoot
                       %tr
                         %td{:colspan => 6}
@@ -79,7 +78,7 @@
                     - unless changed_article.new_record?
                       %p.help-block{style: 'color: grey;'}=article.minimum_order_quantity.to_s
               .fold-line
-                = form.input :billing_unit, hint: changed_article.new_record? ? nil : ArticleUnits.get_translated_name_for_code(article.billing_unit), hint_html: {style: 'color: grey;'}, as: :select, collection: [], input_html: {'data-initial-value': changed_article.billing_unit, class: 'input-medium', style: highlight_new(attrs, :billing_unit)}, include_blank: false
+                = form.input :billing_unit, hint: changed_article.new_record? ? nil : ArticleUnits.get_translated_name_for_code(article.billing_unit || article.supplier_order_unit), hint_html: {style: 'color: grey;'}, as: :select, collection: [], input_html: {'data-initial-value': changed_article.billing_unit, class: 'input-medium', style: highlight_new(attrs, :billing_unit)}, include_blank: false
               .fold-line
                 = form.input :group_order_granularity, hint: changed_article.new_record? ? nil : "#{article.group_order_granularity} x #{ArticleUnits.get_translated_name_for_code(article.group_order_unit)}", hint_html: {style: 'color: grey;'}, label: "Allow orders per", input_html: {class: 'input-mini', style: highlight_new(attrs, :group_order_granularity), title: "steps in which ordergroups can order this article"}
                 = form.input :group_order_unit, as: :select, collection: [], input_html: {'data-initial-value': changed_article.group_order_unit, class: 'input-medium', style: highlight_new(attrs, :group_order_unit)}, label: '&times;'.html_safe, include_blank: false

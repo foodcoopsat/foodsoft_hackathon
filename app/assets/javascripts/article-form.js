@@ -78,11 +78,16 @@ class ArticleForm {
   }
 
   initializeFormSubmitListener() {
-    (this.multiForm$ === undefined ? this.articleForm$ : this.multiForm$).submit(() => {
-      this.undoSequentialRatioDataRepresentation();
-      this.loadRatios();
-      this.undoPriceConversion();
-      this.undoOrderAndReceivedUnitsConversion();
+    (this.multiForm$ === undefined ? this.articleForm$ : this.multiForm$).submit((e) => {
+      try {
+        this.undoSequentialRatioDataRepresentation();
+        this.loadRatios();
+        this.undoPriceConversion();
+        this.undoOrderAndReceivedUnitsConversion();
+      } catch(err) {
+        e.preventDefault();
+        throw err;
+      }
     });
   }
 
@@ -477,7 +482,7 @@ class ArticleForm {
       if (previousValue !== undefined) {
         const td$ = currentField$.closest('td');
         const name = currentField$.attr('name');
-        const ratioNameRegex = new RegExp(`${this.unitFieldsNamePrefix}\\[article_unit_ratios_attributes\\]\\[([0-9]+)\\]`);
+        const ratioNameRegex = new RegExp(`${escapeForRegex(this.unitFieldsNamePrefix)}\\[article_unit_ratios_attributes\\]\\[([0-9]+)\\]`);
         const index = name.match(ratioNameRegex)[1];
         quantity = quantity * previousValue;
         currentField$ = $(`<input type="hidden" name="${this.ratioQuantityFieldNameByIndex(index)}" value="${quantity}" />`);
@@ -489,7 +494,7 @@ class ArticleForm {
   }
 
   ratioQuantityFieldNameByIndex(i) {
-    return `${this.unitFieldsIdPrefix}[article_unit_ratios_attributes][${i}][quantity]`;
+    return `${this.unitFieldsNamePrefix}[article_unit_ratios_attributes][${i}][quantity]`;
   }
 }
 
@@ -507,4 +512,8 @@ function round(num, precision) {
   }
   const factor = Math.pow(10, precision);
   return Math.round((num + Number.EPSILON) * factor) / factor;
+}
+
+function escapeForRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

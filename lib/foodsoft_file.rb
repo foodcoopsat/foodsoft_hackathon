@@ -4,10 +4,12 @@ class FoodsoftFile
   # returns two arrays with articles and outlisted_articles
   # the parsed article is a simple hash
   def self.parse(file, options = {})
-    SpreadsheetFile.parse file, options do |row, row_index|
+    articles = []
+    SpreadsheetFile.parse file, options do |row|
       next if row[2].blank?
 
-      article = { :order_number => row[1],
+      article = { :availability => row[0]&.strip&.downcase != 'x',
+                  :order_number => row[1],
                   :name => row[2],
                   :note => row[3],
                   :manufacturer => row[4],
@@ -25,9 +27,10 @@ class FoodsoftFile
                   :billing_unit => ArticleUnits.get_code_for_translated_name(row[16]),
                   :article_category => row[19],
                   :article_unit_ratios => FoodsoftFile.parse_ratios_cell(row[20]) }
-      status = row[0] && row[0].strip.downcase == 'x' ? :outlisted : nil
-      yield status, article, row_index
+      articles << article
     end
+
+    articles
   end
 
   def self.parse_ratios_cell(ratios_cell)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_10_26_102301) do
+ActiveRecord::Schema.define(version: 2023_04_14_122017) do
 
   create_table "active_storage_attachments", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci", force: :cascade do |t|
     t.string "name", null: false
@@ -513,6 +513,7 @@ ActiveRecord::Schema.define(version: 2022_10_26_102301) do
     t.string "shared_sync_method"
     t.string "iban"
     t.integer "supplier_category_id", null: false
+    t.string "supplier_remote_source"
     t.index ["name"], name: "index_suppliers_on_name", unique: true
   end
 

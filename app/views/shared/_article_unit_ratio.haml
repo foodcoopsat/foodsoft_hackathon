@@ -1,4 +1,5 @@
-- changed = defined?(changes) && !changes&.dig(article_unit_ratio_counter).nil?
+- original_ratio = defined?(original_ratios) ? original_ratios&.to_a&.dig(article_unit_ratio_counter) : nil
+- changed = !original_ratio.nil? && (original_ratio.quantity != article_unit_ratio.quantity || original_ratio.unit != article_unit_ratio.unit)
 %tr{:class => 'no-indent-left', :style => changed ? "background-color: yellow" : ""}
   = f.fields_for(:article_unit_ratios, article_unit_ratio) do |sub_form|
     -# title: unit quantifier

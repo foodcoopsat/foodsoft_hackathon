@@ -1,3 +1,5 @@
+require 'net/http'
+
 class Supplier < ApplicationRecord
   include MarkAsDeletedWithName
   include CustomFields
@@ -81,44 +83,24 @@ class Supplier < ApplicationRecord
   # @option options [Boolean] :outlist_absent Set to +true+ to remove articles not in spreadsheet.
   # @option options [Boolean] :convert_units Omit or set to +true+ to keep current units, recomputing unit quantity and price.
   def sync_from_file(file, options = {})
-    all_order_numbers = []
-    updated_article_pairs, outlisted_articles, new_articles = [], [], []
-    FoodsoftFile::parse file, options do |status, new_attrs, line|
-      article = articles.includes(:latest_article_version).undeleted.where(article_versions: { order_number: new_attrs[:order_number] }).first
-      new_attrs[:article_category] = ArticleCategory.find_match(new_attrs[:article_category])
-      new_attrs[:tax] ||= FoodsoftConfig[:tax_default]
-      new_attrs[:article_unit_ratios] = new_attrs[:article_unit_ratios].map { |ratio_hash| ArticleUnitRatio.new(ratio_hash) }
-      new_article = articles.build
-      new_article_version = new_article.article_versions.build(new_attrs)
-      new_article.article_versions << new_article_version
-      new_article.latest_article_version = new_article_version
+    data = FoodsoftFile::parse(file, options)
+    self.parse_import_data(data, options)
+  end
 
-      if status.nil?
-        if article.nil?
-          new_articles << new_article
-        else
-          unequal_attributes = article.unequal_attributes(new_article, options.slice(:convert_units))
-          unless unequal_attributes.empty?
-            article.latest_article_version.article_unit_ratios.target.clear unless unequal_attributes[:article_unit_ratios_attributes].nil?
-            article.latest_article_version.attributes = unequal_attributes
-            updated_article_pairs << [article, unequal_attributes]
-          end
-        end
-      elsif status == :outlisted && article.present?
-        outlisted_articles << article
+  def sync_from_remote(options = {})
+    url = URI(self.supplier_remote_source)
+    http = Net::HTTP.new(url.host, url.port)
+    request = Net::HTTP::Get.new(url)
 
-      # stop when there is a parsing error
-      elsif status.is_a? String
-        # @todo move I18n key to model
-        raise I18n.t('articles.model.error_parse', :msg => status, :line => line.to_s)
-      end
+    # TODO: This is just temporary - use proper API token or whatever instead:
+    request["Cookie"] = options[:additional_headers]["Cookie"]
+    request["Referer"] = options[:additional_headers]["Referer"]
+    request["Host"] = options[:additional_headers]["Host"]
 
-      all_order_numbers << article.order_number if article
-    end
-    if options[:outlist_absent]
-      outlisted_articles += articles.undeleted.where.not(order_number: all_order_numbers + [nil])
-    end
-    return [updated_article_pairs, outlisted_articles, new_articles]
+    response = http.request(request)
+    data = JSON.parse(response.body, symbolize_names: true)
+
+    self.parse_import_data(data, options)
   end
 
   # default value
@@ -162,5 +144,44 @@ class Supplier < ApplicationRecord
       message = supplier.first.deleted? ? :taken_with_deleted : :taken
       errors.add :name, message
     end
+  end
+
+  def parse_import_data(data, options = {})
+    all_order_numbers = []
+    updated_article_pairs, outlisted_articles, new_articles = [], [], []
+
+    data.each do |new_attrs|
+      article = articles.includes(:latest_article_version).undeleted.where(article_versions: { order_number: new_attrs[:order_number] }).first
+      new_attrs[:article_category] = ArticleCategory.find_match(new_attrs[:article_category])
+      new_attrs[:tax] ||= FoodsoftConfig[:tax_default]
+      new_attrs[:article_unit_ratios] = new_attrs[:article_unit_ratios].map { |ratio_hash| ArticleUnitRatio.new(ratio_hash) }
+      new_article = articles.build
+      new_article_version = new_article.article_versions.build(new_attrs)
+      new_article.article_versions << new_article_version
+      new_article.latest_article_version = new_article_version
+
+      if new_attrs[:availability]
+        if article.nil?
+          new_articles << new_article
+        else
+          unequal_attributes = article.unequal_attributes(new_article, options.slice(:convert_units))
+          unless unequal_attributes.empty?
+            article.latest_article_version.article_unit_ratios.target.clear unless unequal_attributes[:article_unit_ratios_attributes].nil?
+            article.latest_article_version.attributes = unequal_attributes
+            duped_ratios = article.latest_article_version.article_unit_ratios.map(&:dup)
+            article.latest_article_version.article_unit_ratios.target.clear
+            article.latest_article_version.article_unit_ratios.target.push(*duped_ratios)
+            updated_article_pairs << [article, unequal_attributes]
+          end
+        end
+      elsif article.present?
+        outlisted_articles << article
+      end
+      all_order_numbers << article.order_number if article
+    end
+    if options[:outlist_absent]
+      outlisted_articles += articles.includes(:latest_article_version).undeleted.where.not(article_versions: { order_number: all_order_numbers + [nil] })
+    end
+    return [updated_article_pairs, outlisted_articles, new_articles]
   end
 end

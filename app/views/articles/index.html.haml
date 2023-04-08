@@ -16,7 +16,7 @@
       = text_field_tag :query, params[:query], class: 'input-medium search-query',
         placeholder: t('.search_placeholder')
 
-    - if @supplier.shared_supplier
+    - unless @supplier.supplier_remote_source.blank?
       .btn-group
         - if @supplier.shared_sync_method == 'import'
           = link_to t('.ext_db.import'), "#import", 'data-toggle-this' => '#import', class: 'btn btn-primary'
@@ -30,7 +30,7 @@
       - if current_user.role_orders?
         = link_to t('.new_order'), new_order_path(supplier_id: @supplier), class: 'btn'
 
-- unless @supplier.shared_supplier.nil?
+- unless @supplier.supplier_remote_source.blank?
   #import.well.well-small(style="display:none;")
     = form_tag shared_supplier_articles_path(@supplier), method: :get, remote: true, class: 'form-search',
       'data-submit-onchange' => true do
