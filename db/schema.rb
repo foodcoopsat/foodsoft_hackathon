@@ -507,13 +507,13 @@ ActiveRecord::Schema.define(version: 2023_04_14_122017) do
     t.string "delivery_days"
     t.string "order_howto"
     t.string "note"
-    t.integer "shared_supplier_id"
     t.string "min_order_quantity"
     t.datetime "deleted_at"
     t.string "shared_sync_method"
     t.string "iban"
     t.integer "supplier_category_id", null: false
     t.string "supplier_remote_source"
+    t.string "external_uuid"
     t.index ["name"], name: "index_suppliers_on_name", unique: true
   end
 

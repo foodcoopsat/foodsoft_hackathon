@@ -1793,8 +1793,15 @@ en:
       last_orders: Last orders
       new_delivery: New delivery
       show_deliveries: Show all
+      share: Share
+      remove_share: Remove share
+      confirm_remove_share: Do you really want to stop sharing this supplier's articles? (If you later decide to start sharing them again, you'll have to resend the new link to all subscribers who you think should have access.)
     update:
       notice: Supplier was updated
+  supplier_shares:
+    share_link:
+      not_shared: Supplier's articles are currently not shared with anyone.
+      share_link_copied_to_clipboard: Share link has been copied to the clipboard.
   tasks:
     accept:
       notice: You have accepted the task

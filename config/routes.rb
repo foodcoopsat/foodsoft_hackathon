@@ -112,7 +112,7 @@ Rails.application.routes.draw do
     end
 
     resources :suppliers do
-      get :shared_suppliers, on: :collection
+      resource :share, only: [:create, :destroy], controller: :supplier_shares
 
       resources :deliveries do
         collection do
@@ -132,7 +132,6 @@ Rails.application.routes.draw do
           get :upload
           post :parse_upload
           post :create_from_upload
-          get :shared
           get :import
           post :sync
           post :update_synchronized
@@ -276,6 +275,10 @@ Rails.application.routes.draw do
         resources :order_articles, only: [:index, :show]
         resources :group_order_articles
         resources :article_categories, only: [:index, :show]
+
+        resources :shared_suppliers, param: :uuid, only: [] do
+          resources :articles, only: [:index]
+        end
       end
     end
 

@@ -14,14 +14,8 @@ class SuppliersController < ApplicationController
   end
 
   # new supplier
-  # if shared_supplier_id is given, the new supplier will filled whith its attributes
   def new
-    if params[:shared_supplier_id]
-      shared_supplier = SharedSupplier.find(params[:shared_supplier_id])
-      @supplier = shared_supplier.suppliers.new(shared_supplier.autofill_attributes)
-    else
-      @supplier = Supplier.new
-    end
+    @supplier = Supplier.new
   end
 
   def edit
@@ -59,11 +53,6 @@ class SuppliersController < ApplicationController
     redirect_to @supplier
   end
 
-  # gives a list with all available shared_suppliers
-  def shared_suppliers
-    @shared_suppliers = SharedSupplier.all
-  end
-
   private
 
   def supplier_params
@@ -71,6 +60,6 @@ class SuppliersController < ApplicationController
       .require(:supplier)
       .permit(:name, :address, :phone, :phone2, :fax, :email, :url, :contact_person, :customer_number,
               :iban, :custom_fields, :delivery_days, :order_howto, :note, :supplier_category_id,
-              :shared_supplier_id, :min_order_quantity, :shared_sync_method, :supplier_remote_source)
+              :min_order_quantity, :shared_sync_method, :supplier_remote_source)
   end
 end

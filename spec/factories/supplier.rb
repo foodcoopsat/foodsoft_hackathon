@@ -11,7 +11,6 @@ FactoryBot.define do
     end
 
     before :create do |supplier, evaluator|
-      next if supplier.class == SharedSupplier
       next if supplier.supplier_category_id?
 
       supplier.supplier_category = create :supplier_category
