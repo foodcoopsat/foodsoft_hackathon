@@ -514,6 +514,7 @@ ActiveRecord::Schema.define(version: 2023_04_14_122017) do
     t.integer "supplier_category_id", null: false
     t.string "supplier_remote_source"
     t.string "external_uuid"
+    t.index ["external_uuid"], name: "index_suppliers_on_external_uuid", unique: true
     t.index ["name"], name: "index_suppliers_on_name", unique: true
   end
 

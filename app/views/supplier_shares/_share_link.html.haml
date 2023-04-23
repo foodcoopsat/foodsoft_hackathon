@@ -6,9 +6,11 @@
     %span= share_url
     %i.icon-copy
 
-  - content_for :javascript do
-    :javascript
-      $('#copy-share-link-button').click(() => {
+  :javascript
+    document
+      .getElementById('copy-share-link-button')
+      .addEventListener('click', () => {
         navigator.clipboard.writeText('#{share_url}');
         alert('#{t(".share_link_copied_to_clipboard")}');
       });
+

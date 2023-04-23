@@ -5,6 +5,8 @@ class AlterSuppliersSharingFields < ActiveRecord::Migration[5.2]
       t.column :supplier_remote_source, :string
       t.column :external_uuid, :string
     end
+
+    add_index :suppliers, :external_uuid, unique: true
   end
 
   def down
