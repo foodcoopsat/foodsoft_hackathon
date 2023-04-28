@@ -10,7 +10,6 @@ class Supplier < ApplicationRecord
   has_many :deliveries
   has_many :invoices
   belongs_to :supplier_category
-  belongs_to :shared_supplier, optional: true # for the sharedLists-App
 
   validates :name, :presence => true, :length => { :in => 4..30 }
   validates :phone, :presence => true, :length => { :in => 8..25 }
@@ -18,8 +17,11 @@ class Supplier < ApplicationRecord
   validates_format_of :iban, :with => /\A[A-Z]{2}[0-9]{2}[0-9A-Z]{,30}\z/, :allow_blank => true
   validates_uniqueness_of :iban, :case_sensitive => false, :allow_blank => true
   validates_length_of :order_howto, :note, maximum: 250
-  validate :valid_shared_sync_method
   validate :uniqueness_of_name
+  validates :shared_sync_method, presence: true, unless: -> { supplier_remote_source.blank? }
+  validates :shared_sync_method, absence: true, if: -> { supplier_remote_source.blank? }
+
+  enum shared_sync_method: { :all_available => 'all_available', :all_unavailable => 'all_unavailable', :import => 'import' }
 
   scope :undeleted, -> { where(deleted_at: nil) }
   scope :having_articles, -> { where(id: Article.undeleted.select(:supplier_id).distinct) }
@@ -87,27 +89,19 @@ class Supplier < ApplicationRecord
     self.parse_import_data(data, options)
   end
 
-  def sync_from_remote(options = {})
+  def read_from_remote(search_params = {})
     url = URI(self.supplier_remote_source)
+    url.query = URI.encode_www_form(search_params) unless search_params.nil?
     http = Net::HTTP.new(url.host, url.port)
     request = Net::HTTP::Get.new(url)
 
-    # TODO: This is just temporary - use proper API token or whatever instead:
-    request["Cookie"] = options[:additional_headers]["Cookie"]
-    request["Referer"] = options[:additional_headers]["Referer"]
-    request["Host"] = options[:additional_headers]["Host"]
-
     response = http.request(request)
-    data = JSON.parse(response.body, symbolize_names: true)
-
-    self.parse_import_data(data, options)
+    JSON.parse(response.body, symbolize_names: true)
   end
 
-  # default value
-  def shared_sync_method
-    return unless shared_supplier
-
-    self[:shared_sync_method] || 'import'
+  def sync_from_remote(options = {})
+    data = read_from_remote(options[:search_params])
+    self.parse_import_data(data, options)
   end
 
   def deleted?
@@ -127,14 +121,24 @@ class Supplier < ApplicationRecord
     articles.where('articles.unit_quantity > 1').any?
   end
 
-  protected
-
-  # make sure the shared_sync_method is allowed for the shared supplier
-  def valid_shared_sync_method
-    if shared_supplier && !shared_supplier.shared_sync_methods.include?(shared_sync_method)
-      errors.add :shared_sync_method, :included
+  # TODO: Maybe use the nilify blanks gem instead of the following two methods?:
+  def supplier_remote_source=(value)
+    if value.blank?
+      self[:supplier_remote_source] = nil
+    else
+      super
     end
   end
+
+  def shared_sync_method=(value)
+    if value.blank?
+      self[:shared_sync_method] = nil
+    else
+      super
+    end
+  end
+
+  protected
 
   # Make sure, the name is uniq, add usefull message if uniq group is already deleted
   def uniqueness_of_name
@@ -150,7 +154,7 @@ class Supplier < ApplicationRecord
     all_order_numbers = []
     updated_article_pairs, outlisted_articles, new_articles = [], [], []
 
-    data.each do |new_attrs|
+    data[:articles].each do |new_attrs|
       article = articles.includes(:latest_article_version).undeleted.where(article_versions: { order_number: new_attrs[:order_number] }).first
       new_attrs[:article_category] = ArticleCategory.find_match(new_attrs[:article_category])
       new_attrs[:tax] ||= FoodsoftConfig[:tax_default]

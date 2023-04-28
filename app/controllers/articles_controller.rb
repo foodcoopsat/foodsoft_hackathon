@@ -2,8 +2,8 @@ class ArticlesController < ApplicationController
   before_action :authenticate_article_meta, :find_supplier
 
   before_action :load_article, only: [:edit, :update]
-  before_action :load_article_units, only: [:edit, :update, :new, :create, :parse_upload, :sync]
-  before_action :new_empty_article_ratio, only: [:edit, :update, :new, :create, :parse_upload, :sync]
+  before_action :load_article_units, only: [:edit, :update, :new, :create, :parse_upload, :sync, :update_synchronized]
+  before_action :new_empty_article_ratio, only: [:edit, :update, :new, :create, :parse_upload, :sync, :update_synchronized]
 
   def index
     if params['sort']
@@ -30,7 +30,7 @@ class ArticlesController < ApplicationController
       return
     end
 
-    @articles = @articles.where('articles.name LIKE ?', "%#{params[:query]}%") unless params[:query].nil?
+    @articles = @articles.where('article_versions.name LIKE ?', "%#{params[:query]}%") unless params[:query].nil?
 
     @articles = @articles.page(params[:page]).per(@per_page)
 
@@ -171,29 +171,13 @@ class ArticlesController < ApplicationController
   # sync all articles with the external database
   # renders a form with articles, which should be updated
   def sync
-    # check if there is an shared_supplier
-    # unless @supplier.shared_supplier
-    #   redirect_to supplier_articles_url(@supplier), :alert => I18n.t('articles.controller.sync.shared_alert', :supplier => @supplier.name)
-    # end
-    # # sync articles against external database
-    # @updated_article_pairs, @outlisted_articles, @new_articles = @supplier.sync_all
-    # if @updated_article_pairs.empty? && @outlisted_articles.empty? && @new_articles.empty?
-    #   redirect_to supplier_articles_path(@supplier), :notice => I18n.t('articles.controller.sync.notice')
-    # end
-
-    additional_headers = {}
-    # TODO: This is just temporary - use proper API token or whatever instead:
-    additional_headers['Cookie'] = request.headers['Cookie']
-    additional_headers['Referer'] = request.headers['Referer']
-    additional_headers['Host'] = request.headers['Host']
-
-    @updated_article_pairs, @outlisted_articles, @new_articles = @supplier.sync_from_remote(additional_headers: additional_headers)
+    @updated_article_pairs, @outlisted_articles, @new_articles = @supplier.sync_from_remote
     if @updated_article_pairs.empty? && @outlisted_articles.empty? && @new_articles.empty?
       redirect_to supplier_articles_path(@supplier), :notice => I18n.t('articles.controller.parse_upload.notice')
     end
     @ignored_article_count = 0
-    # rescue => error
-    #   redirect_to upload_supplier_articles_path(@supplier), :alert => I18n.t('errors.general_msg', :msg => error.message)
+  rescue => error
+    redirect_to upload_supplier_articles_path(@supplier), :alert => I18n.t('errors.general_msg', :msg => error.message)
   end
 
   # Updates, deletes articles when upload or sync form is submitted
@@ -242,18 +226,6 @@ class ArticlesController < ApplicationController
       end
       flash.now.alert = I18n.t('articles.controller.error_invalid')
       render params[:from_action] == 'sync' ? :sync : :parse_upload
-    end
-  end
-
-  # fills a form whith values of the selected shared_article
-  # when the direct parameter is set and the article is valid, it is imported directly
-  def import
-    @article = SharedArticle.find(params[:shared_article_id]).build_new_article(@supplier)
-    @article.article_category_id = params[:article_category_id] unless params[:article_category_id].blank?
-    if params[:direct] && !params[:article_category_id].blank? && @article.valid? && @article.save
-      render :action => 'create', :layout => false
-    else
-      render :action => 'new', :layout => false
     end
   end
 

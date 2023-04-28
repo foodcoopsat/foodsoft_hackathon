@@ -112,6 +112,7 @@ Rails.application.routes.draw do
     end
 
     resources :suppliers do
+      get :remote_articles
       resource :share, only: [:create, :destroy], controller: :supplier_shares
 
       resources :deliveries do
@@ -132,7 +133,6 @@ Rails.application.routes.draw do
           get :upload
           post :parse_upload
           post :create_from_upload
-          get :import
           post :sync
           post :update_synchronized
         end

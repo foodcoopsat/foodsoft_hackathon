@@ -498,10 +498,6 @@ en:
       title_edit: Edit article
       title_new: Add new article
       per: per
-    import_search_results:
-      action_import: import
-      already_imported: imported
-      not_found: No articles found
     index:
       change_supplier: Change supplier ...
       download: Download articles
@@ -1798,6 +1794,10 @@ en:
       confirm_remove_share: Do you really want to stop sharing this supplier's articles? (If you later decide to start sharing them again, you'll have to resend the new link to all subscribers who you think should have access.)
     update:
       notice: Supplier was updated
+    import_search_results:
+      action_import: import
+      already_imported: imported
+      not_found: No articles found
   supplier_shares:
     share_link:
       not_shared: Supplier's articles are currently not shared with anyone.

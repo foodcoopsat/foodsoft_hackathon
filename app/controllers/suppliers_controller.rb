@@ -1,3 +1,5 @@
+require 'ostruct'
+
 class SuppliersController < ApplicationController
   before_action :authenticate_suppliers, :except => [:index, :list]
   helper :deliveries
@@ -53,7 +55,23 @@ class SuppliersController < ApplicationController
     redirect_to @supplier
   end
 
+  def remote_articles
+    @supplier = Supplier.find(remote_articles_params.fetch(:supplier_id))
+    search_params = {}
+    search_params[:name] = params.fetch(:name).split if params.include?(:name)
+    search_params[:origin] = params.fetch(:origin) if params.include?(:origin)
+    search_params[:page] = params.fetch(:page, 1)
+    search_params[:per_page] = @per_page
+    data = @supplier.read_from_remote(search_params)
+    @articles = data[:articles]
+    @pagination = OpenStruct.new(data[:pagination])
+  end
+
   private
+
+  def remote_articles_params
+    params.permit(:supplier_id, :name, :origin)
+  end
 
   def supplier_params
     params
