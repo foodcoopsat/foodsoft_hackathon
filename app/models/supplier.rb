@@ -93,6 +93,7 @@ class Supplier < ApplicationRecord
     url = URI(self.supplier_remote_source)
     url.query = URI.encode_www_form(search_params) unless search_params.nil?
     http = Net::HTTP.new(url.host, url.port)
+    http.use_ssl = url.scheme == 'https'
     request = Net::HTTP::Get.new(url)
 
     response = http.request(request)
