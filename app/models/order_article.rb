@@ -213,8 +213,6 @@ class OrderArticle < ApplicationRecord
     modifying_earlier_version = self.article_version.article.latest_article_version.id != self.article_version_id
     finished_order_article_using_same_version = OrderArticle.belonging_to_finished_order.where(article_version_id: self.article_version_id).where.not(id: self.id)
 
-    require 'byebug'
-    byebug
     if (!update_global_price && modifying_earlier_version && !finished_order_article_using_same_version.exists?) ||
        (update_global_price && !modifying_earlier_version)
       # update in place:

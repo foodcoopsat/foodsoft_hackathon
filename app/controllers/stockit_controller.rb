@@ -1,10 +1,10 @@
 class StockitController < ApplicationController
   before_action :new_empty_article_ratio, only: [:edit, :update, :new, :create, :derive, :copy]
   before_action :load_article_units, only: [:edit, :update, :new, :create, :derive, :copy]
+  before_action :prepare_params_for_create_update, only: [:create, :update]
 
   def index
-    @stock_articles = StockArticle.undeleted.joins(:supplier, latest_article_version: [:article_category])
-                                  .order('suppliers.name, article_categories.name, article_versions.name')
+    @stock_articles = StockArticle.with_latest_versions_and_categories.joins(:supplier).order('suppliers.name, article_categories.name, article_versions.name').undeleted
   end
 
   def index_on_stock_article_create # See publish/subscribe design pattern in /doc.
@@ -17,6 +17,11 @@ class StockitController < ApplicationController
     @stock_article = StockArticle.find(params[:id])
 
     render :layout => false
+  end
+
+  def show
+    @stock_article = StockArticle.find(params[:id])
+    @stock_changes = @stock_article.stock_changes.order('stock_changes.created_at DESC')
   end
 
   # three possibilites to fill a new_stock_article form
@@ -46,10 +51,15 @@ class StockitController < ApplicationController
     render :layout => false
   end
 
+  def edit
+    @stock_article = StockArticle.find(params[:id])
+
+    render :layout => false
+  end
+
   def create
     StockArticle.transaction do
-      @stock_article = StockArticle.create(quantity: 0, supplier_id: params[:article_version][:article][:supplier_id])
-      params[:article_version].delete :article
+      @stock_article = StockArticle.create(quantity: 0, supplier_id: @supplier_id)
       @stock_article.attributes = { latest_article_version_attributes: params[:article_version] }
       @stock_article.save
     end
@@ -58,26 +68,13 @@ class StockitController < ApplicationController
     render :action => 'new', :layout => false
   end
 
-  def edit
-    @stock_article = StockArticle.find(params[:id])
-
-    render :layout => false
-  end
-
   def update
     @stock_article = StockArticle.find(params[:id])
-    supplier_id = params[:article_version][:article][:supplier_id]
-    params[:article_version].delete :article
     article_version_attributes = params[:article_version]
-    @stock_article.update_attributes!(supplier_id: supplier_id, latest_article_version_attributes: article_version_attributes)
+    @stock_article.update_attributes!(supplier_id: @supplier_id, latest_article_version_attributes: article_version_attributes)
     render :layout => false
   rescue ActiveRecord::RecordInvalid
     render :action => 'edit', :layout => false
-  end
-
-  def show
-    @stock_article = StockArticle.find(params[:id])
-    @stock_changes = @stock_article.stock_changes.order('stock_changes.created_at DESC')
   end
 
   def show_on_stock_article_update # See publish/subscribe design pattern in /doc.
@@ -111,5 +108,15 @@ class StockitController < ApplicationController
     @empty_article_unit_ratio = ArticleUnitRatio.new
     @empty_article_unit_ratio.article_version = @article.latest_article_version unless @article.nil?
     @empty_article_unit_ratio.sort = -1
+  end
+
+  def prepare_params_for_create_update
+    @supplier_id = params[:article_version][:article][:supplier_id]
+    params[:article_version].delete :article
+
+    # Stock article form doesn't have some of the unit fields -> set them to supplier_order_unit:
+    params[:article_version][:group_order_unit] = params[:article_version][:supplier_order_unit]
+    params[:article_version][:billing_unit] = params[:article_version][:supplier_order_unit]
+    params[:article_version][:price_unit] = params[:article_version][:supplier_order_unit]
   end
 end

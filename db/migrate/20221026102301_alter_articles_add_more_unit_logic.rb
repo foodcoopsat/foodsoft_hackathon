@@ -36,7 +36,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
 
       new_version_id = insert(%{
         INSERT INTO article_versions (
-          article_id, price, tax, deposit, created_at, name, article_category_id, note, availability, manufacturer, origin, order_number, updated_at, supplier_order_unit, group_order_granularity, group_order_unit)
+          article_id, price, tax, deposit, created_at, name, article_category_id, note, availability, manufacturer, origin, order_number, updated_at, supplier_order_unit, group_order_granularity, group_order_unit, billing_unit, price_unit)
         VALUES(
           #{quote latest_article_version['article_id']},
           #{quote latest_article_version['price'].to_f * unit_quantity},
@@ -53,7 +53,9 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
           NOW(),
           #{quote new_unit_data[:supplier_order_unit]},
           #{quote new_unit_data[:group_order_granularity]},
-          #{quote new_unit_data[:group_order_unit]}
+          #{quote new_unit_data[:group_order_unit]},
+          #{quote new_unit_data[:supplier_order_unit]},
+          #{quote new_unit_data[:supplier_order_unit]}
         )
       })
 
