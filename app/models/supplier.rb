@@ -86,7 +86,7 @@ class Supplier < ApplicationRecord
   # @option options [Boolean] :convert_units Omit or set to +true+ to keep current units, recomputing unit quantity and price.
   def sync_from_file(file, options = {})
     data = FoodsoftFile::parse(file, options)
-    self.parse_import_data(data, options)
+    self.parse_import_data({ articles: data }, options)
   end
 
   def read_from_remote(search_params = {})
