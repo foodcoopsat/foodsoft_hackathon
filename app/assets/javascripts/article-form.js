@@ -46,7 +46,7 @@ class ArticleForm {
       this.initializeFormSubmitListener();
       this.initializeToggleExtraUnitsButton();
     } catch (e) {
-      console.log('Could not initialize article form', e);
+      console.log('Could not initialize article form', e, 'articleUnitRatioTemplate$', articleUnitRatioTemplate$, 'articleForm$', articleForm$, 'units', units, 'priceMarkup', priceMarkup, 'multiForm$', multiForm$, 'unitFieldsIdPrefix', unitFieldsIdPrefix, 'unitFieldsNamePrefix', unitFieldsNamePrefix);
     }
   }
 
@@ -92,14 +92,47 @@ class ArticleForm {
   }
 
   initializeToggleExtraUnitsButton() {
-    this.toggleExtraUnitsButton$.on('click', (e) => {
-      this.toggleExtraUnits();
-    });
+    if (this.toggleExtraUnitsButton$.length > 0) {
+      this.setExtraUnitsButtonStatus();
+
+      this.toggleExtraUnitsButton$.on('click', (e) => {
+        this.toggleExtraUnits();
+      });
+
+      this.supplierUnitSelect$.on('change', () => this.setExtraUnitsButtonStatus());
+    }
+  }
+
+  setExtraUnitsButtonStatus() {
+    if (this.hasDeviatingExtraUnits()) {
+      this.toggleExtraUnitsButton$.removeClass('default-values');
+    } else {
+      this.toggleExtraUnitsButton$.addClass('default-values');
+    }
+  }
+
+  hasDeviatingExtraUnits() {
+    if ($(`input[name^="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes]"][name$="[quantity]"]`).length > 0) {
+      return true;
+    }
+
+    const supplierOrderUnit = this.supplierUnitSelect$.val();
+    if (supplierOrderUnit !== this.groupOrderUnit$.val() || supplierOrderUnit !== this.billingUnit$.val()) {
+      return true;
+    }
+
+    if (this.minimumOrderQuantity$.val().trim() != '') {
+      return true;
+    }
+
+    return false;
   }
 
   toggleExtraUnits() {
+    this.setExtraUnitsButtonStatus();
     $(document).off('mousedown.extra-units');
     this.extraUnits$.toggleClass('show');
+    this.toggleExtraUnitsButton$.toggleClass('show');
 
     if (this.extraUnits$.hasClass('show')) {
       $(document).on('mousedown.extra-units', (e) => {

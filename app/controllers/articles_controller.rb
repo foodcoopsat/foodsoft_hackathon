@@ -56,13 +56,16 @@ class ArticlesController < ApplicationController
   end
 
   def create
+    valid = false
     Article.transaction do
       @article = Article.create(supplier_id: @supplier.id)
       @article.attributes = { latest_article_version_attributes: params[:article_version] }
-      @article.save
+      raise ActiveRecord::Rollback unless @article.valid?
+
+      valid = @article.save
     end
 
-    if @article.valid? && @article.save
+    if valid
       render :layout => false
     else
       render :action => 'new', :layout => false
