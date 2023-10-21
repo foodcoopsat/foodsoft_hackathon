@@ -1,3 +1,6 @@
+:javascript
+  const units = #{raw(ArticleUnits.units.to_json)};
+- price_markup = FoodsoftConfig[:price_markup].to_f
 %table.table
   %thead
     %tr
@@ -5,7 +8,6 @@
       %th= heading_helper Article, :name
       %th= heading_helper Article, :unit
       %th= heading_helper Article, :price, short: true
-      %th= heading_helper Article, :unit_quantity, short: true
       %th= heading_helper Article, :order_number, short: true
       %th= heading_helper Article, :note
       %th= heading_helper Article, :article_category
@@ -13,15 +15,57 @@
       %th= heading_helper Article, :deposit
   %tbody
     - @articles.each_with_index do |article, index|
-      = fields_for "articles[#{article.id || index}]", article do |form|
-        %tr
+      %tr{:id => "article_row_#{article.id}"}
+        = render 'shared/js_templates/unit_conversion_popover_template'
+        = simple_fields_for "articles[#{article.id}]", article.latest_article_version do |form|
+          - content_for :javascript do
+            :javascript
+              articleUnitRatioTemplate$ = $($.parseHTML("#{escape_javascript(render(partial: 'shared/article_unit_ratio', locals: {article_unit_ratio: @empty_article_unit_ratio, f: form, article_unit_ratio_counter: -1}))}"));
+              new ArticleForm(articleUnitRatioTemplate$, $('#article_row_#{article.id}'), units, #{price_markup}, $('#article_row_#{article.id}').closest('form'), 'articles_#{article.id}', 'articles[#{article.id}]');
+          - if index + 1 === @articles.length
+            - content_for :javascript do
+              :javascript
+                $('input[name="commit"]').removeAttr('disabled');
           %td
             = yield form # allow to add hidden fields to form
             = form.check_box 'availability'
           %td= form.text_field 'name', class: 'input-medium'
-          %td= form.text_field 'unit', class: 'input-mini'
-          %td= form.text_field 'price', class: 'input-mini'
-          %td= form.text_field 'unit_quantity', class: 'input-mini'
+          %td
+            .d-flex.gap-1.align-items-center
+              = form.input :supplier_order_unit, as: :select, collection: @article_units, label: false, value: article.supplier_order_unit, include_blank: t('Custom (avoid if possible!)') + ':', input_html: {class: 'input-medium'}
+              = form.input :unit, input_html: {class: 'input-mini ml-1'}, label: false
+              %div.btn-link.toggle-extra-units.text-decoration-none.default-values
+                %i.icon-cog
+            %div.extra-unit-fields.form-horizontal
+              .fold-line
+                .control-group
+                  %label.control-label{for: 'unit_ratios'}
+                    = "Unit ratios"
+                  %table#fc_base_price{:class => "controls"}
+                    %tbody
+                      - ratios = article.article_unit_ratios
+                      = render :partial => 'shared/article_unit_ratio', :as => 'article_unit_ratio', :collection => ratios, locals: {f: form, original_ratios: article&.article_unit_ratios}
+                    %tfoot
+                      %tr
+                        %td{:colspan => 6}
+                          = link_to t('.add_ratio'), '#', 'data-add-ratio' => true, class: 'btn', title: "add ratio"
+              .fold-line
+                = form.input :minimum_order_quantity, label: "Mininum order quantity" do
+                  .input-append
+                    = form.input_field :minimum_order_quantity, class: 'input-mini', title: "total minimum order quantity for this article"
+              .fold-line
+                = form.input :billing_unit, as: :select, collection: [], input_html: {class: 'input-medium'}, include_blank: false
+              .fold-line
+                = form.input :group_order_granularity, label: "Allow orders per", input_html: {class: 'input-mini', title: "steps in which ordergroups can order this article"}
+                = form.input :group_order_unit, as: :select, collection: [], input_html: {class: 'input-medium'}, label: '&times;'.html_safe, include_blank: false
+          %td
+            .d-flex.gap-1
+              .input-prepend
+                %span.add-on= t 'number.currency.format.unit'
+                = form.text_field 'price', class: 'input-mini', style: 'width: 45px'
+              .input.d-flex.gap-1
+                %label=t('articles.form.per')
+                = form.select :price_unit, [], {include_blank: false}, {class: 'input-medium'}
           %td= form.text_field 'order_number', class: 'input-mini'
           %td= form.text_field 'note', class: 'input-medium'
           %td= form.collection_select 'article_category_id', ArticleCategory.all,

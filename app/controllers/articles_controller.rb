@@ -2,7 +2,7 @@ class ArticlesController < ApplicationController
   before_action :authenticate_article_meta, :find_supplier
 
   before_action :load_article, only: [:edit, :update]
-  before_action :load_article_units, only: [:edit, :update, :new, :create, :parse_upload, :sync, :update_synchronized]
+  before_action :load_article_units, only: [:edit, :update, :new, :create, :parse_upload, :sync, :update_synchronized, :edit_all]
   before_action :new_empty_article_ratio, only: [:edit, :update, :new, :create, :parse_upload, :sync, :update_synchronized]
 
   def index
@@ -102,9 +102,13 @@ class ArticlesController < ApplicationController
       Article.transaction do
         unless params[:articles].blank?
           # Update other article attributes...
-          @articles = Article.find(params[:articles].keys)
+          @articles = Article.with_latest_versions_and_categories
+                             .includes(latest_article_version: [:article_unit_ratios])
+                             .find(params[:articles].keys)
           @articles.each do |article|
-            unless article.update_attributes(params[:articles][article.id.to_s])
+            article_version_params = params[:articles][article.id.to_s]
+            article_version_params["id"] = article.latest_article_version.id
+            unless article.update_attributes(latest_article_version_attributes: article_version_params)
               invalid_articles = true unless invalid_articles # Remember that there are validation errors
             end
           end

@@ -13,6 +13,7 @@ class ArticleForm {
       this.unitRatiosTable$ = $('#fc_base_price', this.articleForm$);
       this.minimumOrderQuantity$ = $(`#${this.unitFieldsIdPrefix}_minimum_order_quantity`, this.articleForm$);
       this.billingUnit$ = $(`#${this.unitFieldsIdPrefix}_billing_unit`, this.articleForm$);
+      this.groupOrderGranularity$ = $(`#${this.unitFieldsIdPrefix}_group_order_granularity`, this.articleForm$);
       this.groupOrderUnit$ = $(`#${this.unitFieldsIdPrefix}_group_order_unit`, this.articleForm$);
       this.price$ = $(`#${this.unitFieldsIdPrefix}_price`, this.articleForm$);
       this.priceUnit$ = $(`#${this.unitFieldsIdPrefix}_price_unit`, this.articleForm$);
@@ -121,7 +122,7 @@ class ArticleForm {
       return true;
     }
 
-    if (this.minimumOrderQuantity$.val().trim() != '') {
+    if (this.minimumOrderQuantity$.val().trim() !== '' || parseFloat(this.groupOrderGranularity$.val().trim()) !== 1) {
       return true;
     }
 

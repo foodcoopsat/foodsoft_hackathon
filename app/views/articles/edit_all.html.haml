@@ -6,5 +6,5 @@
   %br/
   %i= t '.warning'
   .form-actions
-    = submit_tag t('.submit'), class: 'btn btn-primary'
+    = submit_tag t('.submit'), class: 'btn btn-primary', disabled: true
     = link_to t('ui.or_cancel'), supplier_articles_path(@supplier)
