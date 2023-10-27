@@ -19,7 +19,7 @@ class ArticleForm {
       this.priceUnit$ = $(`#${this.unitFieldsIdPrefix}_price_unit`, this.articleForm$);
       this.tax$ = $(`#${this.unitFieldsIdPrefix}_tax`, this.articleForm$);
       this.deposit$ = $(`#${this.unitFieldsIdPrefix}_deposit`, this.articleForm$);
-      this.fcPrice$ = $(`#${this.unitFieldsIdPrefix}_fc_price`, this.articleForm$);
+      this.fcPrice$ = $(`#article_fc_price`, this.articleForm$);
       this.unitsToOrder$ = $('#order_article_units_to_order', this.articleForm$);
       this.unitsReceived$ = $('#order_article_units_received', this.articleForm$);
       this.toggleExtraUnitsButton$ = $('.toggle-extra-units', this.articleForm$);
@@ -184,6 +184,7 @@ class ArticleForm {
     this.unit$.change(() => {
       this.setMinimumOrderUnitDisplay();
       this.updateAvailableBillingAndGroupOrderUnits();
+      this.updateUnitMultiplierLabels();
     });
     this.unit$.keyup(() => this.unit$.trigger('change'));
 
@@ -227,11 +228,11 @@ class ArticleForm {
       e.preventDefault();
       e.stopPropagation();
 
-      this.onAddClicked();
+      this.onAddRatioClicked();
     });
   }
 
-  onAddClicked() {
+  onAddRatioClicked() {
     const newRow$ = this.articleUnitRatioTemplate$.clone();
     $('tbody', this.unitRatiosTable$).append(newRow$);
 
@@ -337,7 +338,8 @@ class ArticleForm {
         }
         return unit.label;
       } else {
-        return this.unit$.val();
+        const unitVal = this.unit$.val();
+        return unitVal ? unitVal : '?';
       }
     }
   }
@@ -348,7 +350,8 @@ class ArticleForm {
       const chosenOption$ = $(`option[value="${this.supplierUnitSelect$.val()}"]`, this.supplierUnitSelect$);
       unitsSelectedAbove.push({ key: chosenOption$.val(), label: chosenOption$.text() });
     } else {
-      unitsSelectedAbove.push({ key: '', label: this.unit$.val() });
+      const unitVal = this.unit$.val();
+      unitsSelectedAbove.push({ key: '', label: unitVal ? unitVal : '?' });
     }
 
     const selectedRatioUnits = $('tr select[name$="[unit]"]', this.unitRatiosTable$).map((_, ratioSelect) => ({
@@ -373,6 +376,7 @@ class ArticleForm {
     }
 
     this.updateUnitsInSelect(availableUnits, this.billingUnit$);
+    this.billingUnit$.parents('.fold-line').css('display', availableUnits.length > 1 ? 'block' : 'none');
     this.updateUnitsInSelect(availableUnits, this.groupOrderUnit$);
     this.updateUnitsInSelect(availableUnits, this.priceUnit$);
   }
@@ -398,6 +402,14 @@ class ArticleForm {
     }
 
     unitSelect$.trigger('change');
+
+    unitSelect$.parents('.control-group').find('.immutable_unit_label').remove();
+    if (units.length === 1) {
+      unitSelect$.hide();
+      unitSelect$.parents('.control-group').append($(`<div class="immutable_unit_label control-label">${units[0].label}</div>`))
+    } else {
+      unitSelect$.show();
+    }
   }
 
   setFieldVisibility() {
@@ -405,10 +417,10 @@ class ArticleForm {
     const firstUnitRatioUnit$ = $('tr select[name$="[unit]"]:first', this.unitRatiosTable$);
 
     const supplierOrderUnitSet = !!this.unit$.val() || !!this.supplierUnitSelect$.val();
-    const unitRationsVisible = supplierOrderUnitSet;
-    this.unitRatiosTable$.parents('.fold-line').toggle(unitRationsVisible);
+    const unitRatiosVisible = supplierOrderUnitSet || this.unitRatiosTable$.find('tbody tr').length > 0;
+    this.unitRatiosTable$.parents('.fold-line').toggle(unitRatiosVisible);
 
-    if (!unitRationsVisible) {
+    if (!unitRatiosVisible) {
       $('tbody tr', this.unitRatiosTable$).remove();
     }
 

@@ -55,8 +55,6 @@ class OrderArticle < ApplicationRecord
     if order.open?
       self.quantity = group_order_articles.collect(&:quantity).sum
       self.tolerance = group_order_articles.collect(&:tolerance).sum
-      require 'byebug'
-      byebug
       self.units_to_order = calculate_units_to_order(quantity, tolerance)
       enforce_boxfill if order.boxfill?
       save!

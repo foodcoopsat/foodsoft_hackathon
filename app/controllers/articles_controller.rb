@@ -132,7 +132,9 @@ class ArticlesController < ApplicationController
   def update_selected
     raise I18n.t('articles.controller.error_nosel') if params[:selected_articles].nil?
 
-    articles = Article.find(params[:selected_articles])
+    articles = Article.with_latest_versions_and_categories
+                      .includes(latest_article_version: [:article_unit_ratios])
+                      .find(params[:selected_articles])
     Article.transaction do
       case params[:selected_action]
       when 'destroy'
