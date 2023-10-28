@@ -174,7 +174,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
         group_order_unit: unit
       }
     else
-      supplier_order_unit = unit == 'XPP' ? 'XPA' : 'XPP'
+      supplier_order_unit = unit == 'XPP' ? 'XPK' : 'XPP'
       {
         supplier_order_unit: supplier_order_unit,
         first_ratio: {

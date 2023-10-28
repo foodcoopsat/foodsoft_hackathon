@@ -76,13 +76,13 @@ describe AlterArticlesAddMoreUnitLogic do
   it 'converts "4 piece" correctly' do
     result = migration.send(:convert_old_unit, '4 piece', 1)
     expect(result).to eq({
-                           supplier_order_unit: 'XPA',
+                           supplier_order_unit: 'XPK',
                            first_ratio: {
                              unit: 'XPP',
                              quantity: 4
                            },
                            group_order_granularity: 1.0,
-                           group_order_unit: 'XPA'
+                           group_order_unit: 'XPK'
                          })
   end
 
