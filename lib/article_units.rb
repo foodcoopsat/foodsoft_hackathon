@@ -2,7 +2,7 @@ class ArticleUnits
   @un_ece_20_units = YAML.safe_load(ERB.new(File.read(File.expand_path('config/units-of-measure/un-ece-20-remastered.yml', Rails.root))).result)
   @un_ece_21_units = YAML.safe_load(ERB.new(File.read(File.expand_path('config/units-of-measure/un-ece-21.yml', Rails.root))).result)
 
-  @allowed_units = %w[GRM HGM KGM LTR MLT XPP XCB XBO XBH XGR XPK]
+  @allowed_units = %w[GRM HGM KGM LTR MLT XPP XCB XBO XBH XGR XPK XSA XPU XPT PTN STC]
 
   def self.untranslated_units
     options = {}

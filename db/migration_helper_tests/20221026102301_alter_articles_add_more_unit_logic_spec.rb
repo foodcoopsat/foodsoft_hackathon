@@ -99,13 +99,13 @@ describe AlterArticlesAddMoreUnitLogic do
   it 'converts "2 bunch" correctly' do
     result = migration.send(:convert_old_unit, '2 bunch', 1)
     expect(result).to eq({
-                           supplier_order_unit: 'XPP',
+                           supplier_order_unit: 'XPK',
                            first_ratio: {
                              unit: 'XBH',
                              quantity: 2
                            },
                            group_order_granularity: 1.0,
-                           group_order_unit: 'XPP'
+                           group_order_unit: 'XPK'
                          })
   end
 
@@ -119,6 +119,19 @@ describe AlterArticlesAddMoreUnitLogic do
                            },
                            group_order_granularity: 250,
                            group_order_unit: 'GRM'
+                         })
+  end
+
+  it 'converts "6 x glass" correctly' do
+    result = migration.send(:convert_old_unit, 'glass', 6)
+    expect(result).to eq({
+                           supplier_order_unit: 'XPK',
+                           first_ratio: {
+                             unit: 'XGR',
+                             quantity: 6
+                           },
+                           group_order_granularity: 1,
+                           group_order_unit: 'XGR'
                          })
   end
 

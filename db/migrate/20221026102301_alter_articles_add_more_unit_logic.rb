@@ -158,7 +158,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
   private
 
   def convert_old_unit(old_compound_unit_str, unit_quantity)
-    md = old_compound_unit_str.match(%r{^\s*([0-9][0-9,./]*)?\s*([A-Za-z\u00C0-\u017F]+)\s*$})
+    md = old_compound_unit_str.match(%r{^\s*([0-9][0-9,./]*)?\s*([A-Za-z\u00C0-\u017F.]+)\s*$})
     return nil if md.nil?
 
     unit = get_unit_from_old_str(md[2])
@@ -166,7 +166,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
 
     quantity = get_quantity_from_old_str(md[1])
 
-    if quantity == 1
+    if quantity == 1 && unit_quantity == 1
       {
         supplier_order_unit: unit,
         first_ratio: nil,
@@ -174,7 +174,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
         group_order_unit: unit
       }
     else
-      supplier_order_unit = unit == 'XPP' ? 'XPK' : 'XPP'
+      supplier_order_unit = unit.starts_with?('X') && unit != 'XPK' ? 'XPK' : 'XPP'
       {
         supplier_order_unit: supplier_order_unit,
         first_ratio: {
@@ -220,14 +220,30 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
   # see https://github.com/foodcoopsat/foodsoft_hackathon/issues/10
   def matches_unit_name(unit, unit_str)
     unit_str = case unit_str
-               when "bund"
+               when "gr", "grm"
+                 "gramm"
+               when "kilo"
+                 "kilogramm"
+               when "dkg"
+                 "decagramm"
+               when "bund", "bd", "bd."
                  "bunch"
-               when "stück", "stk"
+               when "stück", "stk", "st", "stk.", "stueck"
                  "piece"
                when "glas", "gl"
                  "glass"
-               when "pkg", "packung"
-                 "packet"
+               when "pkg", "packung", "pkt", "pkg."
+                 "package"
+               when "schale"
+                 "tray pack"
+               when "topf", "tiegel"
+                 "pot"
+               when "flasche", "fl", "fl."
+                 "bottle"
+               when "port", "port."
+                 "portion"
+               when "stange"
+                 "stick"
                else
                  unit_str
                end
