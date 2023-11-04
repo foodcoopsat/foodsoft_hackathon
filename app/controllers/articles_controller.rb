@@ -248,7 +248,13 @@ class ArticlesController < ApplicationController
   end
 
   def load_article_units
-    @article_units = ArticleUnits.as_options
+    @article_units = ArticleUnit.as_options(additional_units: current_article_units)
+  end
+
+  def current_article_units
+    return [] if @article.nil?
+
+    [@article.supplier_order_unit, @article.group_order_unit, @article.billing_unit, @article.price_unit].compact
   end
 
   def new_empty_article_ratio

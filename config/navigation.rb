@@ -30,6 +30,7 @@ SimpleNavigation::Configuration.run do |navigation|
       subnav.item :suppliers, I18n.t('navigation.articles.suppliers'), suppliers_path
       subnav.item :stockit, I18n.t('navigation.articles.stock'), stock_articles_path
       subnav.item :categories, I18n.t('navigation.articles.categories'), article_categories_path
+      subnav.item :article_units, I18n.t('navigation.articles.article_units'), article_units_path
     end
 
     primary.item :finance, I18n.t('navigation.finances.title'), '#', if: Proc.new { current_user.role_finance? || current_user.role_invoices? } do |subnav|

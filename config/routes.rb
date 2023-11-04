@@ -111,6 +111,12 @@ Rails.application.routes.draw do
       end
     end
 
+    resources :article_units do
+      collection do
+        get :search
+      end
+    end
+
     resources :suppliers do
       get :remote_articles
       resource :share, only: [:create, :destroy], controller: :supplier_shares

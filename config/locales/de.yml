@@ -25,6 +25,11 @@ de:
         unit_quantity: Gebindegröße
         unit_quantity_short: GebGr
         units: Gebinde
+      article_unit:
+        code: Einheitencode gemäß Empfehlung der United Nations Economic Commission (UNECE)
+        code_short: Code
+        symbol: Einheitenzeichen
+        description: Beschreibung (Englisch)
       article_category:
         description: Beschreibung
         name: Name
@@ -1406,6 +1411,7 @@ de:
       stock: Lager
       suppliers: Lieferanten/Artikel
       title: Artikel
+      article_units: Artikeleinheiten
     finances:
       accounts: Konten verwalten
       balancing: Bestellungen abrechnen
@@ -1736,6 +1742,20 @@ de:
       stock_changes: Verlauf des Lagerbestands
     update:
       notice: Lagerartikel »%{name}« aktualisiert.
+  article_units:
+    index:
+      search: Einheit/Symbol suchen
+    rows:
+      request_translation: Für diese Einheit existiert noch keine Übersetzung. Wenn Sie der Meinung sind, dass es eine gebräuchliche Einheit ist, klicken Sie hier um ein neues GitHub Issue zu erstellen.
+    create_link:
+      add: Hinzufügen
+    destroy_link:
+      delete: Entfernen
+      confirm: Wollen Sie die Artikeleinheit wirklich entfernen? (Bestehende Artikel, die diese Einheit verwenden, werden nicht verändert, aber man kann die Einheit dann nicht mehr in neuen Artikeln verwenden.)
+    create:
+      success: Artikeleinheit %{name} erfolgreich hinzugefügt.
+    destroy:
+      success: Artikeleinheit %{name} erfolgreich entfernt.
   suppliers:
     create:
       notice: Lieferant wurde erstellt

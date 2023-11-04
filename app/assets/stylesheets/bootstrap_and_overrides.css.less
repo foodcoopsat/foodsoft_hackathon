@@ -45,6 +45,9 @@ body {
 @articleUnavailColor: #999;
 @articleUpdatedColor: #468847;
 
+// article units:
+@unitUntranslatedColor: #999;
+
 // dim colors by this amount when the information is less important
 @nonessentialDim: 35%;
 
@@ -328,6 +331,11 @@ td.symbol, th.symbol {
     padding: 0;
     margin: 0;
   }
+}
+
+// ********* Article units
+tr.untranslated {
+  color: @unitUntranslatedColor;
 }
 
 

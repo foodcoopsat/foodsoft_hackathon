@@ -1,7 +1,7 @@
 - content_for :javascript do
   - group_balance = FoodsoftConfig[:charge_members_manually] ? @ordering_data[:account_balance] : @ordering_data[:available_funds]
   :javascript
-    const units = #{raw(ArticleUnits.units.to_json)};
+    const units = #{raw(ArticleUnit.as_hash.to_json)};
     /*$(function() {
       #{data_to_js(@ordering_data)}
       setGroupBalance(#{group_balance});

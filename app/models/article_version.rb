@@ -64,7 +64,7 @@ class ArticleVersion < ApplicationRecord
   end
 
   def supplier_order_unit_is_si_convertible
-    !ArticleUnits.units[self.supplier_order_unit]&.dig(:conversionFactor).nil?
+    !ArticleUnit.as_hash[self.supplier_order_unit]&.dig(:conversionFactor).nil?
   end
 
   # TODO: Maybe use the nilify blanks gem instead of the following six methods?:

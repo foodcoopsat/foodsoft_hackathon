@@ -20,7 +20,7 @@
           %td= article[:manufacturer]
           %td{title: article[:note]}= truncate(article[:note], length: 11)
           %td= number_to_currency(article[:price])
-          %td= ArticleUnits.get_translated_name_for_code(article[:supplier_order_unit])
+          %td= ArticleUnitsLib.get_translated_name_for_code(article[:supplier_order_unit])
           %td.actions.import-actions{:data => {order_number: article[:order_number]}}
             - article_exists = @supplier.articles.includes(:latest_article_version).undeleted.where(article_versions: {order_number: article[:order_number]}).exists?
             %i.icon-ok{:style => article_exists ? '' : 'display:none;'}= t '.already_imported'

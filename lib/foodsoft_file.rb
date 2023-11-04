@@ -19,12 +19,12 @@ class FoodsoftFile
                   :tax => row[8],
                   :deposit => (row[9].nil? ? "0" : row[9]),
                   # :quantity => row[10], TODO?
-                  :supplier_order_unit => ArticleUnits.get_code_for_translated_name(row[11]),
-                  :price_unit => ArticleUnits.get_code_for_translated_name(row[12]),
-                  :group_order_unit => ArticleUnits.get_code_for_translated_name(row[13]),
+                  :supplier_order_unit => ArticleUnitsLib.get_code_for_translated_name(row[11]),
+                  :price_unit => ArticleUnitsLib.get_code_for_translated_name(row[12]),
+                  :group_order_unit => ArticleUnitsLib.get_code_for_translated_name(row[13]),
                   :group_order_granularity => row[14],
                   :minimum_order_quantity => row[15],
-                  :billing_unit => ArticleUnits.get_code_for_translated_name(row[16]),
+                  :billing_unit => ArticleUnitsLib.get_code_for_translated_name(row[16]),
                   :article_category => row[19],
                   :article_unit_ratios => FoodsoftFile.parse_ratios_cell(row[20]) }
       articles << article
@@ -41,7 +41,7 @@ class FoodsoftFile
       {
         sort: index + 1,
         quantity: md[:quantity],
-        unit: ArticleUnits.get_code_for_translated_name(md[:unit_name])
+        unit: ArticleUnitsLib.get_code_for_translated_name(md[:unit_name])
       }
     end
   end

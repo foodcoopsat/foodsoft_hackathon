@@ -16,13 +16,13 @@ module ArticlesHelper
   end
 
   def format_supplier_article_unit(article)
-    return ArticleUnits.as_options.invert[article.supplier_order_unit] unless article.supplier_order_unit.nil?
+    return ArticleUnit.as_hash[article.supplier_order_unit][:name] unless article.supplier_order_unit.nil?
 
     article.unit
   end
 
   def format_group_order_unit(article)
-    return ArticleUnits.as_options.invert[article.group_order_unit] unless article.group_order_unit.nil?
+    return ArticleUnit.as_hash[article.group_order_unit][:name] unless article.group_order_unit.nil?
 
     article.unit
   end

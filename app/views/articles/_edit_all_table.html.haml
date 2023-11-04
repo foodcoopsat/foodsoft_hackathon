@@ -1,5 +1,5 @@
 :javascript
-  const units = #{raw(ArticleUnits.units.to_json)};
+  const units = #{raw(ArticleUnit.as_hash.to_json)};
 - price_markup = FoodsoftConfig[:price_markup].to_f
 %table.table
   %thead

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_04_14_122017) do
+ActiveRecord::Schema.define(version: 2023_11_04_141204) do
 
   create_table "active_storage_attachments", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci", force: :cascade do |t|
     t.string "name", null: false
@@ -46,6 +46,13 @@ ActiveRecord::Schema.define(version: 2023_04_14_122017) do
     t.string "unit"
     t.index ["article_version_id"], name: "index_article_unit_ratios_on_article_version_id"
     t.index ["sort"], name: "index_article_unit_ratios_on_sort"
+  end
+
+  create_table "article_units", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci", force: :cascade do |t|
+    t.string "unit", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["unit"], name: "index_article_units_on_unit", unique: true
   end
 
   create_table "article_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci", force: :cascade do |t|

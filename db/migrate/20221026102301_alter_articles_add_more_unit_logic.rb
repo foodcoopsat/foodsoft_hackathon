@@ -205,9 +205,9 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
 
   def get_unit_from_old_str(old_unit_str)
     unit_str = old_unit_str.strip.downcase
-    matching_unit_arr = ArticleUnits.untranslated_units
-                                    .select { |_key, unit| unit[:visible] && (unit[:sign] == unit_str || matches_unit_name(unit, unit_str)) }
-                                    .to_a
+    matching_unit_arr = ArticleUnitsLib.untranslated_units
+                                       .select { |_key, unit| unit[:visible] && (unit[:symbol] == unit_str || matches_unit_name(unit, unit_str)) }
+                                       .to_a
     return nil if matching_unit_arr.empty?
 
     matching_unit_arr[0][0]

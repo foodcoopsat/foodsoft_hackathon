@@ -4,7 +4,7 @@
 - content_for :javascript do
   :javascript
     $('.units_received').each((_, field) => $(field).unitConversionField({
-      units: #{raw(ArticleUnits.units.to_json)},
+      units: #{raw(ArticleUnit.as_hash.to_json)},
       popoverTemplate$: $('#unit_conversion_popover_content_template'),
       useTargetUnitForStep: false
     }));

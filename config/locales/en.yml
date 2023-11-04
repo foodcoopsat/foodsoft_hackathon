@@ -26,6 +26,11 @@ en:
         unit_quantity_short: U.Q.
         units: Units
         supplier_order_unit: Supplier order unit
+      article_unit:
+        code: Unit code according to the recommendation of the United Nations Economic Commission (UNECE)
+        code_short: Code
+        symbol: Symbol
+        description: Description
       article_category:
         description: Import names
         name: Name
@@ -1415,6 +1420,7 @@ en:
       stock: Stock
       suppliers: Suppliers/articles
       title: Articles
+      article_units: Article units
     dashboard: Dashboard
     finances:
       accounts: Manage accounts

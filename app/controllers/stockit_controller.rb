@@ -101,7 +101,7 @@ class StockitController < ApplicationController
   private
 
   def load_article_units
-    @article_units = ArticleUnits.as_options
+    @article_units = ArticleUnit.as_options
   end
 
   def new_empty_article_ratio

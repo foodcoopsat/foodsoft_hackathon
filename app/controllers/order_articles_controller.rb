@@ -12,6 +12,8 @@ class OrderArticlesController < ApplicationController
     @order_article = @order.order_articles.build(params[:order_article])
   end
 
+  def edit; end
+
   def create
     # The article may be ordered with zero units - in that case do not complain.
     #   If order_article is ordered and a new order_article is created, an error message will be
@@ -24,8 +26,6 @@ class OrderArticlesController < ApplicationController
   rescue
     render action: :new
   end
-
-  def edit; end
 
   def update
     # begin
@@ -69,7 +69,7 @@ class OrderArticlesController < ApplicationController
   end
 
   def load_article_units
-    @article_units = ArticleUnits.as_options
+    @article_units = ArticleUnit.as_options
   end
 
   def new_empty_article_ratio
