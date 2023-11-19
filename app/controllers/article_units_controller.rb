@@ -1,4 +1,5 @@
 class ArticleUnitsController < ApplicationController
+  before_action :authenticate_article_meta
   before_action :load_available_units, only: [:search, :create, :destroy]
 
   def index; end

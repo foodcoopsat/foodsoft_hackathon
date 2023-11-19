@@ -508,6 +508,7 @@ de:
       change_supplier: Lieferant wechseln ...
       download: Artikel herunterladen
       edit_all: Alle bearbeiten
+      migrate_units: Alte Artikeleinheiten migrieren
       ext_db:
         import: Suchen/Importieren
         sync: Synchronisieren

@@ -2,7 +2,7 @@ class ArticlesController < ApplicationController
   before_action :authenticate_article_meta, :find_supplier
 
   before_action :load_article, only: [:edit, :update]
-  before_action :load_article_units, only: [:edit, :update, :new, :create, :parse_upload, :sync, :update_synchronized, :edit_all]
+  before_action :load_article_units, only: [:edit, :update, :new, :create, :parse_upload, :sync, :update_synchronized, :edit_all, :migrate_units]
   before_action :new_empty_article_ratio, only: [:edit, :update, :new, :create, :parse_upload, :sync, :update_synchronized]
 
   def index
@@ -92,6 +92,39 @@ class ArticlesController < ApplicationController
   # Renders a form for editing all articles from a supplier
   def edit_all
     @articles = @supplier.articles.undeleted
+  end
+
+  def migrate_units
+    @articles = @supplier.articles.undeleted
+    @articles.each_with_index do |article, _index|
+      article_version = article.latest_article_version
+      quantity = 1
+      ratios = article_version.article_unit_ratios
+
+      next if ratios.length > 1
+
+      if ratios.length == 1 && ratios[0].quantity != 1 && ratios[0].unit == 'XPP'
+        quantity = ratios[0].quantity
+      end
+
+      conversion_result = ArticleUnitsLib.convert_old_unit(article_version.unit, quantity)
+
+      next if conversion_result.nil?
+
+      article_version.unit = nil
+      article_version.supplier_order_unit = conversion_result[:supplier_order_unit]
+      article_version.group_order_granularity = conversion_result[:group_order_granularity]
+      article_version.group_order_unit = conversion_result[:group_order_unit]
+
+      first_ratio = conversion_result[:first_ratio]
+      if first_ratio.nil?
+        article_version.article_unit_ratios = []
+      else
+        article_version.article_unit_ratios = [article_version.article_unit_ratios.build(first_ratio.merge(sort: 1))]
+      end
+    end
+
+    render :edit_all
   end
 
   # Updates all article of specific supplier
