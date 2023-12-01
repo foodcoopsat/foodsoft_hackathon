@@ -30,17 +30,15 @@ class ArticleUnitsLib
 
   def self.units
     units = self.untranslated_units
-    units.map do |code, unit|
+    units.to_h do |code, unit|
       translated_name = ArticleUnitsLib.get_translated_name_for_code(code, default_nil: true)
       unit = unit.clone
       unit[:name] = translated_name || unit[:name]
       unit[:untranslated] = translated_name.nil?
       unit[:symbol] = ArticleUnitsLib.get_translated_symbol_for_code(code)
 
-      unit
+      [code, unit]
     end
-
-    units
   end
 
   def self.get_translated_name_for_code(code, default_nil: false)

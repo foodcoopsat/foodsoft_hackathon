@@ -24,7 +24,10 @@ class ArticleUnit < ApplicationRecord
     ArticleUnitsLib.units.each do |code, unit|
       next unless available_units.include?(code) || additional_units.include?(code)
 
-      options[unit[:name]] = code
+      label = unit[:name]
+      label += " (#{unit[:symbol]})" unless unit[:symbol].blank?
+
+      options[label] = code
     end
 
     options
