@@ -32,7 +32,8 @@
             = form.check_box 'availability'
           %td= form.text_field 'name', class: 'input-medium'
           - unless @original_units.nil?
-            %td= "\"#{@original_units[article.id]}\""
+            %td
+              = "\"#{@original_units[article.id]}\"" unless @original_units[article.id].blank?
           %td
             .d-flex.gap-1.align-items-center
               = form.hidden_field :unit, id: 'article_unit_hidden', value: ''

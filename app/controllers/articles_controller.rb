@@ -153,6 +153,8 @@ class ArticlesController < ApplicationController
             end
           end
 
+          @supplier.update_attribute(:unit_migration_completed, Time.now) if params[:complete_migration]
+
           raise ActiveRecord::Rollback if invalid_articles # Rollback all changes
         end
       end

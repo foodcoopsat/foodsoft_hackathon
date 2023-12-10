@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_11_04_141204) do
+ActiveRecord::Schema.define(version: 2023_12_10_181807) do
 
   create_table "active_storage_attachments", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci", force: :cascade do |t|
     t.string "name", null: false
@@ -521,6 +521,7 @@ ActiveRecord::Schema.define(version: 2023_11_04_141204) do
     t.integer "supplier_category_id", null: false
     t.string "supplier_remote_source"
     t.string "external_uuid"
+    t.datetime "unit_migration_completed"
     t.index ["external_uuid"], name: "index_suppliers_on_external_uuid", unique: true
     t.index ["name"], name: "index_suppliers_on_name", unique: true
   end
