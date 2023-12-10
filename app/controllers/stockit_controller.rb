@@ -1,5 +1,6 @@
 class StockitController < ApplicationController
   before_action :new_empty_article_ratio, only: [:edit, :update, :new, :create, :derive, :copy]
+  before_action :load_article, only: [:index_on_stock_article_create, :index_on_stock_article_update, :show, :edit, :update, :show_on_stock_article_update, :destroy]
   before_action :load_article_units, only: [:edit, :update, :new, :create, :derive, :copy]
   before_action :prepare_params_for_create_update, only: [:create, :update]
 
@@ -8,19 +9,14 @@ class StockitController < ApplicationController
   end
 
   def index_on_stock_article_create # See publish/subscribe design pattern in /doc.
-    @stock_article = StockArticle.find(params[:id])
-
     render :layout => false
   end
 
   def index_on_stock_article_update # See publish/subscribe design pattern in /doc.
-    @stock_article = StockArticle.find(params[:id])
-
     render :layout => false
   end
 
   def show
-    @stock_article = StockArticle.find(params[:id])
     @stock_changes = @stock_article.stock_changes.order('stock_changes.created_at DESC')
   end
 
@@ -52,8 +48,6 @@ class StockitController < ApplicationController
   end
 
   def edit
-    @stock_article = StockArticle.find(params[:id])
-
     render :layout => false
   end
 
@@ -69,7 +63,6 @@ class StockitController < ApplicationController
   end
 
   def update
-    @stock_article = StockArticle.find(params[:id])
     article_version_attributes = params[:article_version]
     @stock_article.update_attributes!(supplier_id: @supplier_id, latest_article_version_attributes: article_version_attributes)
     render :layout => false
@@ -78,13 +71,10 @@ class StockitController < ApplicationController
   end
 
   def show_on_stock_article_update # See publish/subscribe design pattern in /doc.
-    @stock_article = StockArticle.find(params[:id])
-
     render :layout => false
   end
 
   def destroy
-    @stock_article = StockArticle.find(params[:id])
     @stock_article.mark_as_deleted
     render :layout => false
   rescue => error
@@ -100,8 +90,14 @@ class StockitController < ApplicationController
 
   private
 
+  def load_article
+    @stock_article = StockArticle.find(params[:id])
+  end
+
   def load_article_units
-    @article_units = ArticleUnit.as_options
+    additional_units = @stock_article&.current_article_units || []
+    @article_units = ArticleUnit.as_options(additional_units: additional_units)
+    @all_units = ArticleUnit.as_hash(additional_units: additional_units)
   end
 
   def new_empty_article_ratio

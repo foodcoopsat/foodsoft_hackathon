@@ -1,11 +1,12 @@
 :javascript
-  const units = #{raw(ArticleUnit.as_hash.to_json)};
+  const units = #{raw(@all_units.to_json)};
 - price_markup = FoodsoftConfig[:price_markup].to_f
 %table.table
   %thead
     %tr
       %th= heading_helper Article, :availability, short: true
       %th= heading_helper Article, :name
+      %th= heading_helper Article, :original_unit unless @original_units.nil?
       %th= heading_helper Article, :unit
       %th= heading_helper Article, :price, short: true
       %th= heading_helper Article, :order_number, short: true
@@ -30,6 +31,8 @@
             = yield form # allow to add hidden fields to form
             = form.check_box 'availability'
           %td= form.text_field 'name', class: 'input-medium'
+          - unless @original_units.nil?
+            %td= "\"#{@original_units[article.id]}\""
           %td
             .d-flex.gap-1.align-items-center
               = form.hidden_field :unit, id: 'article_unit_hidden', value: ''
@@ -49,7 +52,7 @@
                     %tfoot
                       %tr
                         %td{:colspan => 6}
-                          = link_to t('.add_ratio'), '#', 'data-add-ratio' => true, class: 'btn', title: "add ratio"
+                          = link_to t('.add_ratio'), '#', 'data-add-ratio' => true, class: 'btn', title: t(".add_ratio")
               .fold-line
                 = form.input :minimum_order_quantity, label: "Mininum order quantity" do
                   .input-append

@@ -231,6 +231,13 @@ class Article < ApplicationRecord
     update_column :deleted_at, Time.now
   end
 
+  def current_article_units
+    [supplier_order_unit, group_order_unit, billing_unit, price_unit, article_unit_ratios.map(&:unit)]
+      .flatten
+      .uniq
+      .compact
+  end
+
   protected
 
   # Checks if the article is in use before it will deleted

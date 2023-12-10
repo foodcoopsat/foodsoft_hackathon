@@ -29,8 +29,10 @@ class ArticleUnitsLib
   end
 
   def self.units
+    return @units unless @units.nil?
+
     units = self.untranslated_units
-    units.to_h do |code, unit|
+    @units = units.to_h do |code, unit|
       translated_name = ArticleUnitsLib.get_translated_name_for_code(code, default_nil: true)
       unit = unit.clone
       unit[:name] = translated_name || unit[:name]
@@ -39,6 +41,10 @@ class ArticleUnitsLib
 
       [code, unit]
     end
+  end
+
+  def self.unit_is_si_convertible(code)
+    !units.to_h[code]&.dig(:conversionFactor).nil?
   end
 
   def self.get_translated_name_for_code(code, default_nil: false)

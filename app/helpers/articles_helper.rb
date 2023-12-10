@@ -22,8 +22,23 @@ module ArticlesHelper
   end
 
   def format_group_order_unit(article)
-    return ArticleUnit.as_hash[article.group_order_unit][:name] unless article.group_order_unit.nil?
+    return article.unit if article.group_order_unit.nil?
 
-    article.unit
+    unit = ArticleUnitsLib.units.to_h[article.group_order_unit]
+    unit[:symbol] || unit[:name]
+  end
+
+  def format_group_order_unit_with_ratios(article)
+    base = format_group_order_unit(article)
+    return base if ArticleUnitsLib.unit_is_si_convertible(article.group_order_unit)
+
+    first_si_convertible_unit = [article.article_unit_ratios.map(&:unit), article.supplier_order_unit]
+                                .flatten
+                                .find { |unit| ArticleUnitsLib.unit_is_si_convertible(unit) }
+
+    return base if first_si_convertible_unit.nil?
+
+    quantity = article.convert_quantity(1, article.group_order_unit, first_si_convertible_unit)
+    "#{base} (#{format('%g', format('%.2f', quantity))}#{ArticleUnitsLib.units.to_h[first_si_convertible_unit][:symbol]})"
   end
 end

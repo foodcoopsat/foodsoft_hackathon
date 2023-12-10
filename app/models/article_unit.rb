@@ -11,12 +11,13 @@ class ArticleUnit < ApplicationRecord
     @all_cached = nil
   end
 
-  def self.as_hash
+  def self.as_hash(config = nil)
+    additional_units = config&.dig(:additional_units) || []
     available_units = all_cached.map(&:unit)
-    ArticleUnitsLib.units.to_h { |code, unit| [code, unit.merge({ visible: available_units.include?(code) })] }
+    ArticleUnitsLib.units.to_h { |code, unit| [code, unit.merge({ visible: available_units.include?(code) || additional_units.include?(code) })] }
   end
 
-  def self.as_options(config)
+  def self.as_options(config = nil)
     additional_units = config&.dig(:additional_units) || []
     options = {}
 

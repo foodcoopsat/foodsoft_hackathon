@@ -2,8 +2,8 @@ class ArticlesController < ApplicationController
   before_action :authenticate_article_meta, :find_supplier
 
   before_action :load_article, only: [:edit, :update]
-  before_action :load_article_units, only: [:edit, :update, :new, :create, :parse_upload, :sync, :update_synchronized, :edit_all, :migrate_units]
-  before_action :new_empty_article_ratio, only: [:edit, :update, :new, :create, :parse_upload, :sync, :update_synchronized]
+  before_action :load_article_units, only: [:edit, :update, :new, :create, :parse_upload, :sync, :update_synchronized]
+  before_action :new_empty_article_ratio, only: [:edit, :edit_all, :migrate_units, :update, :new, :create, :parse_upload, :sync, :update_synchronized]
 
   def index
     if params['sort']
@@ -92,14 +92,19 @@ class ArticlesController < ApplicationController
   # Renders a form for editing all articles from a supplier
   def edit_all
     @articles = @supplier.articles.undeleted
+
+    load_article_units
   end
 
   def migrate_units
     @articles = @supplier.articles.undeleted
-    @articles.each_with_index do |article, _index|
+    @original_units = {}
+    @articles.each do |article|
       article_version = article.latest_article_version
       quantity = 1
       ratios = article_version.article_unit_ratios
+
+      @original_units[article.id] = article_version.unit
 
       next if ratios.length > 1
 
@@ -123,6 +128,8 @@ class ArticlesController < ApplicationController
         article_version.article_unit_ratios = [article_version.article_unit_ratios.build(first_ratio.merge(sort: 1))]
       end
     end
+
+    load_article_units
 
     render :edit_all
   end
@@ -281,13 +288,18 @@ class ArticlesController < ApplicationController
   end
 
   def load_article_units
-    @article_units = ArticleUnit.as_options(additional_units: current_article_units)
-  end
+    additional_units = if !@article.nil?
+                         @article.current_article_units
+                       elsif !@articles.nil?
+                         @articles.map(&:current_article_units)
+                                  .flatten
+                                  .uniq
+                       else
+                         []
+                       end
 
-  def current_article_units
-    return [] if @article.nil?
-
-    [@article.supplier_order_unit, @article.group_order_unit, @article.billing_unit, @article.price_unit].compact
+    @article_units = ArticleUnit.as_options(additional_units: additional_units)
+    @all_units = ArticleUnit.as_hash(additional_units: additional_units)
   end
 
   def new_empty_article_ratio
