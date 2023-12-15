@@ -39,6 +39,6 @@ module ArticlesHelper
     return base if first_si_convertible_unit.nil?
 
     quantity = article.convert_quantity(1, article.group_order_unit, first_si_convertible_unit)
-    "#{base} (#{format('%g', format('%.2f', quantity))}#{ArticleUnitsLib.units.to_h[first_si_convertible_unit][:symbol]})"
+    "#{base} (#{format_number(quantity)}#{ArticleUnitsLib.units.to_h[first_si_convertible_unit][:symbol]})"
   end
 end

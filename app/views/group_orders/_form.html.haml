@@ -85,7 +85,7 @@
           %th{style: 'width:120px'}= heading_helper StockArticle, :supplier
         %th{style: "width:13px;"}
         %th{style: "width:4.5em;"}= t '.price'
-        %th{style: "width:4.5em;"}= heading_helper Article, :group_order_unit
+        %th{style: "width:4.5em;"}= heading_helper Article, :unit
         - unless @order.stockit?
           %th{style: "width:70px;"}= heading_helper OrderArticle, :missing_units, short: true
           %th#col_required= heading_helper GroupOrderArticle, :quantity
@@ -123,9 +123,9 @@
             - quantity_data['price'] = @ordering_data[:order_articles][order_article.id][:price]
             - quantity_data['minimum_order_quantity'] = @ordering_data[:order_articles][order_article.id][:minimum_order_quantity] unless @ordering_data[:order_articles][order_article.id][:minimum_order_quantity].nil?
             %td.quantity.group-order-input
-              %span.used= @ordering_data[:order_articles][order_article.id][:used_quantity]
+              %span.used= format_number(@ordering_data[:order_articles][order_article.id][:used_quantity])
               +
-              %span.unused= @ordering_data[:order_articles][order_article.id][:quantity] - @ordering_data[:order_articles][order_article.id][:used_quantity]
+              %span.unused= format_number(@ordering_data[:order_articles][order_article.id][:quantity] - @ordering_data[:order_articles][order_article.id][:used_quantity])
               .btn-group
                 %a.btn.btn-ordering.increase
                   %i.icon-plus
@@ -135,9 +135,9 @@
 
             %td.tolerance.group-order-input{style: ('display:none' if @order.stockit?)}
               - if (@ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit] != order_article.article_version.group_order_granularity || (order_article.article_version.minimum_order_quantity.presence || 0) > order_article.article_version.group_order_granularity)
-                %span.used= @ordering_data[:order_articles][order_article.id][:used_tolerance]
+                %span.used= format_number(@ordering_data[:order_articles][order_article.id][:used_tolerance])
                 +
-                %span.unused= @ordering_data[:order_articles][order_article.id][:tolerance] - @ordering_data[:order_articles][order_article.id][:used_tolerance]
+                %span.unused= format_number(@ordering_data[:order_articles][order_article.id][:tolerance] - @ordering_data[:order_articles][order_article.id][:used_tolerance])
                 .btn-group
                   %a.btn.btn-ordering.increase
                     %i.icon-plus
