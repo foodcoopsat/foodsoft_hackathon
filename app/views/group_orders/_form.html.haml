@@ -134,7 +134,7 @@
                   %i.icon-minus
 
             %td.tolerance.group-order-input{style: ('display:none' if @order.stockit?)}
-              - if (@ordering_data[:order_articles][order_article.id][:ratio_group_order_unit_supplier_unit] != order_article.article_version.group_order_granularity || (order_article.article_version.minimum_order_quantity.presence || 0) > order_article.article_version.group_order_granularity)
+              - if (requires_tolerance_input?(order_article, @ordering_data))
                 %span.used= format_number(@ordering_data[:order_articles][order_article.id][:used_tolerance])
                 +
                 %span.unused= format_number(@ordering_data[:order_articles][order_article.id][:tolerance] - @ordering_data[:order_articles][order_article.id][:used_tolerance])

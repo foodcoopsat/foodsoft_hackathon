@@ -342,7 +342,7 @@ ActiveRecord::Schema.define(version: 2023_12_10_181807) do
     t.integer "order_id", default: 0, null: false
     t.decimal "quantity", precision: 8, scale: 3, default: "0.0", null: false
     t.decimal "tolerance", precision: 8, scale: 3, default: "0.0", null: false
-    t.integer "units_to_order", default: 0, null: false
+    t.decimal "units_to_order", precision: 8, scale: 3, default: "0.0", null: false
     t.integer "lock_version", default: 0, null: false
     t.integer "article_version_id", null: false
     t.decimal "units_billed", precision: 8, scale: 3

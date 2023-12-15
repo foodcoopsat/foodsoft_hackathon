@@ -86,6 +86,10 @@ class OrderArticle < ApplicationRecord
       return price.minimum_order_quantity
     end
 
+    if price.supplier_order_unit_is_si_convertible
+      return quantity
+    end
+
     unit_size = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
     units = (quantity / unit_size).floor
     remainder = quantity % unit_size
@@ -258,7 +262,10 @@ class OrderArticle < ApplicationRecord
   end
 
   def _missing_units(unit_ratio, quantity, tolerance)
+    return 0 if article_version.supplier_order_unit_is_si_convertible
+
     units = unit_ratio - ((quantity % unit_ratio) + tolerance)
+
     units = 0 if units < 0
     units = 0 if units == unit_ratio
     units

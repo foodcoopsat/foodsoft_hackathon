@@ -49,6 +49,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
     change_table :order_articles do |t|
       t.change :quantity, :decimal, precision: 8, scale: 3, null: false
       t.change :tolerance, :decimal, precision: 8, scale: 3, null: false
+      t.change :units_to_order, :decimal, precision: 8, scale: 3, null: false
     end
 
     change_table :group_order_articles do |t|
@@ -88,6 +89,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
     change_table :order_articles do |t|
       t.change :quantity, :integer, null: false
       t.change :tolerance, :integer, null: false
+      t.change :units_to_order, :integer, null: false
     end
 
     change_table :group_order_articles do |t|
