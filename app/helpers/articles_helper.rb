@@ -28,6 +28,18 @@ module ArticlesHelper
     unit[:symbol] || unit[:name]
   end
 
+  def format_supplier_order_unit_with_ratios(article)
+    base = format_supplier_article_unit(article)
+    return base if ArticleUnitsLib.unit_is_si_convertible(article.supplier_order_unit)
+
+    first_si_convertible_unit = article.article_unit_ratios.map(&:unit)
+                                       .find { |unit| ArticleUnitsLib.unit_is_si_convertible(unit) }
+    return base if first_si_convertible_unit.nil?
+
+    quantity = article.convert_quantity(1, article.supplier_order_unit, first_si_convertible_unit)
+    "#{base} (#{format_number(quantity)}#{ArticleUnitsLib.units.to_h[first_si_convertible_unit][:symbol]})"
+  end
+
   def format_group_order_unit_with_ratios(article)
     base = format_group_order_unit(article)
     return base if ArticleUnitsLib.unit_is_si_convertible(article.group_order_unit)
