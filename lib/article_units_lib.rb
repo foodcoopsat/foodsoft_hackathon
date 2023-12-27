@@ -75,6 +75,9 @@ class ArticleUnitsLib
   def self.convert_old_unit(old_compound_unit_str, unit_quantity)
     return nil if old_compound_unit_str.nil?
 
+    md = old_compound_unit_str.match(/([0-9]*)x(.*)/)
+    old_compound_unit_str = md[2] if !md.nil? && md[1].to_f == unit_quantity
+
     md = old_compound_unit_str.match(%r{^\s*([0-9][0-9,./]*)?\s*([A-Za-z\u00C0-\u017F.]+)\s*$})
     return nil if md.nil?
 
