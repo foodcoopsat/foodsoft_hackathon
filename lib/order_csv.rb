@@ -1,6 +1,9 @@
 require 'csv'
 
 class OrderCsv < RenderCSV
+  include ApplicationHelper
+  include ArticlesHelper
+
   def header
     [
       OrderArticle.human_attribute_name(:units_to_order),
@@ -19,9 +22,10 @@ class OrderCsv < RenderCSV
         oa.units_to_order,
         oa.article_version.order_number,
         oa.article_version.name,
-        oa.article_version.unit,
-        oa.article_version.unit_quantity > 1 ? oa.article_version.unit_quantity : nil,
-        number_to_currency(oa.article_version.price * oa.article_version.unit_quantity),
+        format_supplier_order_unit_with_ratios(oa.article_version),
+        # TODO-article-units: Why should we show the supplier the group order unit quantity?:
+        oa.article_version.convert_quantity(1, oa.article_version.supplier_order_unit, oa.article_version.group_order_unit),
+        number_to_currency(oa.article_version.price),
         number_to_currency(oa.total_price)
       ]
     end

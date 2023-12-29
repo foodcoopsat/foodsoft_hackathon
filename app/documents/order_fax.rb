@@ -82,7 +82,7 @@ class OrderFax < OrderPdf
                oa.article_version.name,
                # TODO-article-units: Why should we show the supplier the group order unit quantity?:
                oa.article_version.convert_quantity(1, oa.article_version.supplier_order_unit, oa.article_version.group_order_unit),
-               format_supplier_article_unit(oa.price),
+               format_supplier_order_unit_with_ratios(oa.price),
                number_to_currency(price),
                number_to_currency(subtotal)]
     end

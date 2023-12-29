@@ -1,4 +1,5 @@
 class OrderPdf < RenderPDF
+  include ArticlesHelper
   attr_reader :order
 
   def initialize(order, options = {})
@@ -47,11 +48,11 @@ class OrderPdf < RenderPDF
   # @return [Number] Price to show
   # @see https://github.com/foodcoops/foodsoft/issues/445
   def order_article_price(order_article)
-    order_article.article_version.fc_price
+    order_article.article_version.fc_group_order_price
   end
 
   def order_article_price_per_unit(order_article)
-    "#{number_to_currency(order_article_price(order_article))} / #{order_article.article_version.unit}"
+    "#{number_to_currency(order_article_price(order_article))} / #{format_group_order_unit_with_ratios(order_article.article_version)}"
   end
 
   def group_order_article_quantity_with_tolerance(goa)
