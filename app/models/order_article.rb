@@ -126,7 +126,10 @@ class OrderArticle < ApplicationRecord
     end
 
     # Recompute
-    group_order_articles.each { |goa| goa.save_results! qty_for_members }
+    group_order_articles.each do |goa|
+      group_order_total = article_version.convert_quantity(qty_for_members, article_version.supplier_order_unit, article_version.group_order_unit)
+      goa.save_results!(group_order_total)
+    end
     qty_left -= qty_for_members
 
     # if there's anything left, move to stock if wanted

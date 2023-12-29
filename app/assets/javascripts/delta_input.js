@@ -19,7 +19,8 @@ function data_delta_update(el, direction) {
   var delta = $(el).data('delta');
   var granularity = $(el).data('granularity');
 
-  var val = $(el).val();
+  var val = $(el).val().replace(',', '.');
+  const valueContainedColon = $(el).val() != val;
   var oldval = $.isNumeric(val) ? Number(val) : 0;
   var newval = oldval + delta*direction;
 
@@ -31,11 +32,16 @@ function data_delta_update(el, direction) {
   $('button[data-increment='+id+']').attr('disabled', newval>=max ? 'disabled' : null);
 
   // warn when what was entered is not a number
-  $(el).toggleClass('error', val!='' && val!='.' && (!$.isNumeric(val) || val < 0));
+  const erroneousValue = val!='' && val!='.' && (!$.isNumeric(val) || val < 0)
+  $(el).toggleClass('error', erroneousValue);
 
   // update field, unless the user is typing
-  if (!$(el).is(':focus')) {
-    $(el).val(round_float(newval, granularity));
+  if (!$(el).is(':focus') && !erroneousValue) {
+    let roundedValue = String(round_float(newval, granularity));
+    if (valueContainedColon) {
+      roundedValue = roundedValue.replace('.', ',');
+    }
+    $(el).val(roundedValue);
     $(el).trigger('changed');
   }
 }

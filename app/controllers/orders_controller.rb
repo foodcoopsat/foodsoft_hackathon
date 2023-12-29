@@ -70,6 +70,12 @@ class OrdersController < ApplicationController
     redirect_to orders_url, alert: t('errors.general_msg', msg: error.message)
   end
 
+  # Page to edit an exsiting order.
+  # editing finished orders is done in FinanceController
+  def edit
+    @order = Order.includes(:articles).find(params[:id])
+  end
+
   # Save a new order.
   # order_articles will be saved in Order.article_ids=()
   def create
@@ -83,12 +89,6 @@ class OrdersController < ApplicationController
       logger.debug "[debug] order errors: #{@order.errors.messages}"
       render :action => 'new'
     end
-  end
-
-  # Page to edit an exsiting order.
-  # editing finished orders is done in FinanceController
-  def edit
-    @order = Order.includes(:articles).find(params[:id])
   end
 
   # Update an existing order.

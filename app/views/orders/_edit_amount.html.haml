@@ -8,9 +8,9 @@
     - order_title.append Article.human_attribute_name(:note)+': ' + order_article.article_version.note unless order_article.article_version.note.to_s.empty?
     %td= order_article.article_version.order_number
     %td.name{title: order_title.join("\n")}= order_article.article_version.name
-    %td.unit= format_supplier_article_unit(order_article.article_version)
+    %td.unit= format_group_order_unit_with_ratios(order_article.article_version)
     %td.article_version
-      = number_to_currency order_article.article_version.price
+      = number_to_currency order_article.article_version.group_order_price
       = article_version_change_hint(order_article)
     %td #{order_article.quantity} + #{order_article.tolerance}
     %td

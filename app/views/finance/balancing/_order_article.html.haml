@@ -6,7 +6,7 @@
   = pkg_helper(order_article.article_version, unit: order_article.article_version.billing_unit)
   - if s=ordered_quantities_different_from_group_orders?(order_article)
     %span{:style => "color:red;font-weight: bold"}= s
-%td #{order_article.article_version.unit}
+%td #{format_group_order_unit_with_ratios(order_article.article_version)}
 %td
   = number_to_currency(order_article.article_version.price, :unit => "")
   :plain

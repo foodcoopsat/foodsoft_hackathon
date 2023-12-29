@@ -34,10 +34,12 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       update(%{
         UPDATE article_versions
         SET unit = #{quote compound_unit},
+          supplier_order_unit = #{quote 'XPP'},
           group_order_granularity = #{quote 1},
           group_order_unit = #{quote 'XPP'},
           price = #{quote article_version['price'].to_f * article_version['unit_quantity']},
-          price_unit = #{quote 'XPP'}
+          price_unit = #{quote 'XPP'},
+          billing_unit = #{quote 'XPP'}
         WHERE article_versions.id = #{quote article_version['id']}
       })
     end
