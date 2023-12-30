@@ -3,6 +3,7 @@ class ArticlesController < ApplicationController
 
   before_action :load_article, only: [:edit, :update]
   before_action :load_article_units, only: [:edit, :update, :new, :create, :parse_upload, :sync, :update_synchronized]
+  before_action :load_article_categories, only: [:edit_all, :migrate_units, :update_all]
   before_action :new_empty_article_ratio, only: [:edit, :edit_all, :migrate_units, :update, :new, :create, :parse_upload, :sync, :update_synchronized]
 
   def index
@@ -97,7 +98,7 @@ class ArticlesController < ApplicationController
   end
 
   def migrate_units
-    @articles = @supplier.articles.undeleted
+    @articles = @supplier.articles.with_latest_versions_and_categories.undeleted.includes(latest_article_version: [:article_unit_ratios])
     @original_units = {}
     @articles.each do |article|
       article_version = article.latest_article_version
@@ -302,6 +303,10 @@ class ArticlesController < ApplicationController
 
     @article_units = ArticleUnit.as_options(additional_units: additional_units)
     @all_units = ArticleUnit.as_hash(additional_units: additional_units)
+  end
+
+  def load_article_categories
+    @article_categories = ArticleCategory.all
   end
 
   def new_empty_article_ratio

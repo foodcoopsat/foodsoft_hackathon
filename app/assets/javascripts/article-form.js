@@ -7,7 +7,7 @@ class ArticleForm {
       this.unitFieldsNamePrefix = unitFieldsNamePrefix === undefined ? this.unitFieldsIdPrefix : unitFieldsNamePrefix;
       this.articleUnitRatioTemplate$ = articleUnitRatioTemplate$;
       this.articleForm$ = articleForm$;
-      this.unitConversionPopoverTemplate$ = this.articleForm$.find('#unit_conversion_popover_content_template');
+      this.unitConversionPopoverTemplate$ = $('#unit_conversion_popover_content_template');
       this.unit$ = $(`#${this.unitFieldsIdPrefix}_unit`, this.articleForm$);
       this.supplierUnitSelect$ = $(`#${this.unitFieldsIdPrefix}_supplier_order_unit`, this.articleForm$);
       this.unitRatiosTable$ = $('#fc_base_price', this.articleForm$);

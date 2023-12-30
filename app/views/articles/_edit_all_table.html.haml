@@ -1,12 +1,19 @@
-:javascript
-  const units = #{raw(@all_units.to_json)};
+- content_for :javascript do
+  :javascript
+    const units = #{raw(@all_units.to_json)};
+- content_for :javascript do
+  = simple_fields_for "articles[TEMPLATEREPLACEMARKER]" do |form|
+    :javascript
+      const ratioTemplateHtml = "#{escape_javascript(render(partial: 'shared/article_unit_ratio', locals: {article_unit_ratio: @empty_article_unit_ratio, f: form, article_unit_ratio_counter: -1}))}";
 - price_markup = FoodsoftConfig[:price_markup].to_f
+= render 'shared/js_templates/unit_conversion_popover_template'
 %table.table
   %thead
     %tr
       %th= heading_helper Article, :availability, short: true
       %th= heading_helper Article, :name
-      %th= heading_helper Article, :original_unit unless @original_units.nil?
+      - unless @original_units.nil?
+        %th= heading_helper Article, :original_unit
       %th= heading_helper Article, :unit
       %th= heading_helper Article, :price, short: true
       %th= heading_helper Article, :order_number, short: true
@@ -17,16 +24,7 @@
   %tbody
     - @articles.each_with_index do |article, index|
       %tr{:id => "article_row_#{article.id}"}
-        = render 'shared/js_templates/unit_conversion_popover_template'
         = simple_fields_for "articles[#{article.id}]", article.latest_article_version do |form|
-          - content_for :javascript do
-            :javascript
-              articleUnitRatioTemplate$ = $($.parseHTML("#{escape_javascript(render(partial: 'shared/article_unit_ratio', locals: {article_unit_ratio: @empty_article_unit_ratio, f: form, article_unit_ratio_counter: -1}))}"));
-              new ArticleForm(articleUnitRatioTemplate$, $('#article_row_#{article.id}'), units, #{price_markup}, $('#article_row_#{article.id}').closest('form'), 'articles_#{article.id}', 'articles[#{article.id}]');
-          - if index + 1 === @articles.length
-            - content_for :javascript do
-              :javascript
-                $('input[name="commit"]').removeAttr('disabled');
           %td
             = yield form # allow to add hidden fields to form
             = form.check_box 'availability'
@@ -68,12 +66,12 @@
               .input-prepend
                 %span.add-on= t 'number.currency.format.unit'
                 = form.text_field 'price', class: 'input-mini', style: 'width: 45px'
-              .input.d-flex.gap-1
+              .input.d-flex.gap-1.control-group
                 %label=t('articles.form.per')
                 = form.select :price_unit, [], {include_blank: false}, {class: 'input-medium'}
           %td= form.text_field 'order_number', class: 'input-mini'
           %td= form.text_field 'note', class: 'input-medium'
-          %td= form.collection_select 'article_category_id', ArticleCategory.all,
+          %td= form.collection_select 'article_category_id', @article_categories,
             :id, :name, { :include_blank => true }, class: 'input-small'
           %td.input-append
             = form.text_field 'tax', class: 'input-mini'
@@ -82,3 +80,11 @@
         - unless article.errors.empty?
           %tr.alert
             %td(colspan="10")= article.errors.full_messages.join(", ")
+- content_for :javascript do
+  - @articles.each_with_index do |article, index|
+    :javascript
+      articleUnitRatioTemplate$ = $($.parseHTML(ratioTemplateHtml.replace(/TEMPLATEREPLACEMARKER/g, '#{article.id}')));
+      new ArticleForm(articleUnitRatioTemplate$, $('#article_row_#{article.id}'), units, #{price_markup}, $('#article_row_#{article.id}').closest('form'), 'articles_#{article.id}', 'articles[#{article.id}]');
+    - if index + 1 === @articles.length
+      :javascript
+        $('input[name="commit"]').removeAttr('disabled');
