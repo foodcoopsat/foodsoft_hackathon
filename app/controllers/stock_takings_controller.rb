@@ -7,7 +7,7 @@ class StockTakingsController < ApplicationController
 
   def new
     @stock_taking = StockTaking.new
-    StockArticle.undeleted.each { |a| @stock_taking.stock_changes.build(:stock_article => a) }
+    StockArticle.with_latest_versions_and_categories.undeleted.each { |a| @stock_taking.stock_changes.build(:stock_article => a) }
   end
 
   def new_on_stock_article_create # See publish/subscribe design pattern in /doc.
