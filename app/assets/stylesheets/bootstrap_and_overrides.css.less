@@ -44,6 +44,7 @@ body {
 @articleUnusedColor: red;
 @articleUnavailColor: #999;
 @articleUpdatedColor: #468847;
+@articleCustomUnitWarning: #ff8c00;
 
 // article units:
 @unitUntranslatedColor: #999;
@@ -338,6 +339,12 @@ td.symbol, th.symbol {
 .unused      .symbol { color: tint(@articleUnusedColor, @nonessentialDim); }
 .partused    .symbol { color: tint(@articlePartusedColor, @nonessentialDim); }
 .unavailable .symbol { color: @articleUnavailColor; }
+
+.article-form .icon-warning-sign {
+  margin-top: 8px;
+  margin-left: 10px;
+  color: @articleCustomUnitWarning;
+}
 
 // hide symbols completely on small screens to save space
 @media (max-width: 768px) {

@@ -44,7 +44,7 @@
           %td{:style => highlight_new(attrs, :origin)}= form.text_field 'origin', class: 'input-mini'
           %td{:style => highlight_new(attrs, :supplier_order_unit)}
             .d-flex.gap-1.align-items-center
-              = form.input :supplier_order_unit, as: :select, collection: @article_units, label: false, value: changed_article.supplier_order_unit, include_blank: t('Custom (avoid if possible!)') + ':', input_html: {class: 'input-medium'}
+              = form.input :supplier_order_unit, as: :select, collection: @article_units, label: false, value: changed_article.supplier_order_unit, include_blank: t('custom_unit'), input_html: {class: 'input-medium'}
               = form.input :unit, input_html: {class: 'input-mini ml-1'}, label: false
               %div.btn-link.toggle-extra-units.text-decoration-none.default-values
                 %i.icon-cog{:style => highlight_new(attrs, [:article_unit_ratio_attributes, :minimum_order_quantity, :billing_unit, :group_order_unit, :group_order_granularity])}

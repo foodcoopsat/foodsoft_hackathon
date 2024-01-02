@@ -9,6 +9,7 @@ class ArticleForm {
       this.articleForm$ = articleForm$;
       this.unitConversionPopoverTemplate$ = $('#unit_conversion_popover_content_template');
       this.unit$ = $(`#${this.unitFieldsIdPrefix}_unit`, this.articleForm$);
+      this.customUnitWarning$ = $('.icon-warning-sign', this.articleForm$);
       this.supplierUnitSelect$ = $(`#${this.unitFieldsIdPrefix}_supplier_order_unit`, this.articleForm$);
       this.unitRatiosTable$ = $('#fc_base_price', this.articleForm$);
       this.minimumOrderQuantity$ = $(`#${this.unitFieldsIdPrefix}_minimum_order_quantity`, this.articleForm$);
@@ -175,7 +176,7 @@ class ArticleForm {
   loadAvailableUnits() {
     this.availableUnits = Object.entries(this.units)
       .filter(([, unit]) => unit.visible)
-      .map(([code, unit]) => ({ key: code, label: unit.name, baseUnit: unit.baseUnit }));
+      .map(([code, unit]) => ({ key: code, label: unit.name, baseUnit: unit.baseUnit, symbol: unit.symbol }));
 
     $(`#${this.unitFieldsIdPrefix}_supplier_order_unit`, this.articleForm$).select2(this.select2Config);
   }
@@ -185,14 +186,32 @@ class ArticleForm {
       this.setMinimumOrderUnitDisplay();
       this.updateAvailableBillingAndGroupOrderUnits();
       this.updateUnitMultiplierLabels();
+      this.updateCustomUnitWarning();
     });
+    this.updateCustomUnitWarning();
     this.unit$.keyup(() => this.unit$.trigger('change'));
 
 
     this.supplierUnitSelect$.change(() => {
       this.onSupplierUnitChanged();
+      this.updateCustomUnitWarning();
     });
     this.onSupplierUnitChanged();
+  }
+
+  updateCustomUnitWarning() {
+    const supplierUnitValueChosen = this.supplierUnitSelect$.val() !== undefined && this.supplierUnitSelect$.val().trim() !== '';
+    if (supplierUnitValueChosen) {
+      this.customUnitWarning$.hide();
+      return;
+    }
+
+    const unitVal = this.unit$.val().trim().toLowerCase();
+    if (unitVal !== '' && (unitVal.match(/[0-9]/) || this.availableUnits.some((unit) => (unit.symbol != null && unit.symbol.toLowerCase() === unitVal) || unit.label.toLowerCase() === unitVal))) {
+      this.customUnitWarning$.show();
+    } else {
+      this.customUnitWarning$.hide();
+    }
   }
 
   onSupplierUnitChanged() {
