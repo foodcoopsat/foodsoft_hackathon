@@ -164,7 +164,7 @@ class ArticleUnitsLib
     name = translation_data&.dig('name')&.downcase
     return true if !name.nil? && name == unit_str
 
-    aliases = translation_data&.dig('aliases')&.map(&:strip)
+    aliases = translation_data&.dig('aliases')&.map(&:strip)&.map(&:downcase)
     !aliases.nil? && aliases.any? { |a| a == unit_str || "#{a}." == unit_str }
   end
 end

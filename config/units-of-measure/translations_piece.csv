@@ -20,7 +20,7 @@ XBO,"Bottle, non-protected, cylindrical ",Bottle,btl.,btl,Flasche,Fl.,fl,A narro
 XBQ,"Bottle, protected cylindrical",Protected bottle,btl.,,Flasche in Umverpackung,Fl.,,A narrow-necked cylindrical shaped vessel with external protective packing material.
 XFB,Flexibag,Flexibag,,,Flexibag,,,"A flexible containment bag made of plastic, typically for the transportation bulk non-hazardous cargoes using standard size shipping containers."
 XFT,Foodtainer,Foodtainer,,,Foodtainer,,,
-XJR,Jar,Jar,,gl,Glas,Gl.,gl,
+XJR,Jar,Jar,,,Glas,Gl.,gl,
 XGR,"Receptacle, glass ",Glass receptacle,,,Glasgefäß,,,Containment vessel made of glass for retaining substances or articles.
 XOW,"Large bag, pallet sized",Pallet sized large bag,,,Großer Sack in Palettengröße,,,"A non-rigid container made of fabric, paper, plastic, etc, with an opening at the top which can be closed and which is suitable for use on pallets"
 X8B,"Crate, wooden",Wooden crate,,,Holzkiste,,,"A receptacle, made of wood, on which goods are retained for ease of mechanical handling during transport and storage."

@@ -47,13 +47,13 @@ describe ArticleUnitsLib do
                          })
   end
 
-  it 'converts "glass" correctly' do
-    result = described_class.convert_old_unit('glass', 1)
+  it 'converts "jar" correctly' do
+    result = described_class.convert_old_unit('jar', 1)
     expect(result).to eq({
-                           supplier_order_unit: 'XGR',
+                           supplier_order_unit: 'XJR',
                            first_ratio: nil,
                            group_order_granularity: 1.0,
-                           group_order_unit: 'XGR'
+                           group_order_unit: 'XJR'
                          })
   end
 
@@ -116,16 +116,16 @@ describe ArticleUnitsLib do
                          })
   end
 
-  it 'converts "6 x glass" correctly' do
-    result = described_class.convert_old_unit('glass', 6)
+  it 'converts "6 x jar" correctly' do
+    result = described_class.convert_old_unit('jar', 6)
     expect(result).to eq({
                            supplier_order_unit: 'XPK',
                            first_ratio: {
-                             unit: 'XGR',
+                             unit: 'XJR',
                              quantity: 6
                            },
                            group_order_granularity: 1,
-                           group_order_unit: 'XGR'
+                           group_order_unit: 'XJR'
                          })
   end
 

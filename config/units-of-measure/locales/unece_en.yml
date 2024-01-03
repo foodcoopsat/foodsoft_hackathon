@@ -51,8 +51,6 @@ unece_units:
     name: Foodtainer
   XJR:
     name: Jar
-    aliases:
-    - gl
   XGR:
     name: Glass receptacle
   XOW:
