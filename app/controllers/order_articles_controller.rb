@@ -69,7 +69,7 @@ class OrderArticlesController < ApplicationController
   end
 
   def load_article_units
-    additional_units = @order_article&.article&.current_article_units || []
+    additional_units = @order_article&.article_version&.article&.current_article_units || []
     @article_units = ArticleUnit.as_options(additional_units: additional_units)
     @all_units = ArticleUnit.as_hash(additional_units: additional_units)
   end
