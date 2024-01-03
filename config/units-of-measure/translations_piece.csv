@@ -1,67 +1,69 @@
-Common code,Original name,English suggestion,Engl. abbr.,German suggestion,German abbr.,Description
-XCU,Cup,Cup,,Becher,,
-XCN,"Container, not otherwise specified as transport equipment",Container,,Behälter,,
-XSH,Sachet ,Sachet ,,Beutel,,
-X43,"Bag, super bulk",Big bag,,Bigbag,,A cloth plastic or paper based bag having the dimensions of the pallet on which it is constructed.
-XST,Sheet,Sheet,,Blatt,Bl.,
-XOK,Block,Block,,Block,,"A solid piece of a hard substance, such as granite, having one or more flat sides."
-XVA,Vat,Vat,,Bottich,,
-XBX,Box,Box,,Box,,
-XBH,Bunch,Bunch,,Bund,Bd.,
-XBE,Bundle ,Bundle ,bdl.,Bündel ,Bdl.,
-XCX,"Can, cylindrical ",Can,,Dose,,
-XBJ,Bucket ,Bucket ,,Eimer ,,
-XUN,Unit,Unit,,Einheit,,"A type of package composed of a single item or object, not otherwise specified as a unit of transport equipment."
-XOS,Oneway pallet,Oneway pallet,,Einweg-Palette,,Pallet need not be returned to the point of expedition
-XDH,"Box, Commonwealth Handling Equipment Pool (CHEP), Eurobox","Eurobox, CHEP box",box,"Eurobox, CHEP-Box",Box,A box mounted on a pallet base under the control of CHEP.
-XBA,Barrel ,Barrel ,,Fass,,
-XFI,Firkin ,Firkin ,,Fässchen ,,
-XBO,"Bottle, non-protected, cylindrical ",Bottle,btl.,Flasche,Fl.,A narrow-necked cylindrical shaped vessel without external protective packing material.
-XBQ,"Bottle, protected cylindrical",Protected bottle,btl.,Flasche in Umverpackung,Fl.,A narrow-necked cylindrical shaped vessel with external protective packing material.
-XFB,Flexibag,Flexibag,,Flexibag,,"A flexible containment bag made of plastic, typically for the transportation bulk non-hazardous cargoes using standard size shipping containers."
-XFT,Foodtainer,Foodtainer,,Foodtainer,,
-XJR,Jar,Jar,,Glas,Gl.,
-XGR,"Receptacle, glass ",Glass receptacle,,Glasgefäß,,Containment vessel made of glass for retaining substances or articles.
-XOW,"Large bag, pallet sized",Pallet sized large bag,,Großer Sack in Palettengröße,,"A non-rigid container made of fabric, paper, plastic, etc, with an opening at the top which can be closed and which is suitable for use on pallets"
-X8B,"Crate, wooden",Wooden crate,,Holzkiste,,"A receptacle, made of wood, on which goods are retained for ease of mechanical handling during transport and storage."
-XCV,Cover,Cover,,Hülle,,
-XWA,Intermediate bulk container,Intermediate bulk container (IBC),IBC,Intermediate Bulk Container (IBC),IBC,"A reusable container made of metal, plastic, textile, wood or composite materials used to facilitate transportation of bulk solids and liquids in manageable volumes."
-XEI,"Case, isothermic ",Isothermic case,,Isotherme Box,,
-XJT,Jutebag,Jutebag,,Jutebeutel,,
-XGY,"Bag, gunny",Gunny bag,,Jutesack,,"A sack made of gunny or burlap, used for transporting coarse commodities, such as grains, potatoes, and other agricultural products. "
-XJY,"Jerrican, cylindrical",Jerrican,,Kanister,,
-XBD,Board,Board,,Karton,,
-XCR,Crate,Crate,,Kiste,,
-XAI,Clamshell,Clamshell,,Klappverpackung,,
-XPA,Packet ,Packet ,,Kollo,,Small package.
-XBK,Basket ,Basket ,,Korb ,,
-XBI,Bin,Bin,,Kübel,,
-XOV,Returnable pallet,Returnable pallet,,Mehrwegpalette,,Pallet must be returned to the point of expedition.
-XNT,Net,Net,,Netz,,
-XPK,Package,Package,pkg.,Packung,Pkg.,Standard packaging unit.
-XPC,Parcel ,Parcel ,,Paket ,,
-XPX,Pallet ,Pallet ,,Palette ,,"Platform or open-ended box, usually made of wood, on which goods are retained for ease of mechanical handling during transport and storage."
-X5M,"Bag, paper ",Paper bag,,Papiertüte,,
-XPR,"Receptacle, plastic ",Plastic receptacle,,Plastikgefäß,,Containment vessel made of plastic for retaining substances or articles.
-XEC,"Bag, plastic ",Plastic bag,,Plastiktüte,,
-X6H,"Composite packaging, plastic receptacle",Plastic composite packaging,,Plastik-Verbundverpackung,,
-X44,"Bag, polybag",Polybag,,Polybeutel,,"A type of plastic bag, typically used to wrap promotional pieces, publications, product samples, and/or catalogues. "
-XBR,Bar,Bar,,Riegel,,
-XCW,"Cage, roll ",Roll cage,,Rollcontainer,,
-XBT,Bolt ,Bolt ,,Rolle,,
-XSA,Sack ,Sack ,,Sack ,,
-XBM,Basin,Bowl,,Schüssel,,
-XSX,Set,Set,,Set,,
-XDN,Dispenser,Dispenser,,Spender,,
-XAE,Aerosol,Aerosol,,Sprühdose,,
-XSC,"Crate, shallow ",Shallow crate,,Steige,,
-XLU,Lug,Lug,,Stiege,,A wooden box for the transportation and storage of fruit or vegetables.
-X5L,"Bag, textile ",Textile bag,,Stofftüte,,
-XPP,Piece,Piece,,Stück,,A loose or unpacked article. 
-XPU,Tray ,Tray ,,Schale,,
-XBG,Bag,Bag,,Tasche,,A receptacle made of flexible material with an open or closed top.
-XP2,Pan,Pan,,Tiegel,,"A shallow, wide, open container, usually of metal."
-XCK,Cask ,Cask ,,Tonne,,
-XPT,Pot,Pot,,Topf,,
-XGI,Girder ,Girder ,,Träger ,,
-XTU,Tube ,Tube ,,Tube,,
+Common code,Original name,English suggestion,Engl. abbr.,Engl. Aliases,German suggestion,German abbr.,German aliases,Description
+XCU,Cup,Cup,,,Becher,,,
+XCN,"Container, not otherwise specified as transport equipment",Container,,,Behälter,,,
+XSH,Sachet ,Sachet ,,,Beutel,,,
+X43,"Bag, super bulk",Big bag,,,Bigbag,,,A cloth plastic or paper based bag having the dimensions of the pallet on which it is constructed.
+XST,Sheet,Sheet,,,Blatt,Bl.,,
+XOK,Block,Block,,,Block,,,"A solid piece of a hard substance, such as granite, having one or more flat sides."
+XVA,Vat,Vat,,,Bottich,,,
+XBX,Box,Box,,,Box,,,
+XBH,Bunch,Bunch,,,Bund,Bd.,bd,
+XBE,Bundle ,Bundle ,bdl.,,Bündel ,Bdl.,,
+XCX,"Can, cylindrical ",Can,,,Dose,,,
+XBJ,Bucket ,Bucket ,,,Eimer ,,,
+XUN,Unit,Unit,,,Einheit,,,"A type of package composed of a single item or object, not otherwise specified as a unit of transport equipment."
+XOS,Oneway pallet,Oneway pallet,,,Einweg-Palette,,,Pallet need not be returned to the point of expedition
+XDH,"Box, Commonwealth Handling Equipment Pool (CHEP), Eurobox","Eurobox, CHEP box",box,,"Eurobox, CHEP-Box",Box,,A box mounted on a pallet base under the control of CHEP.
+XBA,Barrel ,Barrel ,,,Fass,,,
+XFI,Firkin ,Firkin ,,,Fässchen ,,,
+XBO,"Bottle, non-protected, cylindrical ",Bottle,btl.,btl,Flasche,Fl.,fl,A narrow-necked cylindrical shaped vessel without external protective packing material.
+XBQ,"Bottle, protected cylindrical",Protected bottle,btl.,,Flasche in Umverpackung,Fl.,,A narrow-necked cylindrical shaped vessel with external protective packing material.
+XFB,Flexibag,Flexibag,,,Flexibag,,,"A flexible containment bag made of plastic, typically for the transportation bulk non-hazardous cargoes using standard size shipping containers."
+XFT,Foodtainer,Foodtainer,,,Foodtainer,,,
+XJR,Jar,Jar,,gl,Glas,Gl.,gl,
+XGR,"Receptacle, glass ",Glass receptacle,,,Glasgefäß,,,Containment vessel made of glass for retaining substances or articles.
+XOW,"Large bag, pallet sized",Pallet sized large bag,,,Großer Sack in Palettengröße,,,"A non-rigid container made of fabric, paper, plastic, etc, with an opening at the top which can be closed and which is suitable for use on pallets"
+X8B,"Crate, wooden",Wooden crate,,,Holzkiste,,,"A receptacle, made of wood, on which goods are retained for ease of mechanical handling during transport and storage."
+XCV,Cover,Cover,,,Hülle,,,
+XWA,Intermediate bulk container,Intermediate bulk container (IBC),IBC,,Intermediate Bulk Container (IBC),IBC,,"A reusable container made of metal, plastic, textile, wood or composite materials used to facilitate transportation of bulk solids and liquids in manageable volumes."
+XEI,"Case, isothermic ",Isothermic case,,,Isotherme Box,,,
+XJT,Jutebag,Jutebag,,,Jutebeutel,,,
+XGY,"Bag, gunny",Gunny bag,,,Jutesack,,,"A sack made of gunny or burlap, used for transporting coarse commodities, such as grains, potatoes, and other agricultural products. "
+XJY,"Jerrican, cylindrical",Jerrican,,,Kanister,,,
+XBD,Board,Board,,,Karton,,,
+XCR,Crate,Crate,,,Kiste,,,
+XAI,Clamshell,Clamshell,,,Klappverpackung,,,
+XPA,Packet ,Packet ,,,Kollo,,,Small package.
+XBK,Basket ,Basket ,,,Korb ,,,
+XBI,Bin,Bin,,,Kübel,,,
+XOV,Returnable pallet,Returnable pallet,,,Mehrwegpalette,,,Pallet must be returned to the point of expedition.
+XNT,Net,Net,,,Netz,,,
+XPK,Package,Package,pkg.,pkg,Packung,Pkg.,"pkg, pkt",Standard packaging unit.
+XPC,Parcel ,Parcel ,,,Paket ,,,
+XPX,Pallet ,Pallet ,,,Palette ,,,"Platform or open-ended box, usually made of wood, on which goods are retained for ease of mechanical handling during transport and storage."
+X5M,"Bag, paper ",Paper bag,,,Papiertüte,,,
+XPR,"Receptacle, plastic ",Plastic receptacle,,,Plastikgefäß,,,Containment vessel made of plastic for retaining substances or articles.
+XEC,"Bag, plastic ",Plastic bag,,,Plastiktüte,,,
+X6H,"Composite packaging, plastic receptacle",Plastic composite packaging,,,Plastik-Verbundverpackung,,,
+X44,"Bag, polybag",Polybag,,,Polybeutel,,,"A type of plastic bag, typically used to wrap promotional pieces, publications, product samples, and/or catalogues. "
+XBR,Bar,Bar,,,Riegel,,,
+XCW,"Cage, roll ",Roll cage,,,Rollcontainer,,,
+XBT,Bolt ,Bolt ,,,Rolle,,,
+XSA,Sack ,Sack ,,,Sack ,,,
+XBM,Basin,Bowl,,,Schüssel,,,
+XSX,Set,Set,,,Set,,,
+XDN,Dispenser,Dispenser,,,Spender,,,
+XAE,Aerosol,Aerosol,,,Sprühdose,,,
+XSC,"Crate, shallow ",Shallow crate,,,Steige,,,
+XLU,Lug,Lug,,,Stiege,,,A wooden box for the transportation and storage of fruit or vegetables.
+X5L,"Bag, textile ",Textile bag,,,Stofftüte,,,
+XPP,Piece,Piece,,pc,Stück,,"stk, st, stueck",A loose or unpacked article. 
+XPU,Tray ,Tray ,,,Schale,,,
+XBG,Bag,Bag,,,Tasche,,,A receptacle made of flexible material with an open or closed top.
+XP2,Pan,Pan,,,Tiegel,,,"A shallow, wide, open container, usually of metal."
+XCK,Cask ,Cask ,,,Tonne,,,
+XPT,Pot,Pot,,,Topf,,tiegel,
+XGI,Girder ,Girder ,,,Träger ,,,
+XTU,Tube ,Tube ,,,Tube,,,
+PTN,Portion,Portion,,,Portion,,port,
+STC,Sick,Stick,,,Stange,,,

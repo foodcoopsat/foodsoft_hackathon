@@ -28,6 +28,12 @@ class ArticleUnitsLib
     @untranslated_units = options
   end
 
+  def self.unit_translations
+    return @unit_translations unless @unit_translations.nil?
+
+    @unit_translations = YAML.safe_load(ERB.new(File.read(File.expand_path("config/units-of-measure/locales/unece_#{I18n.locale}.yml", Rails.root))).result) || {}
+  end
+
   def self.units
     return @units unless @units.nil?
 
@@ -50,13 +56,13 @@ class ArticleUnitsLib
   def self.get_translated_name_for_code(code, default_nil: false)
     return nil if code.blank?
 
-    I18n.t "unece_units.#{code}.name", default: default_nil ? nil : self.untranslated_units[code][:name]
+    self.unit_translations&.dig('unece_units')&.dig(code)&.dig('name') || (default_nil ? nil : self.untranslated_units[code][:name])
   end
 
   def self.get_translated_symbol_for_code(code)
     return nil if code.blank?
 
-    I18n.t "unece_units.#{code}.symbol", default: self.untranslated_units[code][:symbol]
+    self.unit_translations&.dig('unece_units')&.dig(code)&.dig('symbols')&.dig(0) || self.untranslated_units[code][:symbol]
   end
 
   def self.get_code_for_translated_name(name)
@@ -125,10 +131,10 @@ class ArticleUnitsLib
 
   def self.get_unit_from_old_str(old_unit_str)
     unit_str = old_unit_str.strip.downcase
-    matching_unit_arr = ArticleUnitsLib.untranslated_units
-                                       .sort { |a, b| sort_by_translation_state(a[1], b[1]) }
-    matching_unit_arr = matching_unit_arr.select { |_key, unit| unit[:symbol] == unit_str || matches_unit_name(unit, unit_str) }
-                                         .to_a
+    units = ArticleUnitsLib.untranslated_units
+                           .sort { |a, b| sort_by_translation_state(a[1], b[1]) }
+    matching_unit_arr = units.select { |key, unit| matches_unit(key, unit, unit_str) }
+                             .to_a
     return nil if matching_unit_arr.empty?
 
     matching_unit_arr[0][0]
@@ -141,44 +147,17 @@ class ArticleUnitsLib
     0
   end
 
-  # Temporary workaround to
-  # a. map single names to unit specs' name fields (which include multiple names separated by commas)
-  # b. include some German unit names
-  # TODO: Do unit translations and matching properly somehow
-  # see https://github.com/foodcoopsat/foodsoft_hackathon/issues/10
-  def self.matches_unit_name(unit, unit_str)
-    unit_str = case unit_str
-               when "gr", "grm"
-                 "gramm"
-               when "kilo"
-                 "kilogramm"
-               when "dkg"
-                 "decagramm"
-               when "bund", "bd", "bd."
-                 "bunch"
-               when "stück", "stk", "st", "stk.", "stueck"
-                 "piece"
-               when "glas", "gl"
-                 "glass"
-               when "pkg", "packung", "pkt", "pkg."
-                 "package"
-               when "schale"
-                 "tray pack"
-               when "topf", "tiegel"
-                 "pot"
-               when "flasche", "fl", "fl."
-                 "bottle"
-               when "port", "port."
-                 "portion"
-               when "stange"
-                 "stick"
-               else
-                 unit_str
-               end
+  def self.matches_unit(unit_code, unit, unit_str)
+    return true if unit[:symbol] == unit_str
 
-    name = unit[:name].downcase
-    return true if name == unit_str
+    translation_data = self.unit_translations&.dig('unece_units')&.dig(unit_code)
 
-    name.split(',').map(&:strip).include?(unit_str)
+    return true if translation_data&.dig('symbols')&.include?(unit_str)
+
+    name = translation_data&.dig('name')&.downcase
+    return true if !name.nil? && name == unit_str
+
+    aliases = translation_data&.dig('aliases')&.map(&:strip)
+    !aliases.nil? && aliases.any? { |a| a == unit_str || "#{a}." == unit_str }
   end
 end
