@@ -44,6 +44,7 @@ class ArticleUnitsLib
       unit[:name] = translated_name || unit[:name]
       unit[:untranslated] = translated_name.nil?
       unit[:symbol] = ArticleUnitsLib.get_translated_symbol_for_code(code)
+      unit[:aliases] = ArticleUnitsLib.get_translated_aliases_for_code(code)
 
       [code, unit]
     end
@@ -63,6 +64,12 @@ class ArticleUnitsLib
     return nil if code.blank?
 
     self.unit_translations&.dig('unece_units')&.dig(code)&.dig('symbols')&.dig(0) || self.untranslated_units[code][:symbol]
+  end
+
+  def self.get_translated_aliases_for_code(code)
+    return nil if code.blank?
+
+    self.unit_translations&.dig('unece_units')&.dig(code)&.dig('aliases')
   end
 
   def self.get_code_for_translated_name(name)

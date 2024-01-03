@@ -176,7 +176,7 @@ class ArticleForm {
   loadAvailableUnits() {
     this.availableUnits = Object.entries(this.units)
       .filter(([, unit]) => unit.visible)
-      .map(([code, unit]) => ({ key: code, label: unit.name, baseUnit: unit.baseUnit, symbol: unit.symbol }));
+      .map(([code, unit]) => ({ key: code, label: unit.name, baseUnit: unit.baseUnit, symbol: unit.symbol, aliases: unit.aliases ? unit.aliases : [] }));
 
     $(`#${this.unitFieldsIdPrefix}_supplier_order_unit`, this.articleForm$).select2(this.select2Config);
   }
@@ -207,7 +207,7 @@ class ArticleForm {
     }
 
     const unitVal = this.unit$.val().trim().toLowerCase();
-    if (unitVal !== '' && (unitVal.match(/[0-9]/) || this.availableUnits.some((unit) => (unit.symbol != null && unit.symbol.toLowerCase() === unitVal) || unit.label.toLowerCase() === unitVal))) {
+    if (unitVal !== '' && (unitVal.match(/[0-9]/) || this.availableUnits.some((unit) => (unit.symbol != null && unit.symbol.toLowerCase() === unitVal) || unit.label.toLowerCase() === unitVal || unit.aliases.some((alias) => alias.toLowerCase() === unitVal)))) {
       this.customUnitWarning$.show();
     } else {
       this.customUnitWarning$.hide();
