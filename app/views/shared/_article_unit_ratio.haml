@@ -11,9 +11,9 @@
       = sub_form.input :quantity, {input_html: {class: 'input-mini'}, label: false}
     %td= '&times;'.html_safe
     %td= sub_form.input :unit, as: :select, include_blank: true, collection: @article_units, label: false, input_html: {class: 'input-medium'}
-    %td.ml-1= t 'per'
+    %td.ml-1= t('.per')
     %td
       %span.unit_multiplier.mr-1
     %td.actions{style: 'width:1em'}
-      = link_to t('.remove'), method: :delete, 'data-remove-ratio' => true, title: 'remove', class: 'btn btn-danger btn-mini' do
+      = link_to t('.remove'), method: :delete, 'data-remove-ratio' => true, title: t('.remove'), class: 'btn btn-danger btn-mini' do
         = glyph :remove

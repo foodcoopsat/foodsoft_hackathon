@@ -35,7 +35,7 @@
           %td
             .d-flex.gap-1.align-items-center
               = form.hidden_field :unit, id: 'article_unit_hidden', value: ''
-              = form.input :supplier_order_unit, as: :select, collection: @article_units, label: false, value: article.supplier_order_unit, include_blank: t('custom_unit'), input_html: {class: 'input-medium'}
+              = form.input :supplier_order_unit, as: :select, collection: @article_units, label: false, value: article.supplier_order_unit, include_blank: t('.custom_unit'), input_html: {class: 'input-medium'}
               = form.input :unit, input_html: {class: 'input-mini ml-1'}, label: false
               %div.btn-link.toggle-extra-units.text-decoration-none.default-values
                 %i.icon-cog

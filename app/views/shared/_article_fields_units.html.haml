@@ -6,14 +6,14 @@
   -# title: unit in which article can be ordered from supplier
   - supplier_order_unit_override = article.supplier_order_unit
   - supplier_order_unit_override = 'XPP' if supplier_order_unit_override.nil? && article.unit.nil?
-  = f.input :supplier_order_unit, as: :select, collection: @article_units, selected: supplier_order_unit_override, include_blank: t('custom_unit'), input_html: {class: 'input-medium'}
+  = f.input :supplier_order_unit, as: :select, collection: @article_units, selected: supplier_order_unit_override, include_blank: t('.custom_unit'), input_html: {class: 'input-medium'}
   -# title: free text unit
-  = f.input :unit, input_html: {class: 'input-mini ml-1', placeholder: t('custom_unit')}, label: false
+  = f.input :unit, input_html: {class: 'input-mini ml-1', placeholder: t('.unit')}, label: false
   %i.icon-warning-sign{title: t('warn_about_needless_custom_unit')}
 .fold-line
   .control-group
-    %label.control-label{for: 'unit_ratios'}
-      = "Unit ratios"
+    %label.control-label
+      = t('.unit_ratios')
     %table#fc_base_price{:class => "controls"}
       %tbody
         - ratios = article.article_unit_ratios
@@ -22,13 +22,12 @@
         %td{:colspan => 6}
           = link_to t('.add_ratio'), '#', 'data-add-ratio' => true, class: 'btn', title: "add ratio"
 .fold-line
-  = f.input :minimum_order_quantity, label: "Mininum order quantity" do
+  = f.input :minimum_order_quantity do
     .input-append
-      = f.input_field :minimum_order_quantity, class: 'input-mini', title: "total minimum order quantity for this article"
-      / TODO: replace 'pck' with unit offered by supplier
+      = f.input_field :minimum_order_quantity, class: 'input-mini'
       %span.add-on
 .fold-line
   = f.input :billing_unit, as: :select, collection: [], input_html: {'data-initial-value': article.billing_unit, class: 'input-medium'}, include_blank: false
 .fold-line
-  = f.input :group_order_granularity, label: "Allow orders per", input_html: {class: 'input-mini', title: "steps in which ordergroups can order this article"}
+  = f.input :group_order_granularity, input_html: {class: 'input-mini'}
   = f.input :group_order_unit, as: :select, collection: [], input_html: {'data-initial-value': article.group_order_unit, class: 'input-medium'}, label: '&times;'.html_safe, include_blank: false

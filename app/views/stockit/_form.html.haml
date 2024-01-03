@@ -15,7 +15,7 @@
     .fold-line.d-flex
       = f.hidden_field :unit, id: 'article_unit_hidden', value: ''
       -# title: unit in which article can be ordered from supplier
-      = f.input :supplier_order_unit, as: :select, collection: @article_units, value: stock_article.supplier_order_unit, include_blank: t('custom_unit'), input_html: {class: 'input-medium'}
+      = f.input :supplier_order_unit, as: :select, collection: @article_units, value: stock_article.supplier_order_unit, include_blank: t('.custom_unit'), input_html: {class: 'input-medium'}
       -# title: free text unit
       = f.input :unit, input_html: {class: 'input-mini ml-1'}, label: false
     .fold-line
