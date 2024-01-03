@@ -1139,6 +1139,10 @@ de:
         create: Einladung verschicken
     tasks:
       required_users: "Es fehlen %{count} Mitstreiterinnen!"
+    unit_conversion_fields:
+      title: Einheiten umrechnen
+      cancel: Abbrechen
+      apply: Anwenden
   home:
     apple_bar:
       desc: 'Abgebildet ist das Verhältnis von erledigten Aufgaben zu dem Bestellvolumen Deiner Bestellgruppe im Vergleich zum Durchschnitt in der Foodcoop. Konkret: Pro %{amount} Bestellsumme solltest Du eine Aufgabe machen!'

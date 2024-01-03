@@ -51,7 +51,7 @@
     }
 
     initializeFocusListener() {
-      this.field$.popover({title: 'Conversions', placement: 'bottom', trigger: 'manual'});
+      this.field$.popover({title: this.popoverTemplate.dataset.title, placement: 'bottom', trigger: 'manual'});
 
       this.field$.on('focus.unit-conversion-field',() => this.openPopover());
 
@@ -94,7 +94,7 @@
       }
 
       this.quantityInput$ = contents$.find('input.quantity');
-      this.quantityInput$.val(this.field$.val());
+      this.quantityInput$.val(String(this.field$.val()).replace(',', '.'));
       this.conversionResult$ = contents$.find('.conversion-result');
       this.unitSelect$ = contents$.find('select.unit');
       this.unitSelect$.append(this.unitSelectOptions.map(option => $(`<option value${option.value === undefined ? '' : `="${option.value}"`}>${option.label}</option>`)))

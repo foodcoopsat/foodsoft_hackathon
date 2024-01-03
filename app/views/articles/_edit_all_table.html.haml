@@ -6,7 +6,7 @@
     :javascript
       const ratioTemplateHtml = "#{escape_javascript(render(partial: 'shared/article_unit_ratio', locals: {article_unit_ratio: @empty_article_unit_ratio, f: form, article_unit_ratio_counter: -1}))}";
 - price_markup = FoodsoftConfig[:price_markup].to_f
-= render 'shared/js_templates/unit_conversion_popover_template'
+= render partial: 'shared/js_templates/unit_conversion_popover_template'
 %table.table
   %thead
     %tr

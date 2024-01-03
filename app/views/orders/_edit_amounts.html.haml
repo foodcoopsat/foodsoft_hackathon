@@ -1,15 +1,15 @@
+= render partial: 'shared/js_templates/unit_conversion_popover_template', locals: {set_units_data: true}
 - new_articles = (@order.supplier.articles.undeleted rescue @order.articles)
 - current_article_ids = @order_articles.map { |oa| oa.article_version.article_id }
 - new_article_data = articles_for_select2(new_articles, current_article_ids) {|a| "#{a.name} (#{a.unit_quantity}⨯#{a.unit})"}
 - content_for :javascript do
   :javascript
     $('.units_received').each((_, field) => $(field).unitConversionField({
-      units: #{raw(ArticleUnit.as_hash.to_json)},
+      units: unitsData,
       popoverTemplate$: $('#unit_conversion_popover_content_template'),
       useTargetUnitForStep: false
     }));
     $('table#order_articles').parents('form').receiveOrderForm({packageHelperIcon: '#{j pkg_helper_icon}', newOrderArticlePath:'#{order_order_articles_path(@order)}'});
-= render 'shared/js_templates/unit_conversion_popover_template'
 %table#order_articles.ordered-articles.table.table-striped.stupidtable{style: 'margin-bottom: 0'}
   %thead
     %tr

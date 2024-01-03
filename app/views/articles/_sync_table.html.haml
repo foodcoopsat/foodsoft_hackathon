@@ -27,7 +27,7 @@
           %td= number_to_currency article.deposit
           %td= article.article_category.name if article.article_category
       %tr{:id => "article_row_#{field}_#{index}"}
-        = render 'shared/js_templates/unit_conversion_popover_template'
+        = render partial: 'shared/js_templates/unit_conversion_popover_template'
         = simple_fields_for "#{field}[#{index}]", changed_article.latest_article_version do |form|
           - content_for :javascript do
             :javascript

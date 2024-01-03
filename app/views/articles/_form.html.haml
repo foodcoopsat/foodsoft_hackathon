@@ -5,7 +5,7 @@
     const units = #{raw(@all_units.to_json)};
     new ArticleForm(articleUnitRatioTemplate$, $('.article-form').parents('form'), units, #{FoodsoftConfig[:price_markup].to_f});
 
-  = render 'shared/js_templates/unit_conversion_popover_template'
+  = render partial: 'shared/js_templates/unit_conversion_popover_template'
   .modal-header
     = close_button :modal
     %h3= @article.new_record? ? t('.title_new') : t('.title_edit')

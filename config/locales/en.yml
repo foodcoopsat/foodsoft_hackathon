@@ -1141,6 +1141,7 @@ en:
       required_users: "%{count} members are still needed!"
       task_title: "%{name} (%{duration}h)"
     unit_conversion_fields:
+      title: Convert units
       cancel: Cancel
       apply: Apply
   home:

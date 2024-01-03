@@ -6,7 +6,9 @@ module GroupOrderArticlesHelper
       result
     else
       simple_form_for goa, remote: true, html: { 'data-submit-onchange' => 'changed', class: 'delta-input' } do |f|
-        f.input_field :result, as: :delta, class: 'input-nano', data: { min: 0 }, id: "r_#{goa.id}", value: result
+        order_article = goa.order_article
+        quantity_data = ratio_quantity_data(order_article, order_article.article_version.group_order_unit)
+        f.input_field :result, as: :delta, class: 'input-nano', data: { min: 0 }.merge(quantity_data), id: "r_#{goa.id}", value: result
       end
     end
   end

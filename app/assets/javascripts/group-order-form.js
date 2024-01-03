@@ -29,7 +29,7 @@ class GroupOrderForm {
     // eslint-disable-next-line no-undef
     quantityAndTolerance$.each((_, element) => $(element).unitConversionField({
       units: this.units,
-      popoverTemplate$: this.form$.find('#unit_conversion_popover_content_template'),
+      popoverTemplate$: $('#unit_conversion_popover_content_template'),
     }));
     row$.find('.btn-ordering').mousedown((e) => e.preventDefault());
     row$.find('.btn-ordering.decrease').click((event) => this.increaseOrDecrease($(event.target).parents('.btn-group').find('input.numeric'), false));
