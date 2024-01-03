@@ -98,36 +98,40 @@ class ArticlesController < ApplicationController
   end
 
   def migrate_units
-    @articles = @supplier.articles.with_latest_versions_and_categories.undeleted.includes(latest_article_version: [:article_unit_ratios])
-    @original_units = {}
-    @articles.each do |article|
-      article_version = article.latest_article_version
-      quantity = 1
-      ratios = article_version.article_unit_ratios
+    Article.transaction do
+      @articles = @supplier.articles.with_latest_versions_and_categories.undeleted.includes(latest_article_version: [:article_unit_ratios])
+      @original_units = {}
+      @articles.each do |article|
+        article_version = article.latest_article_version
+        quantity = 1
+        ratios = article_version.article_unit_ratios
 
-      @original_units[article.id] = article_version.unit
+        @original_units[article.id] = article_version.unit
 
-      next if ratios.length > 1
+        next if ratios.length > 1
 
-      if ratios.length == 1 && ratios[0].quantity != 1 && ratios[0].unit == 'XPP'
-        quantity = ratios[0].quantity
+        if ratios.length == 1 && ratios[0].quantity != 1 && ratios[0].unit == 'XPP'
+          quantity = ratios[0].quantity
+        end
+
+        conversion_result = ArticleUnitsLib.convert_old_unit(article_version.unit, quantity)
+
+        next if conversion_result.nil?
+
+        article_version.unit = nil
+        article_version.supplier_order_unit = conversion_result[:supplier_order_unit]
+        article_version.group_order_granularity = conversion_result[:group_order_granularity]
+        article_version.group_order_unit = conversion_result[:group_order_unit]
+
+        first_ratio = conversion_result[:first_ratio]
+        if first_ratio.nil?
+          article_version.article_unit_ratios = []
+        else
+          article_version.article_unit_ratios = [article_version.article_unit_ratios.build(first_ratio.merge(sort: 1))]
+        end
       end
 
-      conversion_result = ArticleUnitsLib.convert_old_unit(article_version.unit, quantity)
-
-      next if conversion_result.nil?
-
-      article_version.unit = nil
-      article_version.supplier_order_unit = conversion_result[:supplier_order_unit]
-      article_version.group_order_granularity = conversion_result[:group_order_granularity]
-      article_version.group_order_unit = conversion_result[:group_order_unit]
-
-      first_ratio = conversion_result[:first_ratio]
-      if first_ratio.nil?
-        article_version.article_unit_ratios = []
-      else
-        article_version.article_unit_ratios = [article_version.article_unit_ratios.build(first_ratio.merge(sort: 1))]
-      end
+      raise ActiveRecord::Rollback # required as immediate save on article_version.article_unit_ratios cannot be avoided when clearing the array
     end
 
     load_article_units
