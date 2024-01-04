@@ -73,16 +73,13 @@ class ArticleUnitsLib
   end
 
   def self.get_code_for_translated_name(name)
-    # This is just a temporary sample to have the method
-    # TODO: Proper unit translations - see https://github.com/foodcoopsat/foodsoft_hackathon/issues/10
     return nil if name.blank?
 
-    code = 'XBO' if name == 'bottle'
-    if code.nil?
-      code = self.untranslated_units.select { |_code, unit| unit[:name] == name }.keys[0]
+    translation = self.unit_translations&.dig('unece_units')&.find do |_code, translations|
+      translations['name'] == name
     end
 
-    code
+    translation&.dig(0)
   end
 
   def self.convert_old_unit(old_compound_unit_str, unit_quantity)
