@@ -21,7 +21,7 @@ en:
         price: Price (net)
         supplier: Supplier
         tax: VAT
-        unit: Supplier order unit
+        unit: Unit
         unit_quantity: Unit quantity
         unit_quantity_short: U.Q.
         units: Units

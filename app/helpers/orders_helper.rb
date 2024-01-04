@@ -47,11 +47,11 @@ module OrdersHelper
     price = order_article.price
     group_orders_sum_quantity = order_article.group_orders_sum[:quantity]
     if !order_article.units_received.nil?
-      price.convert_quantity(order_article.units_received, price.supplier_order_unit, price.billing_unit).round(3) == group_orders_sum_quantity ? false : received_mark
+      price.convert_quantity(order_article.units_received, price.supplier_order_unit, price.group_order_unit).round(3) == group_orders_sum_quantity ? false : received_mark
     elsif !order_article.units_billed.nil?
       order_article.units_billed == group_orders_sum_quantity ? false : billed_mark
     elsif !order_article.units_to_order.nil?
-      price.convert_quantity(order_article.units_to_order, price.supplier_order_unit, price.billing_unit).round(3) == group_orders_sum_quantity ? false : ordered_mark
+      price.convert_quantity(order_article.units_to_order, price.supplier_order_unit, price.group_order_unit).round(3) == group_orders_sum_quantity ? false : ordered_mark
     end
   end
 

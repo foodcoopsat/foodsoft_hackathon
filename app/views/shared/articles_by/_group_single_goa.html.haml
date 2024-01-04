@@ -1,6 +1,6 @@
 %tr{class: [cycle('even', 'odd', :name => 'articles'), if goa.result == 0 then 'unavailable' end], id: "goa_#{goa.id}"}
   %td.name= goa.order_article.article_version.name
-  %td= goa.order_article.article_version.unit
+  %td= format_group_order_unit_with_ratios(goa.order_article.article_version)
   %td.center= "#{goa.quantity} + #{goa.tolerance}"
   %td.center.input-delta= group_order_article_edit_result(goa)
   %td.symbol &times;
