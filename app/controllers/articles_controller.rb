@@ -2,7 +2,7 @@ class ArticlesController < ApplicationController
   before_action :authenticate_article_meta, :find_supplier
 
   before_action :load_article, only: [:edit, :update]
-  before_action :load_article_units, only: [:edit, :update, :new, :create, :parse_upload, :sync, :update_synchronized]
+  before_action :load_article_units, only: [:edit, :update, :new, :create, :sync, :update_synchronized]
   before_action :load_article_categories, only: [:edit_all, :migrate_units, :update_all]
   before_action :new_empty_article_ratio, only: [:edit, :edit_all, :migrate_units, :update, :new, :create, :parse_upload, :sync, :update_synchronized]
 
@@ -218,6 +218,10 @@ class ArticlesController < ApplicationController
     options[:outlist_absent] = (params[:articles]['outlist_absent'] == '1')
     options[:convert_units] = (params[:articles]['convert_units'] == '1')
     @updated_article_pairs, @outlisted_articles, @new_articles = @supplier.sync_from_file uploaded_file.tempfile, options
+
+    @articles = @updated_article_pairs.pluck(0) + @new_articles
+    load_article_units
+
     if @updated_article_pairs.empty? && @outlisted_articles.empty? && @new_articles.empty?
       redirect_to supplier_articles_path(@supplier), :notice => I18n.t('articles.controller.parse_upload.notice')
     end
