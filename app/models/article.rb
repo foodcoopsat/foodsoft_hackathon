@@ -101,7 +101,7 @@ class Article < ApplicationRecord
     @in_open_order ||= begin
       order_articles = OrderArticle.where(order_id: Order.open.collect(&:id))
       order_article = order_articles.detect { |oa| oa.article_version.article_id == id }
-      order_article&.order
+      order_article ? order_article.order : nil
     end
   end
 

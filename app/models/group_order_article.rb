@@ -64,14 +64,14 @@ class GroupOrderArticle < ApplicationRecord
         logger.debug("Need to decrease quantities for GroupOrderArticleQuantity[#{quantities[i].id}]")
         if (quantity < self.quantity && quantities[i].quantity > 0)
           delta = self.quantity - quantity
-          delta = [delta, quantities[i].quantity].min
+          delta = (delta > quantities[i].quantity ? quantities[i].quantity : delta)
           logger.debug("Decreasing quantity by #{delta}")
           quantities[i].quantity -= delta
           self.quantity -= delta
         end
         if (tolerance < self.tolerance && quantities[i].tolerance > 0)
           delta = self.tolerance - tolerance
-          delta = [delta, quantities[i].tolerance].min
+          delta = (delta > quantities[i].tolerance ? quantities[i].tolerance : delta)
           logger.debug("Decreasing tolerance by #{delta}")
           quantities[i].tolerance -= delta
           self.tolerance -= delta

@@ -138,7 +138,7 @@ class ArticleVersion < ApplicationRecord
   # @return [Hash<Symbol, Object>] Changed attributes with new values
   def self.compare_attributes(attributes)
     unequal_attributes = attributes.select { |_name, values| values[0] != values[1] && !(values[0].blank? && values[1].blank?) }
-    unequal_attributes.to_a.to_h { |a| [a[0], a[1].last] }
+    unequal_attributes.to_a.map { |a| [a[0], a[1].last] }.to_h
   end
 
   protected

@@ -26,7 +26,7 @@ class AppleBar
 
   # Use apples as percentage, but show at least 10 percent
   def group_bar_width
-    [@ordergroup.apples, 2].max
+    @ordergroup.apples < 2 ? 2 : @ordergroup.apples
   end
 
   def mean_order_amount_per_job
