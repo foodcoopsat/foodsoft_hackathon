@@ -37,7 +37,7 @@ module ArticlesHelper
     return base if first_si_convertible_unit.nil?
 
     quantity = article.convert_quantity(1, article.supplier_order_unit, first_si_convertible_unit)
-    "#{base} (#{format_number(quantity)}#{ArticleUnitsLib.units.to_h[first_si_convertible_unit][:symbol]})"
+    "#{base} (#{format_number(quantity)}\u00a0#{ArticleUnitsLib.units.to_h[first_si_convertible_unit][:symbol]})"
   end
 
   def format_group_order_unit_with_ratios(article)
@@ -51,6 +51,6 @@ module ArticlesHelper
     return base if first_si_convertible_unit.nil?
 
     quantity = article.convert_quantity(1, article.group_order_unit, first_si_convertible_unit)
-    "#{base} (#{format_number(quantity)}#{ArticleUnitsLib.units.to_h[first_si_convertible_unit][:symbol]})"
+    "#{base} (#{format_number(quantity)}\u00a0#{ArticleUnitsLib.units.to_h[first_si_convertible_unit][:symbol]})"
   end
 end
