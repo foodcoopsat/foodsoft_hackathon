@@ -3,9 +3,7 @@ class SessionsController < ApplicationController
   layout 'login'
 
   def new
-    respond_to do |format|
-      format.html
-    end
+    respond_to(&:html)
   end
 
   def create

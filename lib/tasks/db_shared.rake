@@ -3,21 +3,21 @@ task spec: ['shared:db:test:prepare']
 namespace :shared do
   namespace :db do |ns|
     [:drop, :create, :setup, :migrate, :rollback, :seed, :version].each do |task_name|
-      task task_name do
+      task task_name => :environment do
         Rake::Task["db:#{task_name}"].invoke
       end
     end
 
     namespace :schema do
       [:load, :dump].each do |task_name|
-        task task_name do
+        task task_name => :environment do
           Rake::Task["db:schema:#{task_name}"].invoke
         end
       end
     end
 
     namespace :test do
-      task :prepare do
+      task prepare: :environment do
         Rake::Task['db:test:prepare'].invoke
       end
     end
@@ -33,7 +33,7 @@ namespace :shared do
   task set_custom_config: :environment do
     # save current vars
     @original_config = {
-      env_schema: ENV['SCHEMA'],
+      env_schema: ENV.fetch('SCHEMA', nil),
       config: Rails.application.config.dup
     }
 
