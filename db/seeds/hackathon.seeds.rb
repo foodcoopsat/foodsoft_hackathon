@@ -5,6 +5,12 @@ require_relative 'seed_helper'
 FinancialTransactionClass.create!(:id => 1, :name => 'Standard')
 FinancialTransactionClass.create!(:id => 2, :name => 'Foodsoft')
 
+## Article units
+
+# TODO: - make this depend on locale - see https://github.com/foodcoopsat/foodsoft_hackathon/issues/35
+unit_codes = %w[GRM HGM KGM LTR MLT PTN STC XPP XCR XBO XBH XGR XPK XSA XPU XPT]
+unit_codes.each { |unit_code| ArticleUnit.create!(unit: unit_code) }
+
 ## Suppliers & articles
 
 SupplierCategory.create!(:id => 1, :name => "Other", :financial_transaction_class_id => 1)
