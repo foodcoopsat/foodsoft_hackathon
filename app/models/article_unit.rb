@@ -1,6 +1,9 @@
 class ArticleUnit < ApplicationRecord
   self.primary_key = :unit
 
+  before_save { ArticleUnit.clear_cache }
+  before_destroy { ArticleUnit.clear_cache }
+
   def self.all_cached
     return @all_cached unless @all_cached.nil?
 
