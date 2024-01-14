@@ -136,6 +136,7 @@ Rails.application.routes.draw do
           post :update_selected
           get :edit_all
           get :migrate_units
+          post :complete_units_migration
           post :update_all
           get :upload
           post :parse_upload

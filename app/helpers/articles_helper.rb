@@ -53,4 +53,18 @@ module ArticlesHelper
     quantity = article.convert_quantity(1, article.group_order_unit, first_si_convertible_unit)
     "#{base} (#{format_number(quantity)}\u00a0#{ArticleUnitsLib.units.to_h[first_si_convertible_unit][:symbol]})"
   end
+
+  def field_with_preset_value_and_errors(options)
+    form, field, value, field_errors, input_html = options.values_at(:form, :field, :value, :errors, :input_html)
+    form.input field, label: false, wrapper_html: { class: field_errors.blank? ? '' : 'error' }, input_html: input_html do
+      output = [form.input_field(field, { value: value }.merge(input_html))]
+      unless field_errors.blank?
+        errors = tag.span(class: 'help-inline') do
+          field_errors.join(', ')
+        end
+        output << errors
+      end
+      safe_join(output)
+    end
+  end
 end

@@ -36,6 +36,7 @@ class ArticleVersion < ApplicationRecord
   validates_length_of :manufacturer, :maximum => 255
   validates_length_of :order_number, :maximum => 255
   validates_numericality_of :price, :greater_than_or_equal_to => 0
+  validates_numericality_of :group_order_granularity, :greater_than_or_equal_to => 0
   validates_numericality_of :deposit, :tax
   validates_numericality_of :minimum_order_quantity, allow_nil: true, only_integer: false, if: :supplier_order_unit_is_si_convertible
   validates_numericality_of :minimum_order_quantity, allow_nil: true, only_integer: true, unless: :supplier_order_unit_is_si_convertible

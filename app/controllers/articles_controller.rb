@@ -75,11 +75,13 @@ class ArticlesController < ApplicationController
 
   # Updates one Article and highlights the line if succeded
   def update
-    if @article.update_attributes(latest_article_version_attributes: params[:article_version])
-      render :layout => false
-    else
-      Rails.logger.info @article.errors.to_yaml.to_s
-      render :action => 'new', :layout => false
+    Article.transaction do
+      if @article.update_attributes(latest_article_version_attributes: params[:article_version])
+        render :layout => false
+      else
+        Rails.logger.info @article.errors.to_yaml.to_s
+        render :action => 'new', :layout => false
+      end
     end
   end
 
@@ -98,48 +100,123 @@ class ArticlesController < ApplicationController
   end
 
   def migrate_units
-    @articles = @supplier.articles.with_latest_versions_and_categories.undeleted.includes(latest_article_version: [:article_unit_ratios])
-    @original_units = {}
-    @articles.each do |article|
-      article_version = article.latest_article_version
-      quantity = 1
-      ratios = article_version.article_unit_ratios
+    build_article_migration_samples
+  end
 
-      @original_units[article.id] = article_version.unit
+  def complete_units_migration
+    @invalid_articles = []
+    @samples = []
 
-      next if ratios.length > 1
+    Article.transaction do
+      params[:samples].values.each do |sample|
+        next unless sample[:apply_migration] == "1"
 
-      if ratios.length == 1 && ratios[0].quantity != 1 && ratios[0].unit == 'XPP'
-        quantity = ratios[0].quantity
+        original_unit = nil
+        articles = Article.with_latest_versions_and_categories
+                          .includes(latest_article_version: [:article_unit_ratios])
+                          .find(sample[:article_ids])
+        articles.each do |article|
+          latest_article_version = article.latest_article_version
+          original_unit = latest_article_version.unit
+          next if latest_article_version.article_unit_ratios.length > 1 ||
+                  latest_article_version.billing_unit != latest_article_version.group_order_unit ||
+                  latest_article_version.price_unit != latest_article_version.group_order_unit
+
+          article_version_params = sample.slice(:supplier_order_unit, :group_order_granularity, :group_order_unit)
+          article_version_params[:unit] = nil
+          article_version_params[:billing_unit] = article_version_params[:group_order_unit]
+          article_version_params[:price_unit] = article_version_params[:group_order_unit]
+          article_version_params[:article_unit_ratios_attributes] = {}
+          unless sample[:first_ratio_unit].blank?
+            article_version_params[:article_unit_ratios_attributes]["1"] = {
+              id: latest_article_version.article_unit_ratios.first&.id,
+              sort: 1,
+              quantity: sample[:first_ratio_quantity],
+              unit: sample[:first_ratio_unit]
+            }
+          end
+          article_version_params[:id] = latest_article_version.id
+          unless article.update_attributes(latest_article_version_attributes: article_version_params)
+            @invalid_articles << article
+          end
+        end
+
+        errors = articles.find { |a| !a.errors.nil? }&.errors
+        @samples << {
+          unit: original_unit,
+          conversion_result: sample
+                    .except(:article_ids, :first_ratio_quantity, :first_ratio_unit)
+                    .merge(
+                      first_ratio: {
+                        quantity: sample[:first_ratio_quantity],
+                        unit: sample[:first_ratio_unit]
+                      }
+                    ),
+          articles: articles,
+          errors: errors,
+          error: !errors.blank?
+        }
       end
-
-      conversion_result = ArticleUnitsLib.convert_old_unit(article_version.unit, quantity)
-
-      next if conversion_result.nil? ||
-              (conversion_result[:first_ratio].nil? && !article_version.article_unit_ratios.empty?) ||
-              (!conversion_result[:first_ratio].nil? && article_version.article_unit_ratios.length > 1)
-
-      article_version.unit = nil
-      article_version.supplier_order_unit = conversion_result[:supplier_order_unit]
-      article_version.group_order_granularity = conversion_result[:group_order_granularity]
-      article_version.group_order_unit = conversion_result[:group_order_unit]
-
-      first_ratio = conversion_result[:first_ratio]
-      next if first_ratio.nil?
-
-      first_ratio = first_ratio.merge(sort: 1)
-      first_existing_ratio = article_version.article_unit_ratios[0]
-      if first_existing_ratio.nil?
-        article_version.article_unit_ratios.build(first_ratio)
-      else
-        first_existing_ratio.assign_attributes(first_ratio)
-      end
+      @supplier.update_attribute(:unit_migration_completed, Time.now)
+      raise ActiveRecord::Rollback unless @invalid_articles.empty?
     end
 
-    load_article_units
+    if @invalid_articles.empty?
+      redirect_to supplier_articles_path(@supplier), notice: I18n.t('articles.controller.complete_units_migration.notice')
+    else
+      additional_units = @samples.map do |sample|
+        [sample[:conversion_result][:supplier_order_unit], sample[:conversion_result][:group_order_unit], sample[:conversion_result][:first_ratio]&.dig(:unit)]
+      end.flatten.uniq.compact
+      load_article_units(additional_units)
 
-    render :edit_all
+      flash.now.alert = I18n.t('articles.controller.error_invalid')
+      render :migrate_units
+    end
   end
+
+  # def migrate_units
+  #   @articles = @supplier.articles.with_latest_versions_and_categories.undeleted.includes(latest_article_version: [:article_unit_ratios])
+  #   @original_units = {}
+  #   @articles.each do |article|
+  #     article_version = article.latest_article_version
+  #     quantity = 1
+  #     ratios = article_version.article_unit_ratios
+
+  #     @original_units[article.id] = article_version.unit
+
+  #     next if ratios.length > 1
+
+  #     if ratios.length == 1 && ratios[0].quantity != 1 && ratios[0].unit == 'XPP'
+  #       quantity = ratios[0].quantity
+  #     end
+
+  #     conversion_result = ArticleUnitsLib.convert_old_unit(article_version.unit, quantity)
+
+  #     next if conversion_result.nil? ||
+  #             (conversion_result[:first_ratio].nil? && !article_version.article_unit_ratios.empty?) ||
+  #             (!conversion_result[:first_ratio].nil? && article_version.article_unit_ratios.length > 1)
+
+  #     article_version.unit = nil
+  #     article_version.supplier_order_unit = conversion_result[:supplier_order_unit]
+  #     article_version.group_order_granularity = conversion_result[:group_order_granularity]
+  #     article_version.group_order_unit = conversion_result[:group_order_unit]
+
+  #     first_ratio = conversion_result[:first_ratio]
+  #     next if first_ratio.nil?
+
+  #     first_ratio = first_ratio.merge(sort: 1)
+  #     first_existing_ratio = article_version.article_unit_ratios[0]
+  #     if first_existing_ratio.nil?
+  #       article_version.article_unit_ratios.build(first_ratio)
+  #     else
+  #       first_existing_ratio.assign_attributes(first_ratio)
+  #     end
+  #   end
+
+  #   load_article_units
+
+  #   render :edit_all
+  # end
 
   # Updates all article of specific supplier
   def update_all
@@ -293,6 +370,41 @@ class ArticlesController < ApplicationController
 
   private
 
+  def build_article_migration_samples
+    articles = @supplier.articles.with_latest_versions_and_categories.undeleted.includes(latest_article_version: [:article_unit_ratios])
+    samples_hash = {}
+    articles.each do |article|
+      article_version = article.latest_article_version
+      quantity = 1
+      ratios = article_version.article_unit_ratios
+
+      next if ratios.length > 1 ||
+              article_version.billing_unit != article_version.group_order_unit ||
+              article_version.price_unit != article_version.group_order_unit
+
+      if ratios.length == 1 && ratios[0].quantity != 1 && ratios[0].unit == 'XPP'
+        quantity = ratios[0].quantity
+      end
+
+      samples_hash[article_version.unit] = {} if samples_hash[article_version.unit].nil?
+      samples_hash[article_version.unit][quantity] = [] if samples_hash[article_version.unit][quantity].nil?
+      samples_hash[article_version.unit][quantity] << article
+    end
+    @samples = samples_hash.map do |unit, quantities_hash|
+      quantities_hash.map do |quantity, sample_articles|
+        conversion_result = ArticleUnitsLib.convert_old_unit(unit, quantity)
+        { unit: unit, quantity: quantity, articles: sample_articles, conversion_result: conversion_result }
+      end
+    end
+    @samples = @samples.flatten
+                       .reject { |sample| sample[:conversion_result].nil? }
+
+    additional_units = @samples.map do |sample|
+      [sample[:conversion_result][:supplier_order_unit], sample[:conversion_result][:group_order_unit], sample[:conversion_result][:first_ratio]&.dig(:unit)]
+    end.flatten.uniq.compact
+    load_article_units(additional_units)
+  end
+
   def load_article
     @article = Article
                .with_latest_versions_and_categories
@@ -300,7 +412,7 @@ class ArticlesController < ApplicationController
                .find(params[:id])
   end
 
-  def load_article_units
+  def load_article_units(additional_units = [])
     additional_units = if !@article.nil?
                          @article.current_article_units
                        elsif !@articles.nil?
@@ -308,7 +420,7 @@ class ArticlesController < ApplicationController
                                   .flatten
                                   .uniq
                        else
-                         []
+                         additional_units
                        end
 
     @article_units = ArticleUnit.as_options(additional_units: additional_units)

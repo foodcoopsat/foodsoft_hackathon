@@ -124,7 +124,6 @@ ActiveRecord::Schema.define(version: 2023_12_10_181807) do
     t.string "reference"
     t.text "text"
     t.text "receipt"
-    t.binary "image", limit: 16777215
     t.integer "financial_link_id"
     t.index ["financial_link_id"], name: "index_bank_transactions_on_financial_link_id"
   end
