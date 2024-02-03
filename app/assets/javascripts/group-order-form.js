@@ -200,8 +200,8 @@ class GroupOrderForm {
       return 0;
     }
 
-    const used = Math.floor(quantity / packSize)
-    const remainder = quantity % packSize
+    const used = Big(quantity).div(packSize).round(0, Big.roundDown).toNumber();
+    const remainder = Big(quantity).mod(packSize).toNumber();
     return used + ((remainder > 0) && (remainder + tolerance >= packSize) ? 1 : 0)
   }
 
@@ -210,15 +210,20 @@ class GroupOrderForm {
       return minimumOrderQuantity - quantity - tolerance;
     }
 
-    var remainder = quantity % packSize
-    if (isNaN(remainder)) {
-      return remainder;
+    if (isNaN(quantity)) {
+      return quantity;
     }
+
+    if (isNaN(packSize)) {
+      return packSize;
+    }
+
+    var remainder = Big(quantity).mod(packSize).toNumber();
     return remainder > 0 && remainder + tolerance < packSize ? packSize - remainder - tolerance : 0
   }
 
   packCompletedFromTolerance(packSize, quantity, tolerance) {
-    var remainder = quantity % packSize
+    var remainder = Big(quantity).mod(packSize).toNumber();
     return (remainder > 0 && (remainder + tolerance >= packSize));
   }
 }

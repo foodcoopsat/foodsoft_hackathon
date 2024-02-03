@@ -15,6 +15,7 @@
 //= require i18n
 //= require i18n/translations
 //= require_self
+//= require big
 //= require units-converter
 //= require migrate-units-form
 //= require article-form
