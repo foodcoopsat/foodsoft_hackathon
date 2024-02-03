@@ -5,13 +5,15 @@ class ArticleUnit < ApplicationRecord
   before_destroy { ArticleUnit.clear_cache }
 
   def self.all_cached
-    return @all_cached unless @all_cached.nil?
+    @all_cached = {} if @all_cached.nil?
+    cached_units_in_locale = @all_cached[I18n.locale]
+    return cached_units_in_locale unless cached_units_in_locale.nil?
 
-    @all_cached = all.load
+    @all_cached[I18n.locale] = all.load
   end
 
   def self.clear_cache
-    @all_cached = nil
+    @all_cached = {}
   end
 
   def self.as_hash(config = nil)
