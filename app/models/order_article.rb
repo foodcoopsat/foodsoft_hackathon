@@ -86,14 +86,14 @@ class OrderArticle < ApplicationRecord
       return price.minimum_order_quantity
     end
 
-    if price.supplier_order_unit_is_si_convertible
-      return quantity
-    end
-
     unit_size = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
-    units = (quantity / unit_size).floor
-    remainder = quantity % unit_size
-    units += ((remainder > 0) && (remainder + tolerance >= unit_size) ? 1 : 0)
+    if price.supplier_order_unit_is_si_convertible
+      quantity / unit_size
+    else
+      units = (quantity / unit_size).floor
+      remainder = quantity % unit_size
+      units += ((remainder > 0) && (remainder + tolerance >= unit_size) ? 1 : 0)
+    end
   end
 
   # Calculate price for ordered quantity.
