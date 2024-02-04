@@ -112,6 +112,9 @@ $(function() {
         // trigger timeout to submit form when value was changed
         clearTimeout(input.data('submit-timeout-id'));
         input.data('submit-timeout-id', setTimeout(function() {
+          if (input.data('multiply-before-submit')) {
+            input.parents('form').append(`<input type="hidden" name="${input.attr('name')}" value="${input.val() * input.data('multiply-before-submit')}" />`);
+          }
           if (input.val() != input.data('old-value')) input.parents('form').submit();
           input.removeData('submit-timeout-id');
           input.removeData('old-value');

@@ -42,6 +42,7 @@ module PriceCalculation
 
   def group_order_price(value = nil)
     value ||= price
+    # price is always stored in supplier_order_unit:
     value / convert_quantity(1, supplier_order_unit, group_order_unit)
   end
 

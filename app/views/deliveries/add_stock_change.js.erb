@@ -5,7 +5,7 @@
 
   $('#stock_changes tr').removeClass('success');
 
-  var quantity = w.prompt('<%= j(t('.how_many_units', :unit => format_supplier_article_unit(@stock_change.stock_article), :name => @stock_change.stock_article.name)) %>');
+  var quantity = w.prompt('<%= j(t('.how_many_units', :unit => format_supplier_order_unit(@stock_change.stock_article), :name => @stock_change.stock_article.name)) %>');
   if(null === quantity) {
     return false;
   }

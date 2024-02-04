@@ -15,43 +15,53 @@ module ArticlesHelper
     classes.join(" ")
   end
 
-  def format_supplier_article_unit(article)
-    return ArticleUnit.as_hash[article.supplier_order_unit][:name] unless article.supplier_order_unit.nil?
+  def format_unit(unit_property, article)
+    unit_code = article.send(unit_property)
+    return article.unit if unit_code.nil?
 
-    article.unit
-  end
-
-  def format_group_order_unit(article)
-    return article.unit if article.group_order_unit.nil?
-
-    unit = ArticleUnitsLib.units.to_h[article.group_order_unit]
+    unit = ArticleUnitsLib.units.to_h[unit_code]
     unit[:symbol] || unit[:name]
   end
 
-  def format_supplier_order_unit_with_ratios(article)
-    base = format_supplier_article_unit(article)
-    return base if ArticleUnitsLib.unit_is_si_convertible(article.supplier_order_unit)
-
-    first_si_convertible_unit = article.article_unit_ratios.map(&:unit)
-                                       .find { |unit| ArticleUnitsLib.unit_is_si_convertible(unit) }
-    return base if first_si_convertible_unit.nil?
-
-    quantity = article.convert_quantity(1, article.supplier_order_unit, first_si_convertible_unit)
-    "#{base} (#{format_number(quantity)}\u00a0#{ArticleUnitsLib.units.to_h[first_si_convertible_unit][:symbol]})"
+  def format_supplier_order_unit(article)
+    format_unit(:supplier_order_unit, article)
   end
 
-  def format_group_order_unit_with_ratios(article)
-    base = format_group_order_unit(article)
-    return base if ArticleUnitsLib.unit_is_si_convertible(article.group_order_unit)
+  def format_group_order_unit(article)
+    format_unit(:group_order_unit, article)
+  end
 
-    first_si_convertible_unit = [article.article_unit_ratios.map(&:unit), article.supplier_order_unit]
+  def format_billing_unit(article)
+    format_unit(:billing_unit, article)
+  end
+
+  def format_unit_with_ratios(unit_property, article)
+    base = format_unit(unit_property, article)
+    unit_code = article.send(unit_property)
+    return base if ArticleUnitsLib.unit_is_si_convertible(unit_code)
+
+    relevant_units = [article.article_unit_ratios.map(&:unit)]
+    relevant_units << article.supplier_order_unit unless unit_property == :supplier_order_unit
+    first_si_convertible_unit = relevant_units
                                 .flatten
                                 .find { |unit| ArticleUnitsLib.unit_is_si_convertible(unit) }
 
     return base if first_si_convertible_unit.nil?
 
-    quantity = article.convert_quantity(1, article.group_order_unit, first_si_convertible_unit)
+    quantity = article.convert_quantity(1, unit_code, first_si_convertible_unit)
     "#{base} (#{format_number(quantity)}\u00a0#{ArticleUnitsLib.units.to_h[first_si_convertible_unit][:symbol]})"
+  end
+
+  def format_supplier_order_unit_with_ratios(article)
+    format_unit_with_ratios(:supplier_order_unit, article)
+  end
+
+  def format_group_order_unit_with_ratios(article)
+    format_unit_with_ratios(:group_order_unit, article)
+  end
+
+  def format_billing_unit_with_ratios(article)
+    format_unit_with_ratios(:billing_unit, article)
   end
 
   def field_with_preset_value_and_errors(options)
