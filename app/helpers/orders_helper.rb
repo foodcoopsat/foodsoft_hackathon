@@ -68,7 +68,8 @@ module OrdersHelper
 
       uq_text = "× #{first_ratio.quantity} #{ArticleUnitsLib.units[first_ratio.unit][:symbol]}"
     else
-      uq_text = ArticleUnitsLib.units[options[:unit]][:symbol]
+      unit = ArticleUnitsLib.units[options[:unit]]
+      uq_text = unit[:symbol] || unit[:name]
     end
     uq_text = content_tag(:span, uq_text, class: 'hidden-phone') if options[:soft_uq]
     if options[:plain]
