@@ -99,6 +99,9 @@ class ArticlesController < ApplicationController
     load_article_units
   end
 
+  def prepare_units_migration
+  end
+
   def migrate_units
     build_article_migration_samples
   end

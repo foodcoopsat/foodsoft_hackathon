@@ -507,6 +507,8 @@ en:
         notice_unavail: All selected articles were set to be unavailable.
       update_sync:
         notice: All articles and prices were updated.
+      complete_units_migration:
+        notice: Articles successfully migrated
     destroy_active_article:
       drop: delete
       note: "%{article} is used in current orders and can not be deleted Please first ... the article from orders %{drop_link}."
@@ -523,6 +525,7 @@ en:
       change_supplier: Change supplier ...
       download: Download articles
       edit_all: Edit all
+      migrate_units: Migrate old article units
       ext_db:
         import: Import article
         sync: Synchronise
@@ -536,6 +539,23 @@ en:
       search_placeholder: Name ...
       title: Articles from %{supplier} (%{count})
       upload: Upload articles
+    prepare_units_migration:
+      explanation: |
+        TODO: General explanation
+        It's highly recommended to download a backup before continuing:
+      title: Migrate articles of %{supplier}
+      download: Download articles backup
+    migrate_units:
+      title: Migrate articles of %{supplier}
+      explanation: |
+        This will try to migrate articles to their new, more versatile format. You may adapt the suggested changes before continuing if you see fit.
+        TODO: Expand on this explanation - maybe link to some docs
+      column_headers:
+        apply: Convert
+        original_plaintext_unit: Original plaintext unit
+        affected_articles: Affected articles
+        contains: Contains
+      run_migration: Run migration now
     model:
       error_in_use: "%{article} can not be deleted because the article is part of a current order!"
       error_nosel: You have selected no articles

@@ -1,3 +1,5 @@
+- title t('.title', supplier: @supplier.name)
+%span= simple_format(t('.explanation'))
 - content_for :javascript do
   :javascript
     const units = #{raw(@all_units.to_json)};
@@ -14,12 +16,12 @@
   %table.table#migrate-units
     %thead
       %tr
-        %th= heading_helper Article, :apply
-        %th= heading_helper Article, :original_plaintext_unit
-        %th= heading_helper Article, :affected_articles
-        %th= heading_helper Article, :supplier_order_unit
-        %th= heading_helper Article, :contains
-        %th= heading_helper Article, :allow_orders_per
+        %th= t('.column_headers.apply')
+        %th= t('.column_headers.original_plaintext_unit')
+        %th= t('.column_headers.affected_articles')
+        %th= heading_helper ArticleVersion, :supplier_order_unit
+        %th= t('.column_headers.contains')
+        %th= heading_helper ArticleVersion, :group_order_granularity
     %tbody
       - @samples.each_with_index do |sample, index|
         %tr{:id => "sample_row_#{index}"}
@@ -69,4 +71,4 @@
                 %span
                   = '&times;'.html_safe
                 = form.input :group_order_unit, as: :select, collection: [], input_html: {'data-initial-value': sample[:conversion_result][:group_order_unit], class: 'input-medium'}, label: false, include_blank: false
-  = f.submit class: 'btn btn-primary'
+  = f.submit t('.run_migration'), class: 'btn btn-primary'

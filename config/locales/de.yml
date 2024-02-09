@@ -504,6 +504,8 @@ de:
         notice_unavail: Alle gewählten Artikel wurden auf "nicht verfügbar" gesetzt
       update_sync:
         notice: Alle Artikel und Preise wurden aktualisiert
+      complete_units_migration:
+        notice: Artikel erfolgreich migriert
     destroy_active_article:
       drop: entfernen
       note: "%{article} wird in laufenden Bestellungen verwendet und kann nicht gelöscht werden. Bitte zuerst den Artikel aus den Bestellungen %{drop_link}."
@@ -537,6 +539,24 @@ de:
       search_placeholder: Name ...
       title: Artikel von %{supplier} (%{count})
       upload: Artikel hochladen
+    prepare_units_migration:
+      title: Artikel von %{supplier} migrieren
+      explanation: |
+        TODO: Allgemeine Erklärung
+        Es wird sehr empfohlen ein Backup herunterzuladen ehe Sie fortfahren:
+      download: Artikel-Backup herunterladen
+      migrate_units: Nächster Schritt
+    migrate_units:
+      title: Artikel von %{supplier} migrieren
+      explanation: |
+        Die Artikeleinheiten werden nun in eine neue, flexiblere Form konvertiert. Passen Sie die Konvertierungsvorschläge an, ehe sie fortfahren.
+        TODO: Besser erklären; vielleicht mit Doku verlinken?
+      column_headers:
+        apply: Konvertieren
+        original_plaintext_unit: Ursprüngliche Volltext-Einheit
+        affected_articles: Betroffene Artikel
+        contains: Beinhaltet
+      run_migration: Migration jetzt durchführen
     model:
       error_in_use: "%{article} kann nicht gelöscht werden. Der Artikel befindet sich in einer laufenden Bestellung!"
       error_nosel: Du hast keine Artikel ausgewählt
