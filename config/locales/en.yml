@@ -804,6 +804,7 @@ en:
     not_found:
       text: This page does not appear to exist, sorry!
       title: Page not found
+    step_error: Enter a number >=%{min}, which is a multiple of %{granularity}.
   feedback:
     create:
       notice: Your feedback was sent successfully. Thanks a lot!

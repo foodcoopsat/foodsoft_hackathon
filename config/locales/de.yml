@@ -804,6 +804,7 @@ de:
     not_found:
       text: Diese Seite existiert anscheinend nicht. Entschuldigung!
       title: Seite nicht gefunden
+    step_error: Gib eine Zahl >=%{min} ein, die ein Vielfaches von %{granularity} ist.
   feedback:
     create:
       notice: Das Feedback wurde erfolgreich verschickt. Vielen Dank!

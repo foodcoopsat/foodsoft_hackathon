@@ -19,15 +19,15 @@ class UnitsConverter {
     const relatedRatio = this.ratios.find(ratio => this.units[ratio.unit].baseUnit === unit.baseUnit);
     if (relatedRatio !== undefined) {
       const relatedUnit = this.units[relatedRatio.unit];
-      return relatedRatio.quantity / unit.conversionFactor * relatedUnit.conversionFactor;
+      return Big(relatedRatio.quantity).div(unit.conversionFactor).mul(relatedUnit.conversionFactor).toNumber();
     }
 
     const supplierOrderUnitConversionFactor = this.units[this.supplierOrderUnit].conversionFactor;
-    return supplierOrderUnitConversionFactor / unit.conversionFactor;
+    return Big(supplierOrderUnitConversionFactor).div(unit.conversionFactor).toNumber();
   }
 
   getUnitRatio(quantity, inputUnit, outputUnit) {
-    return quantity / this.getUnitQuantity(inputUnit) * this.getUnitQuantity(outputUnit);
+    return Big(quantity).div(this.getUnitQuantity(inputUnit)).mul(this.getUnitQuantity(outputUnit)).toNumber();
   }
 
   isUnitSiConversible(unitId) {

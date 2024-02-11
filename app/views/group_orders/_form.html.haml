@@ -120,12 +120,14 @@
               %span.used= format_number(@ordering_data[:order_articles][order_article.id][:used_quantity])
               +
               %span.unused= format_number(@ordering_data[:order_articles][order_article.id][:quantity] - @ordering_data[:order_articles][order_article.id][:used_quantity])
-              .btn-group
+              .btn-group.numeric-step
                 %a.btn.btn-ordering.increase
                   %i.icon-plus
                 %input.goa-quantity{type: "number", name: "group_order[group_order_articles_attributes][#{order_article.id}][quantity]", value: @ordering_data[:order_articles][order_article.id][:quantity], data: quantity_data, autocomplete: 'off', class: 'input-mini numeric', min: 0, step: order_article.article_version.group_order_granularity}
                 %a.btn.btn-ordering.decrease
                   %i.icon-minus
+              %span.numeric-step-error
+                = t('errors.step_error', granularity: order_article.article_version.group_order_granularity, min: 0)
 
             %td.tolerance.group-order-input{style: ('display:none' if @order.stockit?)}
               - if (requires_tolerance_input?(order_article, @ordering_data))

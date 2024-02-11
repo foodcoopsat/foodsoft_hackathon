@@ -647,3 +647,16 @@ td.mr-1 > *:last-child {
 .user-select-none {
   user-select: none;
 }
+
+.numeric-step-error {
+  display: none;
+  color: #b94a48;
+}
+
+.btn-group.numeric-step > input:invalid {
+  border: 1px solid #b94a48;
+}
+
+.btn-group.numeric-step:has(> input:invalid) + .numeric-step-error {
+  display: block;
+}

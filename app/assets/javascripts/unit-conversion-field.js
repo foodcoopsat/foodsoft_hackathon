@@ -95,6 +95,7 @@
 
       this.quantityInput$ = contents$.find('input.quantity');
       this.quantityInput$.val(String(this.field$.val()).replace(',', '.'));
+      this.applyButton$ = contents$.find('input.apply');
       this.conversionResult$ = contents$.find('.conversion-result');
       this.unitSelect$ = contents$.find('select.unit');
       this.unitSelect$.append(this.unitSelectOptions.map(option => $(`<option value${option.value === undefined ? '' : `="${option.value}"`}>${option.label}</option>`)))
@@ -109,20 +110,23 @@
       this.unitSelect$.change(() => this.onUnitSelectChanged());
 
       // eslint-disable-next-line no-undef
-      mergeJQueryObjects([this.quantityInput$, this.unitSelect$]).change(() => this.showCurrentConversion())
+      mergeJQueryObjects([this.quantityInput$, this.unitSelect$]).change(() => this.prepareConversion())
       this.quantityInput$.keyup(() => this.quantityInput$.trigger('change'));
-      this.showCurrentConversion();
 
       this.field$.on('change.unit-conversion-field', () => {
         this.quantityInput$.val(this.field$.val());
+        this.quantityInput$.trigger('change')
         this.unitSelect$.val(initialUnitSelectValue);
       });
 
       contents$.find('input.cancel').click(() => this.closePopover());
-      contents$.find('input.apply').click(() => {
+      this.applyButton$.click(() => {
         this.applyConversion();
         this.closePopover();
       });
+
+      this.onUnitSelectChanged();
+      this.prepareConversion();
     }
 
     getUnitSelectOptions() {
@@ -149,10 +153,19 @@
       return options;
     }
 
-    showCurrentConversion() {
+    prepareConversion() {
       const unit = this.defaultUnit === undefined ? this.supplierOrderUnit : this.defaultUnit;
       const unitLabel = this.unitSelectOptions.find(option => option.value === unit).label;
       this.conversionResult$.text('= ' + this.getConversionResult() + ' x ' + unitLabel);
+      this.conversionResult$.parent().find('.numeric-step-error').remove();
+      if (this.quantityInput$.is(':invalid')) {
+        this.applyButton$.attr('disabled', 'disabled');
+        const errorSpan$ = $(`<div class="numeric-step-error">${I18n.t('errors.step_error', {min: 0, granularity: this.quantityInput$.attr('step')})}</div>`);
+        errorSpan$.show();
+        this.conversionResult$.after(errorSpan$);
+      } else {
+        this.applyButton$.removeAttr('disabled');
+      }
     }
 
     applyConversion() {
@@ -176,7 +189,7 @@
 
     getConversionResult() {
       const result = this.converter.getUnitRatio(this.getQuantityInputValue(), convertEmptyStringToUndefined(this.unitSelect$.val()), this.getTargetUnit());
-      return Math.round(result * 10000) / 10000;
+      return Big(result).round(4).toNumber();
     }
 
     onUnitSelectChanged() {
@@ -186,7 +199,7 @@
       const selectedUnit = convertEmptyStringToUndefined(this.unitSelect$.val());
       this.previousUnitSelectValue = selectedUnit;
 
-      const step = this.useTargetUnitForStep ? this.converter.getUnitRatio(1, this.getTargetUnit(), selectedUnit) : 0.001;
+      const step = this.useTargetUnitForStep ? this.converter.getUnitRatio(this.field$.attr('step'), this.getTargetUnit(), selectedUnit) : 0.001;
       this.quantityInput$.attr('step', step);
     }
 
