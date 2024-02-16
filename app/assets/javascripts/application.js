@@ -113,7 +113,8 @@ $(function() {
         clearTimeout(input.data('submit-timeout-id'));
         input.data('submit-timeout-id', setTimeout(function() {
           if (input.data('multiply-before-submit')) {
-            input.parents('form').append(`<input type="hidden" name="${input.attr('name')}" value="${input.val() * input.data('multiply-before-submit')}" />`);
+            input.parents('form').find(`input[type="hidden"][name="${input.attr('name')}"]`).remove();
+            input.parents('form').append(`<input type="hidden" name="${input.attr('name')}" value="${Big(input.val()).mul(input.data('multiply-before-submit')).round(8)}" />`);
           }
           if (input.val() != input.data('old-value')) input.parents('form').submit();
           input.removeData('submit-timeout-id');
