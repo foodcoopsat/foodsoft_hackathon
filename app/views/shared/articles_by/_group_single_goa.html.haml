@@ -5,7 +5,6 @@
   %td.center= "#{article_version.convert_quantity(goa.quantity, article_version.group_order_unit, article_version.billing_unit)} + #{article_version.convert_quantity(goa.tolerance, article_version.group_order_unit, article_version.billing_unit)}"
   %td.center.input-delta= group_order_article_edit_result(goa)
   %td.symbol &times;
-  %td= number_to_currency(article_version.convert_quantity(article_version.fc_price, article_version.billing_unit, article_version.group_order_unit))
+  %td= number_to_currency(article_version.convert_quantity(article_version.fc_price, article_version.billing_unit, article_version.supplier_order_unit))
   %td.symbol =
   %td.price{data: {value: goa.total_price}}= number_to_currency(goa.total_price)
-  %td= pkg_helper goa.order_article.price

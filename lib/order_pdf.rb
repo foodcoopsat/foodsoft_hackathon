@@ -55,12 +55,25 @@ class OrderPdf < RenderPDF
     "#{number_to_currency(order_article_price(order_article))} / #{format_group_order_unit_with_ratios(order_article.article_version)}"
   end
 
-  def group_order_article_quantity_with_tolerance(goa)
-    goa.tolerance > 0 ? "#{goa.quantity} + #{goa.tolerance}" : "#{goa.quantity}"
+  def price_per_billing_unit(goa)
+    article_version = goa.order_article.article_version
+    "#{number_to_currency(article_version.convert_quantity(article_version.fc_price, article_version.billing_unit, article_version.supplier_order_unit))} / #{format_billing_unit_with_ratios(article_version)}"
+  end
+
+  def billign_quantity_with_tolerance(goa)
+    article_version = goa.order_article.article_version
+    quantity = number_with_precision(article_version.convert_quantity(goa.quantity, article_version.group_order_unit, article_version.billing_unit), strip_insignificant_zeros: true, precision: 2)
+    tolerance = number_with_precision(article_version.convert_quantity(goa.tolerance, article_version.group_order_unit, article_version.billing_unit), strip_insignificant_zeros: true, precision: 2)
+    goa.tolerance > 0 ? "#{quantity} + #{tolerance}" : quantity
   end
 
   def group_order_article_result(goa)
     number_with_precision goa.result, strip_insignificant_zeros: true
+  end
+
+  def billing_article_result(goa)
+    article_version = goa.order_article.article_version
+    number_with_precision(article_version.convert_quantity(goa.result, article_version.group_order_unit, article_version.billing_unit), precision: 2, strip_insignificant_zeros: true)
   end
 
   def group_order_articles(ordergroup)

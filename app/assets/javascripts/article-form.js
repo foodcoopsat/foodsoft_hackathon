@@ -76,7 +76,7 @@ class ArticleForm {
     if (unit === undefined) {
       return '?';
     }
-    return unit.label;
+    return unit.symbol != null ? unit.symbol : unit.label;
   }
 
   initializeFormSubmitListener() {
@@ -495,7 +495,7 @@ class ArticleForm {
     const inputs$ = mergeJQueryObjects([this.unitsToOrder$, this.unitsReceived$]);
     inputs$.parent().find('.unit_label').remove();
     if (billingUnitLabel.trim() !== '') {
-      inputs$.after($(`<span class="unit_label ml-1">x ${billingUnitLabel}</span>`));
+      inputs$.after($(`<span class="unit_label ml-1">${this.getUnitsConverter().isUnitSiConversible(billingUnitKey) ? '' : 'x '}${billingUnitLabel}</span>`));
     }
     if (this.previousBillingUnit !== undefined) {
       this.convertOrderedAndReceivedUnits(this.previousBillingUnit, billingUnitKey);
@@ -507,8 +507,16 @@ class ArticleForm {
     const inputs$ = mergeJQueryObjects([this.unitsToOrder$, this.unitsReceived$]);
     inputs$.each((_, input) => {
       const input$ = $(input);
-      const convertedValue = this.getUnitRatio(input$.val(), fromUnit, toUnit);
-      input$.val(round(convertedValue));
+      const val = input$.val();
+
+      if (val !== '') {
+        try {
+          const convertedValue = this.getUnitRatio(val, fromUnit, toUnit);
+          input$.val(round(convertedValue));
+        } catch (e) {
+          // In some cases it's impossible to perform this conversion - just leave the original value
+        }
+      }
     });
   }
 

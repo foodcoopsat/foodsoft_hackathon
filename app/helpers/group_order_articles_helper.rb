@@ -12,7 +12,7 @@ module GroupOrderArticlesHelper
         converted_value = convert_to_billing_unit ? article_version.convert_quantity(goa.result, article_version.group_order_unit, article_version.billing_unit) : result
         input_data = { min: 0 }.merge(quantity_data)
         input_data = input_data.merge('multiply-before-submit': article_version.convert_quantity(1, article_version.billing_unit, article_version.group_order_unit)) if convert_to_billing_unit
-        f.input_field(:result, as: :delta, class: 'input-nano', data: input_data, id: "r_#{goa.id}", value: converted_value)
+        f.input_field(:result, as: :delta, class: 'input-nano', data: input_data, id: "r_#{goa.id}", value: converted_value.round(3))
       end
     end
   end
