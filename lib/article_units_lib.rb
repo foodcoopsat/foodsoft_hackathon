@@ -72,14 +72,20 @@ class ArticleUnitsLib
     self.unit_translations&.dig('unece_units')&.dig(code)&.dig('aliases')
   end
 
-  def self.get_code_for_translated_name(name)
+  def self.get_code_for_unit_name(name)
     return nil if name.blank?
 
     translation = self.unit_translations&.dig('unece_units')&.find do |_code, translations|
       translations['name'] == name
     end
 
-    translation&.dig(0)
+    return translation[0] unless translation.nil?
+
+    matching_unit = self.units.find do |_code, unit|
+      unit[:name] == name
+    end
+
+    matching_unit[0]
   end
 
   def self.convert_old_unit(old_compound_unit_str, unit_quantity)

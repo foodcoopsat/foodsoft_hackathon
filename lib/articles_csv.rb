@@ -44,8 +44,12 @@ class ArticlesCsv < RenderCSV
         article.minimum_order_quantity,
         ArticleUnitsLib.get_translated_name_for_code(article.billing_unit),
         article.article_category.try(:name),
-        article.article_unit_ratios.map { |ratio| "#{ratio.quantity} #{ArticleUnitsLib.get_translated_name_for_code(ratio.unit)}" }.join(", ")
+        article.article_unit_ratios.map { |ratio| "#{ratio.quantity} #{escape_csv_ratio(ArticleUnitsLib.get_translated_name_for_code(ratio.unit))}" }.join(", ")
       ]
     end
+  end
+
+  def escape_csv_ratio(str)
+    str.gsub("\\", "\\\\").gsub(",", "\\,")
   end
 end
