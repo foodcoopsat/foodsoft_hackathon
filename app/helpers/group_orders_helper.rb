@@ -51,11 +51,11 @@ module GroupOrdersHelper
     ) || (order_article.article_version.minimum_order_quantity.presence || 0) > order_article.article_version.group_order_granularity
   end
 
-  def get_missing_units_css_class(quantity_missing)
-    if (quantity_missing == 1)
-      return 'missing-few';
-    elsif (quantity_missing == 0)
+  def get_missing_units_css_class(quantity_missing, article_version)
+    if (quantity_missing == 0)
       return ''
+    elsif (quantity_missing <= article_version.group_order_granularity)
+      return 'missing-few';
     else
       return 'missing-many'
     end

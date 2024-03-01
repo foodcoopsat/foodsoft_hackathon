@@ -181,17 +181,19 @@ class GroupOrderForm {
     totalPrice$.data('price', round(totalPrice));
 
     missing$.text(round(missing));
-    if (packSize > 1 || minimumOrderQuantity > 1) {
-      this.setRowStyle(row$, missing, granularity);
+    if (tolerance$.length === 1) {
+      this.setRowStyle(row$, missing, granularity, quantity);
     }
   }
 
-  setRowStyle(row$, missing, packSize) {
+  setRowStyle(row$, missing, granularity, quantity) {
     row$.removeClass('missing-many missing-few missing-none');
     if (missing === 0) {
-      row$.addClass('missing-none');
+      if (quantity !== 0) {
+        row$.addClass('missing-none');
+      }
     } else {
-      row$.addClass(missing <= packSize ? 'missing-few' : 'missing-many');
+      row$.addClass(missing <= granularity ? 'missing-few' : 'missing-many');
     }
   }
 
@@ -206,8 +208,8 @@ class GroupOrderForm {
   }
 
   calcMissingItems(packSize, quantity, tolerance, minimumOrderQuantity) {
-    if (Big(quantity).add(tolerance).toNumber() < minimumOrderQuantity) {
-      return Big(minimumOrderQuantity).sub(quantity).sub(tolerance);
+    if (quantity !== 0 && Big(quantity).add(tolerance).toNumber() < minimumOrderQuantity) {
+      return Big(minimumOrderQuantity).sub(quantity).sub(tolerance).toNumber();
     }
 
     if (isNaN(quantity)) {

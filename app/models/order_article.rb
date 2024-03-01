@@ -180,12 +180,12 @@ class OrderArticle < ApplicationRecord
   # @return [Number] Units missing for the last +unit_quantity+ of the article.
   def missing_units
     unit_ratio = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
-    _missing_units(unit_ratio, quantity, tolerance)
+    _missing_units(unit_ratio, quantity, tolerance, price.minimum_order_quantity)
   end
 
   def missing_units_was
     unit_ratio = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
-    _missing_units(unit_ratio, quantity_was, tolerance_was)
+    _missing_units(unit_ratio, quantity_was, tolerance_was, price.minimum_order_quantity)
   end
 
   # Check if the result of any associated GroupOrderArticle was overridden manually
@@ -264,7 +264,11 @@ class OrderArticle < ApplicationRecord
     end
   end
 
-  def _missing_units(unit_ratio, quantity, tolerance)
+  def _missing_units(unit_ratio, quantity, tolerance, minimum_order_quantity)
+    if !minimum_order_quantity.nil? && quantity > 0 && quantity + tolerance < minimum_order_quantity
+      return minimum_order_quantity - quantity - tolerance
+    end
+
     return 0 if article_version.supplier_order_unit_is_si_convertible
 
     units = unit_ratio - ((quantity % unit_ratio) + tolerance)
