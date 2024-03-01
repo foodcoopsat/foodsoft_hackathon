@@ -4,7 +4,7 @@ class Supplier < ApplicationRecord
   include MarkAsDeletedWithName
   include CustomFields
 
-  has_many :articles, -> { merge(Article.with_latest_versions_and_categories.order('article_categories.name, article_versions.name')) }
+  has_many :articles, -> { merge(Article.not_in_stock.with_latest_versions_and_categories.order('article_categories.name, article_versions.name')) }
   has_many :stock_articles, -> { merge(StockArticle.with_latest_versions_and_categories.order('article_categories.name, article_versions.name')) }
   has_many :orders
   has_many :deliveries
