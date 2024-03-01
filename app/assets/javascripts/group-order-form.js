@@ -46,12 +46,12 @@ class GroupOrderForm {
     const total = this.articleRows$
       .toArray()
       .reduce((acc, row) =>
-        acc + parseFloat($(row).find('*[id^="price_"][id$="_display"]').data('price')),
+        Big(acc).add(parseFloat($(row).find('*[id^="price_"][id$="_display"]').data('price'))).toNumber(),
         0
       );
 
     this.totalPrice$.text(I18n.l('currency', total));
-    const balance = this.groupBalance - total;
+    const balance = Big(this.groupBalance).sub(total).toNumber();
     this.newBalance$.text(I18n.l('currency', balance));
 
     // TODO: Figure out why this hidden field is required (Should be
@@ -142,26 +142,26 @@ class GroupOrderForm {
     const minimumOrderQuantity = parseFloat(quantity$.data('minimum-order-quantity'));
     const price = parseFloat(quantity$.data('price'));
 
-    const totalQuantity = quantity + othersQuantity;
-    const totalTolerance = tolerance + othersTolerance;
+    const totalQuantity = Big(quantity).add(othersQuantity).toNumber();
+    const totalTolerance = Big(tolerance).add(othersTolerance).toNumber();
 
     const totalPacks = this.calculatePacks(packSize, totalQuantity, totalTolerance, minimumOrderQuantity)
 
-    const totalPrice = price * (quantity + (this.toleranceIsCostly ? tolerance : 0));
+    const totalPrice = Big(price).mul(Big(quantity).add(this.toleranceIsCostly ? tolerance : 0)).toNumber();
 
     // update used/unused quantity
-    const available = Math.max(0, totalPacks * packSize - othersQuantity);
+    const available = Math.max(0, Big(totalPacks).mul(packSize).sub(othersQuantity).toNumber());
     let used = Math.min(available, quantity);
     // ensure that at least the amount of items this group has already been allocated is used
     if (quantity >= usedQuantity && used < usedQuantity) {
       used = usedQuantity;
     }
 
-    const unused = quantity - used;
+    const unused = Big(quantity).sub(used).toNumber();
 
-    const availableForTolerance = quantity < minimumOrderQuantity ? minimumOrderQuantity - quantity : Math.max(0, available - used - othersTolerance);
+    const availableForTolerance = quantity < minimumOrderQuantity ? Big(minimumOrderQuantity).sub(quantity).toNumber() : Math.max(0, Big(available).sub(used).sub(othersTolerance).toNumber());
     const usedTolerance = Math.min(availableForTolerance, tolerance);
-    const unusedTolerance = tolerance - usedTolerance;
+    const unusedTolerance = Big(tolerance).sub(usedTolerance).toNumber();
 
     const missing = this.calcMissingItems(packSize, totalQuantity, totalTolerance, minimumOrderQuantity);
 
@@ -196,18 +196,18 @@ class GroupOrderForm {
   }
 
   calculatePacks(packSize, quantity, tolerance, minimumOrderQuantity) {
-    if (quantity + tolerance < minimumOrderQuantity) {
+    if (Big(quantity).add(tolerance).toNumber() < minimumOrderQuantity) {
       return 0;
     }
 
     const used = Big(quantity).div(packSize).round(0, Big.roundDown).toNumber();
     const remainder = Big(quantity).mod(packSize).toNumber();
-    return used + ((remainder > 0) && (remainder + tolerance >= packSize) ? 1 : 0)
+    return Big(used).add((remainder > 0) && (Big(remainder).add(tolerance).toNumber() >= packSize) ? 1 : 0).toNumber();
   }
 
   calcMissingItems(packSize, quantity, tolerance, minimumOrderQuantity) {
-    if (quantity + tolerance < minimumOrderQuantity) {
-      return minimumOrderQuantity - quantity - tolerance;
+    if (Big(quantity).add(tolerance).toNumber() < minimumOrderQuantity) {
+      return Big(minimumOrderQuantity).sub(quantity).sub(tolerance);
     }
 
     if (isNaN(quantity)) {
@@ -219,12 +219,12 @@ class GroupOrderForm {
     }
 
     var remainder = Big(quantity).mod(packSize).toNumber();
-    return remainder > 0 && remainder + tolerance < packSize ? packSize - remainder - tolerance : 0
+    return remainder > 0 && Big(remainder).add(tolerance).toNumber() < packSize ? Big(packSize).sub(remainder).sub(tolerance).toNumber() : 0
   }
 
   packCompletedFromTolerance(packSize, quantity, tolerance) {
     var remainder = Big(quantity).mod(packSize).toNumber();
-    return (remainder > 0 && (remainder + tolerance >= packSize));
+    return (remainder > 0 && (Big(remainder).add(tolerance).toNumber() >= packSize));
   }
 }
 
