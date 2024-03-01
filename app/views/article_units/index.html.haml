@@ -1,5 +1,8 @@
 =form_with url: search_article_units_path, method: :get, id: :article_unit_search_form, html: {'data-remote': true} do |form|
-  = form.text_field :q, id: :article_unit_search, placeholder: t('.search')
+  .d-flex.align-items-center
+    = form.text_field :q, id: :article_unit_search, placeholder: t('.search'), class: 'm-0'
+    = form.check_box :only_recommended, id: :only_recommended, class: 'm-0 ml-2', checked: true
+    = form.label :only_recommended, t('.only_recommended'), class: 'm-0 ml-1', for: :only_recommended
 
 %table.table.table-striped
   %thead
@@ -31,7 +34,7 @@
     }
 
     $(document).ready(function () {
-      $('#article_unit_search').on('input', debounce(250, () => {
+      $('#article_unit_search, #only_recommended').on('input', debounce(250, () => {
         $('#article_unit_search_form').submit();
       }));
     });

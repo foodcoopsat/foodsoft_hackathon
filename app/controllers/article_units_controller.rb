@@ -15,7 +15,8 @@ class ArticleUnitsController < ApplicationController
 
     unless @query.nil?
       @article_units = @article_units.select do |_key, value|
-        value[:name].downcase.include?(@query) || value[:symbol]&.downcase&.include?(@query)
+        (value[:name].downcase.include?(@query) || value[:symbol]&.downcase&.include?(@query)) &&
+          (params[:only_recommended] == "0" || !value[:untranslated])
       end
     end
 
