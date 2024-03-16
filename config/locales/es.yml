@@ -28,7 +28,7 @@ es:
       article_category:
         description: Importar nombres
         name: Nombre
-      article_price:
+      article_version:
         deposit: Depósito
         price: Precio (neto)
         tax: IVA

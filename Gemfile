@@ -84,6 +84,7 @@ group :development do
   gem 'mailcatcher'
   gem 'sqlite3', '~> 1.3.6'
   gem 'web-console'
+  gem 'byebug'
 
   # Better error output
   gem 'better_errors'

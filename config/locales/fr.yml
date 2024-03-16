@@ -27,7 +27,7 @@ fr:
       article_category:
         description: Description
         name: Nom
-      article_price:
+      article_version:
         deposit: Consigne
         price: Prix HT
         tax: TVA

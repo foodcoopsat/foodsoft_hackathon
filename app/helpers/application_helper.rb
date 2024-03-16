@@ -267,4 +267,8 @@ module ApplicationHelper
 
     stylesheet_link_tag foodcoop_css_path, media: 'all'
   end
+
+  def format_number(value)
+    format('%g', format('%.2f', value))
+  end
 end
