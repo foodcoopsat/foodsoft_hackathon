@@ -1,11 +1,15 @@
+- content_for :javascript do
+  :javascript
+    const units = #{raw(@all_units.to_json)};
+    let articleUnitRatioTemplate$ = undefined;
 - if @outlisted_articles.any?
   %h2= t '.outlist.title'
   %p
     = t('.outlist.body').html_safe
     %ul
-      - for article in @outlisted_articles
+      - @outlisted_articles.each_with_index do |article, index|
         %li
-          = hidden_field_tag "outlisted_articles[#{article.id}]", '1'
+          = hidden_field_tag "outlisted_articles[#{index}]", article.id
           = article.name
           - if article.in_open_order
             .alert= t '.outlist.alert_used', article: article.name

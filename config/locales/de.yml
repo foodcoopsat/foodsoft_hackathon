@@ -25,14 +25,33 @@ de:
         unit_quantity: Gebindegröße
         unit_quantity_short: GebGr
         units: Gebinde
+      article_unit:
+        code: Einheitencode gemäß Empfehlung der United Nations Economic Commission (UNECE)
+        code_short: Code
+        symbol: Einheitenzeichen
+        description: Beschreibung (Englisch)
       article_category:
         description: Beschreibung
         name: Name
-      article_price:
+      article_version:
         deposit: Pfand
         price: Nettopreis
         tax: MwSt
         unit_quantity: Gebindegröße
+
+        availability: Artikel ist verfügbar?
+        name: Name
+        note: Notiz
+        origin: Herkunft
+        manufacturer: Produzent
+        order_number: Bestellnummer
+        article_category: Kategorie
+
+        supplier_order_unit: Liefereinheit
+        group_order_granularity: bestellbar per
+        billing_unit: Abrechnungseinheit
+        price_unit: Preiseinheit
+        minimum_order_quantity: Mindestbestellmenge
       bank_account:
         balance: Kontostand
         bank_gateway: Bankgateway
@@ -254,6 +273,7 @@ de:
               exclusion: erledigte Aufgaben können nicht wöchentlich wiederholt werden
     models:
       article: Artikel
+      article_version: Artikel
       article_category: Kategorie
       bank_account: Bankkonto
       bank_gateway: Bankgateway
@@ -498,6 +518,8 @@ de:
         notice_unavail: Alle gewählten Artikel wurden auf "nicht verfügbar" gesetzt
       update_sync:
         notice: Alle Artikel und Preise wurden aktualisiert
+      complete_units_migration:
+        notice: Artikel erfolgreich migriert
     destroy_active_article:
       drop: entfernen
       note: "%{article} wird in laufenden Bestellungen verwendet und kann nicht gelöscht werden. Bitte zuerst den Artikel aus den Bestellungen %{drop_link}."
@@ -517,6 +539,7 @@ de:
       change_supplier: Lieferant wechseln
       download: Artikel herunterladen
       edit_all: Alle bearbeiten
+      migrate_units: Alte Artikeleinheiten migrieren
       ext_db:
         import: Suchen/Importieren
         sync: Synchronisieren
@@ -530,6 +553,24 @@ de:
       search_placeholder: Name ...
       title: Artikel von %{supplier} (%{count})
       upload: Artikel hochladen
+    prepare_units_migration:
+      title: Artikel von %{supplier} migrieren
+      explanation: |
+        TODO: Allgemeine Erklärung
+        Es wird sehr empfohlen ein Backup herunterzuladen ehe Sie fortfahren:
+      download: Artikel-Backup herunterladen
+      migrate_units: Nächster Schritt
+    migrate_units:
+      title: Artikel von %{supplier} migrieren
+      explanation: |
+        Die Artikeleinheiten werden nun in eine neue, flexiblere Form konvertiert. Passen Sie die Konvertierungsvorschläge an, ehe sie fortfahren.
+        TODO: Besser erklären; vielleicht mit Doku verlinken?
+      column_headers:
+        apply: Konvertieren
+        original_plaintext_unit: Ursprüngliche Volltext-Einheit
+        affected_articles: Betroffene Artikel
+        contains: Beinhaltet
+      run_migration: Migration jetzt durchführen
     model:
       error_in_use: "%{article} kann nicht gelöscht werden. Der Artikel befindet sich in einer laufenden Bestellung!"
       error_nosel: Du hast keine Artikel ausgewählt
@@ -779,6 +820,15 @@ de:
     not_found:
       text: Diese Seite existiert anscheinend nicht. Entschuldigung!
       title: Seite nicht gefunden
+    step_error: Gib eine Zahl >=%{min} ein, die ein Vielfaches von %{granularity} ist.
+  feedback:
+    create:
+      notice: Das Feedback wurde erfolgreich verschickt. Vielen Dank!
+    new:
+      first_paragraph: Fehler gefunden? Vorschlag? Idee? Kritik? Wir freuen uns über jegliches Feedback.
+      second_paragraph: Bitte beachte, dass das Foodsoft Team nur die Software wartet. Bei Fragen zur Organisation in Deiner Foodcoop, kontaktiere besser die entsprechenden Ansprechpartner.
+      send: Absenden
+      title: Gib Feedback
   finance:
     balancing:
       close:
@@ -1127,6 +1177,10 @@ de:
     tasks:
       required_users: "Es fehlen %{count} Mitstreiterinnen!"
       task_title: "%{name} (%{duration}h)"
+    unit_conversion_fields:
+      title: Einheiten umrechnen
+      cancel: Abbrechen
+      apply: Anwenden
   home:
     apple_bar:
       desc: 'Abgebildet ist das Verhältnis von erledigten Aufgaben zu dem Bestellvolumen Deiner Bestellgruppe im Vergleich zum Durchschnitt in der Foodcoop. Konkret: Pro %{amount} Bestellsumme solltest Du eine Aufgabe machen!'
@@ -1414,6 +1468,7 @@ de:
       stock: Lager
       suppliers: Lieferanten/Artikel
       title: Artikel
+      article_units: Artikeleinheiten
     dashboard: Übersichtsseite
     finances:
       accounts: Konten verwalten
@@ -1592,6 +1647,14 @@ de:
       ordered_desc: Anzahl der Artikel die durch das Mitglied bestellt wurden (Menge + Toleranz)
       received: Bekommen
       received_desc: Anzahl der Artikel die ein Mitglied erhält
+    article_fields_units:
+      custom_unit: Benutzerdefiniert
+      unit: Einheit
+      unit_ratios: Einheiten-Umrechnung
+      add_ratio: Umrechnung hinzufügen
+    article_unit_ratio:
+      remove: Umrechnung entfernen
+      per: pro
     articles_by:
       price: Gesamtpreis
       price_sum: Summe
@@ -1756,6 +1819,20 @@ de:
       stock_changes: Verlauf des Lagerbestands
     update:
       notice: Lagerartikel »%{name}« aktualisiert.
+  article_units:
+    index:
+      search: Einheit/Symbol suchen
+    rows:
+      request_translation: Für diese Einheit existiert noch keine Übersetzung. Wenn Sie der Meinung sind, dass es eine gebräuchliche Einheit ist, klicken Sie hier um ein neues GitHub Issue zu erstellen.
+    create_link:
+      add: Hinzufügen
+    destroy_link:
+      delete: Entfernen
+      confirm: Wollen Sie die Artikeleinheit wirklich entfernen? (Bestehende Artikel, die diese Einheit verwenden, werden nicht verändert, aber man kann die Einheit dann nicht mehr in neuen Artikeln verwenden.)
+    create:
+      success: Artikeleinheit %{name} erfolgreich hinzugefügt.
+    destroy:
+      success: Artikeleinheit %{name} erfolgreich entfernt.
   suppliers:
     create:
       notice: Lieferant wurde erstellt

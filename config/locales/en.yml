@@ -25,14 +25,35 @@ en:
         unit_quantity: Unit quantity
         unit_quantity_short: U.Q.
         units: Units
+        supplier_order_unit: Supplier order unit
+      article_unit:
+        code: Unit code according to the recommendation of the United Nations Economic Commission (UNECE)
+        code_short: Code
+        symbol: Symbol
+        description: Description
       article_category:
         description: Import names
         name: Name
-      article_price:
+      article_version:
         deposit: Deposit
         price: Price (net)
         tax: VAT
         unit_quantity: Unit quantity
+
+
+        availability: Is article available?
+        name: Name
+        note: Note
+        origin: Origin
+        manufacturer: Manufacturer
+        order_number: Order number
+        article_category: Category
+
+        supplier_order_unit: Delivery unit
+        group_order_granularity: can be ordered per
+        billing_unit: Billing unit
+        price_unit: Price unit
+        minimum_order_quantity: Minimum order quantity
       bank_account:
         balance: Balance
         bank_gateway: Bank gateway
@@ -138,6 +159,7 @@ en:
         updated_by: Last edited by
       order_article:
         article: Article
+        article_version: Article
         missing_units: Missing units
         missing_units_short: Missing
         quantity: Desired amount
@@ -498,6 +520,8 @@ en:
         notice_unavail: All selected articles were set to be unavailable.
       update_sync:
         notice: All articles and prices were updated.
+      complete_units_migration:
+        notice: Articles successfully migrated
     destroy_active_article:
       drop: delete
       note: "%{article} is used in current orders and can not be deleted Please first ... the article from orders %{drop_link}."
@@ -509,6 +533,7 @@ en:
     form:
       title_edit: Edit article
       title_new: Add new article
+      per: per
     import_search_results:
       action_import: import
       already_imported: imported
@@ -517,6 +542,7 @@ en:
       change_supplier: Change supplier
       download: Download articles
       edit_all: Edit all
+      migrate_units: Migrate old article units
       ext_db:
         import: Import article
         sync: Synchronise
@@ -530,6 +556,23 @@ en:
       search_placeholder: Name ...
       title: Articles from %{supplier} (%{count})
       upload: Upload articles
+    prepare_units_migration:
+      explanation: |
+        TODO: General explanation
+        It's highly recommended to download a backup before continuing:
+      title: Migrate articles of %{supplier}
+      download: Download articles backup
+    migrate_units:
+      title: Migrate articles of %{supplier}
+      explanation: |
+        This will try to migrate articles to their new, more versatile format. You may adapt the suggested changes before continuing if you see fit.
+        TODO: Expand on this explanation - maybe link to some docs
+      column_headers:
+        apply: Convert
+        original_plaintext_unit: Original plaintext unit
+        affected_articles: Affected articles
+        contains: Contains
+      run_migration: Run migration now
     model:
       error_in_use: "%{article} can not be deleted because the article is part of a current order!"
       error_nosel: You have selected no articles
@@ -779,6 +822,15 @@ en:
     not_found:
       text: This page does not appear to exist, sorry!
       title: Page not found
+    step_error: Enter a number >=%{min}, which is a multiple of %{granularity}.
+  feedback:
+    create:
+      notice: Your feedback was sent successfully. Thanks a lot!
+    new:
+      first_paragraph: Found a bug? Suggestions? Ideas? Reviews? We are happy to hear any feedback.
+      second_paragraph: Please be aware that the Foodsoft Team is only responsible for the maintenance of the software. For questions regarding the organisation of your Foodcoop, please contact the appropriate contact person.
+      send: Send
+      title: Give feedback
   finance:
     balancing:
       close:
@@ -1127,6 +1179,10 @@ en:
     tasks:
       required_users: "%{count} members are still needed!"
       task_title: "%{name} (%{duration}h)"
+    unit_conversion_fields:
+      title: Convert units
+      cancel: Cancel
+      apply: Apply
   home:
     apple_bar:
       desc: 'This shows the proportion of completed tasks to the volume of orders for your ordergroup in comparison to the average of the Foodcoop. In practice: for every %{amount} of total orders, you should execute a task!'
@@ -1417,6 +1473,7 @@ en:
       stock: Stock
       suppliers: Suppliers/articles
       title: Articles
+      article_units: Article units
     dashboard: Dashboard
     finances:
       accounts: Manage accounts
@@ -1595,6 +1652,14 @@ en:
       ordered_desc: Number of articles as ordered by member (amount + tolerance)
       received: Received
       received_desc: Number of articles that (will be) received by member
+    article_fields_units:
+      custom_unit: Custom
+      unit: Unit
+      unit_ratios: Unit ratios
+      add_ratio: Add ratio
+    article_unit_ratio:
+      remove: Remove ratio
+      per: per
     articles_by:
       price: Total price
       price_sum: Sum
@@ -1792,8 +1857,19 @@ en:
       last_orders: Last orders
       new_delivery: New delivery
       show_deliveries: Show all
+      share: Share
+      remove_share: Remove share
+      confirm_remove_share: Do you really want to stop sharing this supplier's articles? (If you later decide to start sharing them again, you'll have to resend the new link to all subscribers who you think should have access.)
     update:
       notice: Supplier was updated
+    import_search_results:
+      action_import: import
+      already_imported: imported
+      not_found: No articles found
+  supplier_shares:
+    share_link:
+      not_shared: Supplier's articles are currently not shared with anyone.
+      share_link_copied_to_clipboard: Share link has been copied to the clipboard.
   tasks:
     accept:
       notice: You have accepted the task

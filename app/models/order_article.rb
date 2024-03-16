@@ -5,19 +5,20 @@ class OrderArticle < ApplicationRecord
   attr_reader :update_global_price
 
   belongs_to :order
-  belongs_to :article
-  belongs_to :article_price, optional: true
+  belongs_to :article_version
   has_many :group_order_articles, dependent: :destroy
 
-  validates :order_id, :article_id, presence: true
-  validate :article_and_price_exist
-  validates :article_id, uniqueness: { scope: :order_id }
+  validates :order_id, :article_version_id, presence: true
+  validate :article_version_and_price_exist
+  validates :article_version_id, uniqueness: { scope: :order_id }
 
   _ordered_sql = 'order_articles.units_to_order > 0 OR order_articles.units_billed > 0 OR order_articles.units_received > 0'
   scope :ordered, -> { where(_ordered_sql) }
   scope :ordered_or_member, lambda {
                               includes(:group_order_articles).where("#{_ordered_sql} OR order_articles.quantity > 0 OR group_order_articles.result > 0")
                             }
+  scope :belonging_to_open_order, -> { joins(:order).merge(Order.open) }
+  scope :belonging_to_finished_order, -> { joins(:order).merge(Order.finished) }
 
   before_create :init_from_balancing
   after_destroy :update_ordergroup_prices
@@ -30,10 +31,10 @@ class OrderArticle < ApplicationRecord
     %w[order article]
   end
 
-  # This method returns either the ArticlePrice or the Article
+  # This method returns either the ArticleVersion or the Article
   # The first will be set, when the the order is finished
   def price
-    article_price || article
+    article_version || article
   end
 
   # latest information on available units
@@ -48,7 +49,7 @@ class OrderArticle < ApplicationRecord
   # In balancing this can differ from ordered (by supplier) quantity for this article.
   def group_orders_sum
     quantity = group_order_articles.collect(&:result).sum
-    { quantity: quantity, price: quantity * price.fc_price }
+    { quantity: quantity, price: quantity * price.fc_group_order_price }
   end
 
   # Update quantity/tolerance/units_to_order from group_order_articles
@@ -83,30 +84,26 @@ class OrderArticle < ApplicationRecord
   #      4        |    5     |     4     |           2
   #
   def calculate_units_to_order(quantity, tolerance = 0)
-    unit_size = price.unit_quantity
-    units = quantity / unit_size
-    remainder = quantity % unit_size
-    units += ((remainder > 0) && (remainder + tolerance >= unit_size) ? 1 : 0)
+    return price.minimum_order_quantity if quantity > 0 && !price.minimum_order_quantity.nil? && quantity < price.minimum_order_quantity && quantity + tolerance >= price.minimum_order_quantity
+
+    unit_size = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
+    if price.supplier_order_unit_is_si_convertible
+      quantity / unit_size
+    else
+      units = (quantity / unit_size).floor
+      remainder = quantity % unit_size
+      units += ((remainder > 0) && (remainder + tolerance >= unit_size) ? 1 : 0)
+    end
   end
 
   # Calculate price for ordered quantity.
   def total_price
-    units * price.unit_quantity * price.price
+    units * price.price
   end
 
   # Calculate gross price for ordered qunatity.
   def total_gross_price
-    units * price.unit_quantity * price.gross_price
-  end
-
-  def ordered_quantities_different_from_group_orders?(ordered_mark = '!', billed_mark = '?', received_mark = '?')
-    if !units_received.nil?
-      (units_received * price.unit_quantity) == group_orders_sum[:quantity] ? false : received_mark
-    elsif !units_billed.nil?
-      (units_billed * price.unit_quantity) == group_orders_sum[:quantity] ? false : billed_mark
-    elsif !units_to_order.nil?
-      (units_to_order * price.unit_quantity) == group_orders_sum[:quantity] ? false : ordered_mark
-    end
+    units * price.gross_price
   end
 
   # redistribute articles over ordergroups
@@ -129,7 +126,11 @@ class OrderArticle < ApplicationRecord
     end
 
     # Recompute
-    group_order_articles.each { |goa| goa.save_results! qty_for_members }
+    group_order_articles.each do |goa|
+      group_order_total = article_version.convert_quantity(qty_for_members, article_version.supplier_order_unit,
+                                                           article_version.group_order_unit)
+      goa.save_results!(group_order_total)
+    end
     qty_left -= qty_for_members
 
     # if there's anything left, move to stock if wanted
@@ -154,31 +155,19 @@ class OrderArticle < ApplicationRecord
   end
 
   # Updates order_article and belongings during balancing process
-  def update_article_and_price!(order_article_attributes, article_attributes, price_attributes = nil)
+  def update_handling_versioning!(order_article_attributes, version_attributes)
     OrderArticle.transaction do
       # Updates self
       update!(order_article_attributes)
 
-      # Updates article
-      article.update!(article_attributes)
+      # Updates article_version belonging to current order article
+      original_article_version = article_version.duplicate_including_article_unit_ratios
+      article_version.assign_attributes(version_attributes)
+      if article_version.changed?
+        update_or_create_article_version(version_attributes, original_article_version)
 
-      # Updates article_price belonging to current order article
-      if price_attributes.present?
-        article_price.attributes = price_attributes
-        if article_price.changed?
-          # Updates also price attributes of article if update_global_price is selected
-          if update_global_price
-            article.update!(price_attributes)
-            self.article_price = article.article_prices.first and save # Assign new created article price to order article
-          else
-            # Creates a new article_price if neccessary
-            # Set created_at timestamp to order ends, to make sure the current article price isn't changed
-            create_article_price!(price_attributes.merge(article_id: article_id, created_at: order.ends)) and save
-          end
-
-          # Updates ordergroup values
-          update_ordergroup_prices
-        end
+        # Updates ordergroup values
+        update_ordergroup_prices
       end
     end
   end
@@ -189,11 +178,13 @@ class OrderArticle < ApplicationRecord
 
   # @return [Number] Units missing for the last +unit_quantity+ of the article.
   def missing_units
-    _missing_units(price.unit_quantity, quantity, tolerance)
+    unit_ratio = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
+    _missing_units(unit_ratio, quantity, tolerance, price.minimum_order_quantity)
   end
 
   def missing_units_was
-    _missing_units(price.unit_quantity, quantity_was, tolerance_was)
+    unit_ratio = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)
+    _missing_units(unit_ratio, quantity_was, tolerance_was, price.minimum_order_quantity)
   end
 
   # Check if the result of any associated GroupOrderArticle was overridden manually
@@ -207,20 +198,49 @@ class OrderArticle < ApplicationRecord
 
   private
 
-  def article_and_price_exist
-    if !(article = Article.find(article_id)) || article.fc_price.nil?
-      errors.add(:article,
+  def article_version_and_price_exist
+    if !(article_version = ArticleVersion.find(article_version_id)) || article_version.fc_price.nil?
+      errors.add(:article_version,
                  I18n.t('model.order_article.error_price'))
     end
   rescue StandardError
-    errors.add(:article, I18n.t('model.order_article.error_price'))
+    errors.add(:article_version, I18n.t('model.order_article.error_price'))
   end
 
   # Associate with current article price if created in a finished order
   def init_from_balancing
     return unless order.present? && order.finished?
 
-    self.article_price = article.article_prices.first
+    self.article_version = article_version.article.article_versions.first
+  end
+
+  def update_or_create_article_version(version_attributes, original_article_version)
+    version_attributes = version_attributes.merge(article_id: article_version.article_id)
+
+    modifying_earlier_version = article_version.article.latest_article_version.id != article_version_id
+    finished_order_article_using_same_version = OrderArticle.belonging_to_finished_order.where(article_version_id: article_version_id).where.not(id: id)
+
+    if (!update_global_price && modifying_earlier_version && !finished_order_article_using_same_version.exists?) ||
+       (update_global_price && !modifying_earlier_version)
+      # update in place:
+      article_version.save
+    else
+      # create new version:
+      original_version_id = article_version.id
+      self.article_version = article_version.duplicate_including_article_unit_ratios
+      article_version.save
+      update_attribute(:article_version_id, article_version.id)
+
+      if update_global_price
+        # update open order articles:
+        OrderArticle.belonging_to_open_order.where(article_version_id: original_version_id).update_all(article_version_id: article_version.id)
+      else
+        # create yet *another* version, wich contains the old data, so new orders will continue using that data:
+        # (The checkbox "Also update the price of future orders" not being checked implies that)
+        original_article_version.created_at = article_version.created_at + 1.second
+        original_article_version.save
+      end
+    end
   end
 
   def update_ordergroup_prices
@@ -247,10 +267,15 @@ class OrderArticle < ApplicationRecord
     end
   end
 
-  def _missing_units(unit_quantity, quantity, tolerance)
-    units = unit_quantity - ((quantity % unit_quantity) + tolerance)
+  def _missing_units(unit_ratio, quantity, tolerance, minimum_order_quantity)
+    return minimum_order_quantity - quantity - tolerance if !minimum_order_quantity.nil? && quantity > 0 && quantity + tolerance < minimum_order_quantity
+
+    return 0 if article_version.supplier_order_unit_is_si_convertible
+
+    units = unit_ratio - ((quantity % unit_ratio) + tolerance)
+
     units = 0 if units < 0
-    units = 0 if units == unit_quantity
+    units = 0 if units == unit_ratio
     units
   end
 end
