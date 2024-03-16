@@ -5,6 +5,6 @@ class OrderArticleSerializer < ActiveModel::Serializer
   has_one :article
 
   def price
-    object.price.fc_price.to_f
+    object.article_version.fc_price.to_f
   end
 end

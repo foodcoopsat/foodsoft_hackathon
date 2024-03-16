@@ -1,5 +1,7 @@
 @import "twitter/bootstrap/bootstrap";
 @import "twitter/bootstrap/responsive";
+@import "group_order";
+@import "article";
 @import "delta_input";
 
 body {
@@ -42,6 +44,10 @@ body {
 @articleUnusedColor: red;
 @articleUnavailColor: #999;
 @articleUpdatedColor: #468847;
+@articleCustomUnitWarning: #ff8c00;
+
+// article units:
+@unitUntranslatedColor: #999;
 
 // dim colors by this amount when the information is less important
 @nonessentialDim: 35%;
@@ -279,6 +285,21 @@ tr.order-article:hover .article-info {
   display: block;
 }
 
+tr.order-article {
+  .group-order-unit {
+    white-space: nowrap;
+  }
+
+  .group-order-input {
+    text-align: center;
+
+    .goa-quantity {
+      width: 45px;
+      text-align: right;
+    }
+  }
+}
+
 
 // ********* Articles
 
@@ -319,6 +340,12 @@ td.symbol, th.symbol {
 .partused    .symbol { color: tint(@articlePartusedColor, @nonessentialDim); }
 .unavailable .symbol { color: @articleUnavailColor; }
 
+.article-form .icon-warning-sign {
+  margin-top: 8px;
+  margin-left: 10px;
+  color: @articleCustomUnitWarning;
+}
+
 // hide symbols completely on small screens to save space
 @media (max-width: 768px) {
   .symbol {
@@ -326,6 +353,11 @@ td.symbol, th.symbol {
     padding: 0;
     margin: 0;
   }
+}
+
+// ********* Article units
+tr.untranslated {
+  color: @unitUntranslatedColor;
 }
 
 
@@ -448,6 +480,16 @@ i.package.icon-only {
   margin: 0;
 }
 
+// bootstrap 2 doesn't support differnt modal sizes -> let's provide our own modal-xl:
+.modal.modal-xl {
+  width: 80vw;
+  max-width: 650px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+}
+
 // multiple-column layout in forms (landscape tablet and wider only)
 @media (min-width: 768px) {
   .form-horizontal .fold-line {
@@ -547,4 +589,91 @@ span.negative_amout {
 
 details {
   cursor: pointer;
+}
+
+.form-horizontal .no-indent-left .control-group {
+  margin-bottom: 0;
+  .controls {
+    margin-left: 0;
+  }
+}
+
+// bootstrap version 2 doesn't support some styles -> let's add makeshift ones manually for now:
+.d-flex {
+  display: flex;
+}
+
+.d-none {
+  display: none;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.m-0 {
+  margin:0 !important;
+}
+
+.ml-1 {
+  margin-left: 3px !important;
+}
+
+.ml-2 {
+  margin-left: 6px !important;
+}
+
+td.ml-1 > *:first-child {
+  margin-left: 3px !important;
+}
+
+
+.mr-1 {
+  margin-right: 3px !important;
+}
+
+td.mr-1 > *:last-child {
+  margin-right: 3px;
+}
+
+.mt-1 {
+  margin-top: 3px !important;
+}
+
+.mb-1 {
+  margin-bottom: 3px !important;
+}
+
+.text-decoration-none:hover {
+  text-decoration: none;
+}
+
+// Wider popovers
+.popover.wide {
+  max-width: 40vw;
+}
+
+.gap-1 {
+  gap: .25rem;
+}
+
+*[role="button"] {
+  cursor: pointer;
+}
+
+.user-select-none {
+  user-select: none;
+}
+
+.numeric-step-error {
+  display: none;
+  color: #b94a48;
+}
+
+.btn-group.numeric-step > input:invalid {
+  border: 1px solid #b94a48;
+}
+
+.btn-group.numeric-step:has(> input:invalid) + .numeric-step-error {
+  display: block;
 }

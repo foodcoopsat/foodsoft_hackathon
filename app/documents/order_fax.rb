@@ -1,4 +1,6 @@
 class OrderFax < OrderPdf
+  include ArticlesHelper
+
   BATCH_SIZE = 250
 
   def filename
@@ -10,9 +12,20 @@ class OrderFax < OrderPdf
   end
 
   def body
-    contact = FoodsoftConfig[:contact].symbolize_keys
+    from_paragraph
 
-    # From paragraph
+    recipient_paragraph
+
+    articles_paragraph
+  rescue StandardError => e
+    Rails.logger.info e.backtrace
+    raise # always reraise
+  end
+
+  private
+
+  def from_paragraph
+    contact = FoodsoftConfig[:contact].symbolize_keys
     bounding_box [margin_box.right - 200, margin_box.top], width: 200 do
       text FoodsoftConfig[:name], size: fontsize(9), align: :right
       move_down 5
@@ -34,8 +47,9 @@ class OrderFax < OrderPdf
                                                                             align: :right
       end
     end
+  end
 
-    # Recipient
+  def recipient_paragraph
     bounding_box [margin_box.left, margin_box.top - 60], width: 200 do
       text order.name
       move_down 5
@@ -52,23 +66,27 @@ class OrderFax < OrderPdf
     move_down 10
     text "#{Delivery.human_attribute_name :date}:"
     move_down 10
-    if order.supplier.try(:contact_person).present?
-      text "#{Supplier.human_attribute_name :contact_person}: #{order.supplier[:contact_person]}"
-      move_down 10
-    end
+    return if order.supplier.try(:contact_person).blank?
 
-    # Articles
+    text "#{Supplier.human_attribute_name :contact_person}: #{order.supplier[:contact_person]}"
+    move_down 10
+  end
+
+  def articles_paragraph
     total = 0
     data = [I18n.t('documents.order_fax.rows')]
     each_order_article do |oa|
-      subtotal = oa.units_to_order * oa.price.unit_quantity * oa.price.price
+      price = oa.article_version.price
+      subtotal = oa.units_to_order * price
       total += subtotal
-      data << [oa.article.order_number,
+      data << [oa.article_version.order_number,
                oa.units_to_order,
-               oa.article.name,
-               oa.price.unit_quantity,
-               oa.article.unit,
-               number_to_currency(oa.price.price),
+               oa.article_version.name,
+               # TODO-article-units: Why should we show the supplier the group order unit quantity?:
+               oa.article_version.convert_quantity(1, oa.article_version.supplier_order_unit,
+                                                   oa.article_version.group_order_unit),
+               format_supplier_order_unit_with_ratios(oa.price),
+               number_to_currency(price),
                number_to_currency(subtotal)]
     end
     data << [I18n.t('documents.order_fax.total'), nil, nil, nil, nil, nil, number_to_currency(total)]
@@ -91,13 +109,11 @@ class OrderFax < OrderPdf
     # align: {0 => :left}
   end
 
-  private
-
   def order_articles
     order.order_articles.ordered
-         .joins(:article)
-         .order('articles.order_number').order('articles.name')
-         .preload(:article, :article_price)
+         .joins(:article_version)
+         .order('article_versions.order_number').order('article_versions.name')
+         .preload(article_version: :article)
   end
 
   def each_order_article(&block)
