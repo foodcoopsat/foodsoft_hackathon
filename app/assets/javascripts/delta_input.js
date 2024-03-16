@@ -20,6 +20,7 @@ function data_delta_update(el, direction) {
   var granularity = $(el).data('granularity');
 
   var val = $(el).val().replace(',', '.');
+  const valueContainedColon = $(el).val() != val;
   var oldval = $.isNumeric(val) ? Number(val) : 0;
   var newval = oldval + delta*direction;
 
@@ -36,7 +37,11 @@ function data_delta_update(el, direction) {
 
   // update field, unless the user is typing
   if (!$(el).is(':focus') && !erroneousValue) {
-    $(el).val(round_float(newval, granularity));
+    let roundedValue = String(round_float(newval, granularity));
+    if (valueContainedColon) {
+      roundedValue = roundedValue.replace('.', ',');
+    }
+    $(el).val(roundedValue);
     $(el).trigger('changed');
   }
 }
