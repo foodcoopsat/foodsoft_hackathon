@@ -22,7 +22,7 @@ class OrderByArticles < OrderPdf
       each_group_order_article_for_order_article(order_article) do |goa|
         dimrows << rows.length if goa.result == 0
         rows << [goa.group_order.ordergroup_name,
-                 billign_quantity_with_tolerance(goa),
+                 billing_quantity_with_tolerance(goa),
                  article_version.convert_quantity(goa.result, article_version.group_order_unit,
                                                   article_version.billing_unit),
                  number_to_currency(goa.total_price)]

@@ -25,7 +25,7 @@ class OrderByGroups < OrderPdf
         dimrows << rows.length if goa.result == 0
         rows << [goa.order_article.article_version.name,
                  goa.group_order.order.name,
-                 billign_quantity_with_tolerance(goa),
+                 billing_quantity_with_tolerance(goa),
                  billing_article_result(goa),
                  price_per_billing_unit(goa),
                  number_to_currency(goa.total_price)]

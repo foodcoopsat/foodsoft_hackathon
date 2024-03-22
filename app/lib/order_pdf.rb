@@ -61,7 +61,7 @@ class OrderPdf < RenderPdf
                                                            article_version.supplier_order_unit))} / #{format_billing_unit_with_ratios(article_version)}"
   end
 
-  def billign_quantity_with_tolerance(goa)
+  def billing_quantity_with_tolerance(goa)
     article_version = goa.order_article.article_version
     quantity = number_with_precision(
       article_version.convert_quantity(goa.quantity, article_version.group_order_unit,
