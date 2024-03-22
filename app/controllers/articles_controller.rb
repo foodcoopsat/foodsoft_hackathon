@@ -178,50 +178,6 @@ class ArticlesController < ApplicationController
     end
   end
 
-  # def migrate_units
-  #   @articles = @supplier.articles.with_latest_versions_and_categories.undeleted.includes(latest_article_version: [:article_unit_ratios])
-  #   @original_units = {}
-  #   @articles.each do |article|
-  #     article_version = article.latest_article_version
-  #     quantity = 1
-  #     ratios = article_version.article_unit_ratios
-
-  #     @original_units[article.id] = article_version.unit
-
-  #     next if ratios.length > 1
-
-  #     if ratios.length == 1 && ratios[0].quantity != 1 && ratios[0].unit == 'XPP'
-  #       quantity = ratios[0].quantity
-  #     end
-
-  #     conversion_result = ArticleUnitsLib.convert_old_unit(article_version.unit, quantity)
-
-  #     next if conversion_result.nil? ||
-  #             (conversion_result[:first_ratio].nil? && !article_version.article_unit_ratios.empty?) ||
-  #             (!conversion_result[:first_ratio].nil? && article_version.article_unit_ratios.length > 1)
-
-  #     article_version.unit = nil
-  #     article_version.supplier_order_unit = conversion_result[:supplier_order_unit]
-  #     article_version.group_order_granularity = conversion_result[:group_order_granularity]
-  #     article_version.group_order_unit = conversion_result[:group_order_unit]
-
-  #     first_ratio = conversion_result[:first_ratio]
-  #     next if first_ratio.nil?
-
-  #     first_ratio = first_ratio.merge(sort: 1)
-  #     first_existing_ratio = article_version.article_unit_ratios[0]
-  #     if first_existing_ratio.nil?
-  #       article_version.article_unit_ratios.build(first_ratio)
-  #     else
-  #       first_existing_ratio.assign_attributes(first_ratio)
-  #     end
-  #   end
-
-  #   load_article_units
-
-  #   render :edit_all
-  # end
-
   # Updates all article of specific supplier
   def update_all
     invalid_articles = false
