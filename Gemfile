@@ -80,11 +80,13 @@ gem 'foodsoft_wiki', path: 'plugins/wiki'
 # gem 'foodsoft_mollie', path: 'plugins/mollie'
 
 group :development do
+  # TODO-no-upstream
+  gem 'byebug'
+
   gem 'listen'
   gem 'mailcatcher'
   gem 'sqlite3', '~> 1.3.6'
   gem 'web-console'
-  gem 'byebug'
 
   # Better error output
   gem 'better_errors'
