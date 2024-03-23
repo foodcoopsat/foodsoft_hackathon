@@ -11,9 +11,6 @@ class GroupOrderForm {
     this.groupBalance = config.groupBalance;
     this.minimumBalance = config.minimumBalance;
 
-    // TODO: Actually use this!:
-    this.stockit = config.stockit;
-
     this.initializeIncreaseDecreaseButtons();
   }
 
