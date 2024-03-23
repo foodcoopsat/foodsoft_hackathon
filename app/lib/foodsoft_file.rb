@@ -35,11 +35,15 @@ class FoodsoftFile
   def self.parse_ratios_cell(ratios_cell)
     return [] if ratios_cell.blank?
 
+    previous_quantity = nil
     ratios = ratios_cell.split(/(?<!\\), /).each_with_index.map do |ratio_str, index|
       md = ratio_str.gsub('\\\\', '\\').gsub('\\,', ',').match(/(?<quantity>[+-]?(?:[0-9]*[.])?[0-9]+) (?<unit_name>.*)/)
+      quantity = md[:quantity].to_d
+      calculated_quantity = previous_quantity.nil? ? quantity : quantity * previous_quantity
+      previous_quantity = calculated_quantity
       {
         sort: index + 1,
-        quantity: md[:quantity],
+        quantity: calculated_quantity,
         unit: ArticleUnitsLib.get_code_for_unit_name(md[:unit_name])
       }
     end
