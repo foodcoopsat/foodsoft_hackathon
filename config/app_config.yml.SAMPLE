@@ -197,15 +197,6 @@ development:
 
 test:
   <<: *defaults
-  shared_lists:
-    adapter: mysql2
-    encoding: utf8mb4
-    reconnect: false
-    database: db_shared
-    pool: 5
-    host: mariadb
-    username: root
-    password: secret
 
 production:
   <<: *defaults
