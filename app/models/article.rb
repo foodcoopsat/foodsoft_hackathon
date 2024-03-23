@@ -187,16 +187,6 @@ class Article < ApplicationRecord
     ret
   end
 
-  # to get the correspondent shared article
-  def shared_article(supplier = self.supplier)
-    order_number.blank? and return nil
-    @shared_article ||= begin
-      supplier.shared_supplier.find_article_by_number(order_number)
-    rescue StandardError
-      nil
-    end
-  end
-
   # convert units in foodcoop-size
   # uses unit factors in app_config.yml to calc the price/unit_quantity
   # returns new price and unit_quantity in array, when calc is possible => [price, unit_quantity]
@@ -204,8 +194,8 @@ class Article < ApplicationRecord
   # returns nil if units are eqal
   def convert_units(new_article = shared_article)
     return unless unit != new_article.unit
-    # TODO-units-rebase:
-    # return false if new_article.unit.include?(',')
+
+    return false if new_article.unit.include?(',')
 
     # legacy, used by foodcoops in Germany
     if new_article.unit == 'KI' && unit == 'ST' # 'KI' means a box, with a different amount of items in it
@@ -228,7 +218,7 @@ class Article < ApplicationRecord
       rescue StandardError
         nil
       end
-      if fc_unit && supplier_unit && fc_unit =~ supplier_unit
+      if fc_unit != 0 && supplier_unit != 0 && fc_unit && supplier_unit && fc_unit =~ supplier_unit
         conversion_factor = (supplier_unit / fc_unit).to_base.to_r
         new_price = new_article.price / conversion_factor
         new_unit_quantity = new_article.unit_quantity * conversion_factor
