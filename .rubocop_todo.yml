@@ -148,12 +148,6 @@ Lint/EmptyBlock:
     - 'spec/factories/group_order_article_quantity.rb'
 
 # Offense count: 1
-# Configuration parameters: AllowComments.
-Lint/EmptyFile:
-  Exclude:
-    - 'db_shared/seeds.rb'
-
-# Offense count: 1
 # This cop supports safe autocorrection (--autocorrect).
 Lint/EnsureReturn:
   Exclude:
@@ -751,7 +745,6 @@ Rails/PluckInWhere:
 # Include: **/Rakefile, **/*.rake
 Rails/RakeEnvironment:
   Exclude:
-    - 'lib/tasks/db_shared.rake'
     - 'lib/tasks/foodsoft_setup.rake'
     - 'lib/tasks/resque.rake'
 
