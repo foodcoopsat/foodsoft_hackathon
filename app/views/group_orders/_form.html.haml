@@ -6,8 +6,7 @@
       units: unitsData,
       toleranceIsCostly: #{FoodsoftConfig[:tolerance_is_costly]},
       groupBalance: #{group_balance},
-      minimumBalance: #{FoodsoftConfig[:minimum_balance] or 0},
-      stockit: #{@order.stockit?}
+      minimumBalance: #{FoodsoftConfig[:minimum_balance] or 0}
     });
     $(function() {
       // create List for search-feature (using list.js, http://listjs.com)
@@ -116,14 +115,14 @@
             - quantity_data['used_quantity'] = @ordering_data[:order_articles][order_article.id][:used_quantity]
             - quantity_data['price'] = @ordering_data[:order_articles][order_article.id][:price]
             - quantity_data['minimum_order_quantity'] = @ordering_data[:order_articles][order_article.id][:minimum_order_quantity] unless @ordering_data[:order_articles][order_article.id][:minimum_order_quantity].nil?
-            %td.quantity.group-order-input
+            %td.quantity.group-order-input{class: ('stock-order' if @order.stockit?)}
               %span.used= format_number(@ordering_data[:order_articles][order_article.id][:used_quantity])
               +
               %span.unused= format_number(@ordering_data[:order_articles][order_article.id][:quantity] - @ordering_data[:order_articles][order_article.id][:used_quantity])
               .btn-group.numeric-step
                 %a.btn.btn-ordering.increase
                   %i.icon-plus
-                %input.goa-quantity{type: "number", name: "group_order[group_order_articles_attributes][#{order_article.id}][quantity]", value: @ordering_data[:order_articles][order_article.id][:quantity], data: quantity_data, autocomplete: 'off', class: 'input-mini numeric', min: 0, step: order_article.article_version.group_order_granularity}
+                %input.goa-quantity{type: "number", name: "group_order[group_order_articles_attributes][#{order_article.id}][quantity]", value: @ordering_data[:order_articles][order_article.id][:quantity], data: quantity_data, autocomplete: 'off', class: 'input-mini numeric', style: ('display:none' if @order.stockit?), min: 0, max: (@ordering_data[:order_articles][order_article.id][:quantity_available] if @order.stockit?), step: order_article.article_version.group_order_granularity}
                 %a.btn.btn-ordering.decrease
                   %i.icon-minus
               %span.numeric-step-error
