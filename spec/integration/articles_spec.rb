@@ -17,19 +17,19 @@ feature ArticlesController do
 
     it 'can create a new article' do
       click_on I18n.t('articles.index.new')
-      expect(page).to have_css('form#new_article')
+      expect(page).to have_css('form#new_article_version')
       article = build(:article, supplier: supplier, article_category: article_category)
-      within('#new_article') do
-        fill_in 'article_name', with: article.name
-        fill_in 'article_unit', with: article.unit
+      within('#new_article_version') do
+        fill_in 'article_version_name', with: article.name
+        fill_in 'article_version_unit', with: article.unit
         select article.article_category.name, from: 'article_article_category_id'
-        fill_in 'article_price', with: article.price
-        fill_in 'article_unit_quantity', with: article.unit_quantity
-        fill_in 'article_tax', with: article.tax
-        fill_in 'article_deposit', with: article.deposit
+        fill_in 'article_version_price', with: article.price
+        fill_in 'article_version_unit_quantity', with: article.unit_quantity
+        fill_in 'article_version_tax', with: article.tax
+        fill_in 'article_version_deposit', with: article.deposit
         # "Element cannot be scrolled into view" error, js as workaround
         # find('input[type="submit"]').click
-        page.execute_script('$("form#new_article").submit();')
+        page.execute_script('$("form#new_article_version").submit();')
       end
       expect(page).to have_content(article.name)
     end

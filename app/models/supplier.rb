@@ -38,52 +38,6 @@ class Supplier < ApplicationRecord
     %w[articles stock_articles orders]
   end
 
-  # sync all articles with the external database
-  # returns an array with articles(and prices), which should be updated (to use in a form)
-  # also returns an array with outlisted_articles, which should be deleted
-  # also returns an array with new articles, which should be added (depending on shared_sync_method)
-  def sync_all
-    updated_article_pairs = []
-    outlisted_articles = []
-    new_articles = []
-    existing_articles = Set.new
-    for article in articles.undeleted
-      # try to find the associated shared_article
-      shared_article = article.shared_article(self)
-
-      if shared_article # article will be updated
-        existing_articles.add(shared_article.id)
-        unequal_attributes = article.shared_article_changed?(self)
-        if unequal_attributes.present? # skip if shared_article has not been changed
-          article.latest_article_version.article_unit_ratios.each(&:delete) if unequal_attributes.key?(:article_unit_ratios_attributes)
-          article.latest_article_version.reload
-          article.latest_article_version.attributes = unequal_attributes
-          updated_article_pairs << [article, unequal_attributes]
-        end
-      # Articles with no order number can be used to put non-shared articles
-      # in a shared supplier, with sync keeping them.
-      elsif article.order_number.present?
-        # article isn't in external database anymore
-        outlisted_articles << article
-      end
-    end
-    # Find any new articles, unless the import is manual
-    if %w[all_available all_unavailable].include?(shared_sync_method)
-      # build new articles
-      shared_supplier
-        .shared_articles
-        .where.not(id: existing_articles.to_a)
-        .find_each { |new_shared_article| new_articles << new_shared_article.build_new_article(self) }
-      # make them unavailable when desired
-      if shared_sync_method == 'all_unavailable'
-        new_articles.each do |new_article|
-          new_article.latest_article_version.availability = false
-        end
-      end
-    end
-    [updated_article_pairs, outlisted_articles, new_articles]
-  end
-
   # Synchronise articles with spreadsheet.
   #
   # @param file [File] Spreadsheet file to parse
