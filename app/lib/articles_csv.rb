@@ -44,11 +44,18 @@ class ArticlesCsv < RenderCsv
         article.minimum_order_quantity,
         ArticleUnitsLib.get_translated_name_for_code(article.billing_unit),
         article.article_category.try(:name),
-        article.article_unit_ratios.map do |ratio|
-          "#{ratio.quantity} #{escape_csv_ratio(ArticleUnitsLib.get_translated_name_for_code(ratio.unit))}"
-        end.join(', ')
+        get_csv_ratios(article)
       ]
     end
+  end
+
+  def get_csv_ratios(article)
+    previous_quantity = nil
+    article.article_unit_ratios.each_with_index.map do |ratio, _index|
+      quantity = previous_quantity.nil? ? ratio.quantity : ratio.quantity / previous_quantity
+      previous_quantity = ratio.quantity
+      "#{quantity} #{escape_csv_ratio(ArticleUnitsLib.get_translated_name_for_code(ratio.unit))}"
+    end.join(', ')
   end
 
   def escape_csv_ratio(str)
