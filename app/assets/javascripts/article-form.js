@@ -311,8 +311,11 @@ class ArticleForm {
     const id = $(`[name="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes][${index}][id]"]`, this.articleForm$).val();
     row$.remove();
 
-    $(this.unitRatiosTable$).after($(`<input type="hidden" name="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes][${index}][_destroy]" value="true">`));
-    $(this.unitRatiosTable$).after($(`<input type="hidden" name="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes][${index}][id]" value="${id}">`));
+    if (id != null) {
+      $(this.unitRatiosTable$).after($(`<input type="hidden" name="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes][${index}][_destroy]" value="true">`));
+      $(this.unitRatiosTable$).after($(`<input type="hidden" name="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes][${index}][id]" value="${id}">`));
+    }
+
     this.filterAvailableRatioUnits();
     this.updateUnitMultiplierLabels();
     this.setFieldVisibility();
