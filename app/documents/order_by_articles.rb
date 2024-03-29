@@ -23,8 +23,8 @@ class OrderByArticles < OrderPdf
         dimrows << rows.length if goa.result == 0
         rows << [goa.group_order.ordergroup_name,
                  billing_quantity_with_tolerance(goa),
-                 article_version.convert_quantity(goa.result, article_version.group_order_unit,
-                                                  article_version.billing_unit),
+                 number_with_precision(article_version.convert_quantity(goa.result, article_version.group_order_unit,
+                                                  article_version.billing_unit)),
                  number_to_currency(goa.total_price)]
       end
       next unless rows.length > 1
