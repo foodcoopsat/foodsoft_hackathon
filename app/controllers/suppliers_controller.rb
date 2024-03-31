@@ -31,6 +31,8 @@ class SuppliersController < ApplicationController
   def create
     @supplier = Supplier.new(supplier_params)
     @supplier.supplier_category ||= SupplierCategory.first
+    @supplier.unit_migration_completed = Time.now
+
     if @supplier.save
       flash[:notice] = I18n.t('suppliers.create.notice')
       redirect_to suppliers_path
