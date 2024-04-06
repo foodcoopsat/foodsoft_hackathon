@@ -35,7 +35,6 @@ class Invoice < ApplicationRecord
     orders
       .joins(order_articles: [:article_version])
       .sum('COALESCE(order_articles.units_received, order_articles.units_billed, order_articles.units_to_order)' \
-        + '* article_versions.unit_quantity' \
         + '* ROUND((article_versions.price + article_versions.deposit) * (100 + article_versions.tax) / 100, 2)')
   end
 
