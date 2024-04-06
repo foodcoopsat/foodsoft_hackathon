@@ -24,10 +24,6 @@ class SuppliersController < ApplicationController
     @supplier = Supplier.find(params[:id])
   end
 
-  def edit
-    @supplier = Supplier.find(params[:id])
-  end
-
   def create
     @supplier = Supplier.new(supplier_params)
     @supplier.supplier_category ||= SupplierCategory.first
