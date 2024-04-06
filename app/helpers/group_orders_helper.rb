@@ -45,7 +45,6 @@ module GroupOrdersHelper
     { group_order_article: goa, quantity: quantity, tolerance: tolerance, result: result, sub_total: sub_total }
   end
 
-
   def get_missing_units_css_class(quantity_missing, article_version)
     if quantity_missing == 0
       ''
