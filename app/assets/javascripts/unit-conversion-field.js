@@ -21,11 +21,19 @@
       this.converter = new UnitsConverter(this.units, this.ratios, this.supplierOrderUnit);
 
       // if there's less then two options, don't even bother showing the popover:
-      if (this.unitSelectOptions.length < 2) {
+      this.disabled = this.unitSelectOptions.length < 2;
+
+      this.opener$ = $('<button class="conversion-popover-opener btn btn-ordering"><i class="icon-retweet"></i></button>');
+      this.opener$.attr('title', this.popoverTemplate.dataset.title);
+      this.field$.after(this.opener$);
+
+      if (this.disabled) {
+        this.opener$.attr('disabled', 'disabled');
+        this.opener$.attr('title', this.popoverTemplate.dataset.disabledTitle);
         return;
       }
 
-      this.initializeFocusListener();
+      this.initializeOpenListener();
     }
 
     loadArticleUnitRatios() {
@@ -50,10 +58,14 @@
       }
     }
 
-    initializeFocusListener() {
+    initializeOpenListener() {
       this.field$.popover({title: this.popoverTemplate.dataset.title, placement: 'bottom', trigger: 'manual'});
 
-      this.field$.on('focus.unit-conversion-field',() => this.openPopover());
+      this.opener$.click((e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.openPopover()
+      });
 
       this.field$.on('shown.bs.popover', () => this.initializeConversionPopover(this.field$.next('.popover')));
     }
@@ -95,6 +107,9 @@
 
       this.quantityInput$ = contents$.find('input.quantity');
       this.quantityInput$.val(String(this.field$.val()).replace(',', '.'));
+      this.quantityInput$
+        .focus()
+        .select();
       this.applyButton$ = contents$.find('input.apply');
       this.conversionResult$ = contents$.find('.conversion-result');
       this.unitSelect$ = contents$.find('select.unit');
@@ -150,7 +165,7 @@
         options.push(...this.getRelatedUnits(ratio.unit));
       }
 
-      return options;
+      return options.sort((a, b) => a.label.localeCompare(b.label));
     }
 
     prepareConversion() {
@@ -234,7 +249,7 @@
         if (conversionField === undefined || conversionField.field$ === undefined) {
           break;
         }
-        conversionField.field$.off('focus.unit-conversion-field');
+        conversionField.opener$.remove();
         convertersMap.delete($(this)[0]);
         break;
       default: {
