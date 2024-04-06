@@ -3,9 +3,13 @@ require_relative '../spec_helper'
 feature ArticlesController do
   let(:user) { create(:user, groups: [create(:workgroup, role_article_meta: true)]) }
   let(:supplier) { create(:supplier) }
+  let!(:article_unit) { create(:article_unit, unit: 'XPK') }
   let!(:article_category) { create(:article_category) }
 
-  before { login user }
+  before do
+    login user
+    create(:article_unit, unit: 'XPP')
+  end
 
   describe ':index', :js do
     before { visit supplier_articles_path(supplier_id: supplier.id) }
@@ -18,20 +22,18 @@ feature ArticlesController do
     it 'can create a new article' do
       click_on I18n.t('articles.index.new')
       expect(page).to have_css('form#new_article_version')
-      article = build(:article, supplier: supplier, article_category: article_category)
+      article_version = build(:article_version, supplier_order_unit: article_unit.unit)
       within('#new_article_version') do
-        fill_in 'article_version_name', with: article.name
-        fill_in 'article_version_unit', with: article.unit
-        select article.article_category.name, from: 'article_article_category_id'
-        fill_in 'article_version_price', with: article.price
-        fill_in 'article_version_unit_quantity', with: article.unit_quantity
-        fill_in 'article_version_tax', with: article.tax
-        fill_in 'article_version_deposit', with: article.deposit
-        # "Element cannot be scrolled into view" error, js as workaround
-        # find('input[type="submit"]').click
-        page.execute_script('$("form#new_article_version").submit();')
+        fill_in 'article_version_name', with: article_version.name
+        select article_category.name, from: 'article_version_article_category_id'
+        fill_in 'article_version_price', with: article_version.price
+        unit_label = ArticleUnitsLib.units[article_version.supplier_order_unit][:name]
+        select unit_label, from: 'article_version_supplier_order_unit'
+        fill_in 'article_version_tax', with: article_version.tax
+        fill_in 'article_version_deposit', with: article_version.deposit
+        find('input[type="submit"]').click
       end
-      expect(page).to have_content(article.name)
+      expect(page).to have_content(article_version.name)
     end
   end
 
@@ -40,6 +42,9 @@ feature ArticlesController do
     let(:file)     { Rails.root.join("spec/fixtures/#{filename}") }
 
     before do
+      create(:article_category, name: 'Nuts & Seeds')
+      create(:article_category, name: 'Drinks')
+      create(:article_category, name: 'Vegetables')
       visit upload_supplier_articles_path(supplier_id: supplier.id)
       attach_file 'articles_file', file
     end
@@ -50,12 +55,9 @@ feature ArticlesController do
 
         it do
           find('input[type="submit"]').click
-          expect(find('tr:nth-child(1) #new_articles__note').value).to eq 'bio ◎'
-          expect(find('tr:nth-child(2) #new_articles__name').value).to eq 'Pijnboompitten'
+          expect(find('tr:nth-child(1) #new_articles_0_note').value).to eq 'bio ◎'
+          expect(find('tr:nth-child(2) #new_articles_1_name').value).to eq 'Pijnboompitten'
 
-          4.times do |i|
-            all("tr:nth-child(#{i + 1}) select > option")[1].select_option
-          end
           find('input[type="submit"]').click
           expect(page).to have_content('Pijnboompitten')
 
@@ -69,7 +71,8 @@ feature ArticlesController do
 
       it do
         find('input[type="submit"]').click
-        expect(find("#articles_#{article.id}_name").value).to eq 'Tomatoes'
+        expect(find_by_id('articles_0_name').value).to eq 'Tomatoes'
+        expect(find_by_id('articles_0_id', visible: false).value).to eq article.latest_article_version.id.to_s
         find('input[type="submit"]').click
         article.reload
         expect(article.name).to eq 'Tomatoes'
@@ -80,11 +83,12 @@ feature ArticlesController do
     describe 'handles missing data' do
       it do
         find('input[type="submit"]').click # to overview
-        find('input[type="submit"]').click # missing category, re-show form
+        fill_in 'new_articles_0_name', with: ''
+        find('input[type="submit"]').click # missing name, re-show form
         expect(find('tr.alert')).to be_present
         expect(supplier.articles.count).to eq 0
 
-        all('tr select > option')[1].select_option
+        fill_in 'new_articles_0_name', with: 'Test'
         find('input[type="submit"]').click # now it should succeed
         expect(supplier.articles.count).to eq 1
       end
@@ -96,9 +100,8 @@ feature ArticlesController do
       it do
         check('articles_outlist_absent')
         find('input[type="submit"]').click
-        expect(find("#outlisted_articles_#{article.id}", visible: :all)).to be_present
+        expect(find_by_id('outlisted_articles_0', visible: :all).value).to eq article.id.to_s
 
-        all('tr select > option')[1].select_option
         find('input[type="submit"]').click
         expect(article.reload.deleted?).to be true
       end
@@ -110,7 +113,7 @@ feature ArticlesController do
       it do
         check('articles_convert_units')
         find('input[type="submit"]').click
-        expect(find("#articles_#{article.id}_name").value).to eq 'Tomatoes'
+        expect(find_by_id('articles_0_name').value).to eq 'Tomatoes'
         find('input[type="submit"]').click
         article.reload
         expect([article.unit, article.unit_quantity, article.price]).to eq ['250 g', 40, 0.6]

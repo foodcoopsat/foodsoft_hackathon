@@ -36,9 +36,8 @@
           %td{:style => highlight_new(attrs, :name)}
             = form.text_field 'name', :size => 0
             = form.input :id, as: :hidden unless changed_article.new_record?
-            -# TODO:
-            -# - hidden_fields.each do |field|
-            -#   = form.input field, as: :hidden
+            - hidden_fields.each do |field|
+              = form.input field, as: :hidden
           %td{:style => highlight_new(attrs, :note)}= form.text_field 'note', class: 'input-small'
           %td{:style => highlight_new(attrs, :manufacturer)}= form.text_field 'manufacturer', class: 'input-small'
           %td{:style => highlight_new(attrs, :origin)}= form.text_field 'origin', class: 'input-mini'
