@@ -3,7 +3,7 @@
     :javascript
       const unitsData = #{raw(ArticleUnit.as_hash.to_json)};
 %template#unit_conversion_popover_content_template
-  %div.popover_contents.text-right{"data-title" => t('helpers.unit_conversion_fields.title')}
+  %div.popover_contents.text-right{"data-title" => t('helpers.unit_conversion_fields.title'), "data-disabled-title" => t('helpers.unit_conversion_fields.disabled_title')}
     .d-flex
       %select.unit.mr-1{"data-ignore-onchange" => true}
       %input.quantity.input-mini.numeric{:type => 'number', :min => 0}
