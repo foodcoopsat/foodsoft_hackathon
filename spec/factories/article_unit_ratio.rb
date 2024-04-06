@@ -2,9 +2,9 @@ require 'factory_bot'
 
 FactoryBot.define do
   factory :article_unit_ratio do
-    unit { Faker::Unit.unit }
+    unit { 'XPP' } # TODO
     sort { 1 }
-    quantity { 1 } # TODO
+    quantity { 1 }
     article_version
   end
 end

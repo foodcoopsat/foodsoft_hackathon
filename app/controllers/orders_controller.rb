@@ -187,7 +187,7 @@ class OrdersController < ApplicationController
         counts[0] += 1
         if oa.units_received.present?
           units_received = oa.article_version.convert_quantity(oa.units_received,
-                                                               oa.article_version.supplier_order_unit, oa.article_version.billing_unit)
+                                                               oa.article_version.supplier_order_unit, oa.article_version.group_order_unit)
           cunits[0] += units_received
           oacounts = oa.redistribute units_received, rest_to
           oacounts.each_with_index do |c, i|

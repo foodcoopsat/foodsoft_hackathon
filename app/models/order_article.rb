@@ -107,7 +107,7 @@ class OrderArticle < ApplicationRecord
   end
 
   # redistribute articles over ordergroups
-  #   quantity       Number of units to distribute
+  #   quantity       Number of units to distribute (in group_order_unit)
   #   surplus        What to do when there are more articles than ordered quantity
   #                    :tolerance   fill member orders' tolerance
   #                    :stock       move to stock
@@ -126,11 +126,7 @@ class OrderArticle < ApplicationRecord
     end
 
     # Recompute
-    group_order_articles.each do |goa|
-      group_order_total = article_version.convert_quantity(qty_for_members, article_version.supplier_order_unit,
-                                                           article_version.group_order_unit)
-      goa.save_results!(group_order_total)
-    end
+    group_order_articles.each { |goa| goa.save_results! qty_for_members }
     qty_left -= qty_for_members
 
     # if there's anything left, move to stock if wanted
@@ -262,7 +258,7 @@ class OrderArticle < ApplicationRecord
     unless (delta_q == 0 && delta_t >= 0) ||
            (delta_mis < 0 && delta_box >= 0 && delta_t >= 0) ||
            (delta_q > 0 && delta_q == -delta_t)
-      raise ActiveRecord::RecordNotSaved.new("Change not acceptable in boxfill phase for '#{article.name}', sorry.",
+      raise ActiveRecord::RecordNotSaved.new("Change not acceptable in boxfill phase for '#{article_version.name}', sorry.",
                                              self)
     end
   end

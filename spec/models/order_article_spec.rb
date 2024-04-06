@@ -73,7 +73,7 @@ describe OrderArticle do
 
     it 'has expected units_to_order' do
       set_quantities [3, 2], [1, 3], [1, 0]
-      expect(oa.units * oa.article.unit_quantity).to eq 6
+      expect(oa.units * oa.article_version.unit_quantity).to eq 6
       expect([goa1, goa2, goa3].map(&:result)).to eq [4, 1, 1]
     end
 
