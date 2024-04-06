@@ -21,14 +21,14 @@
     %i
       = t '.update.update_msg', count: @updated_article_pairs.size
       = t '.update.body'
-  = render 'sync_table', articles: @updated_article_pairs, field: 'articles', hidden_fields: %w(shared_updated_on)
+  = render 'sync_table', articles: @updated_article_pairs, field: 'articles', hidden_fields: []
   %hr/
 
 - if @new_articles.any?
   %h2= t '.upnew.title'
   %p
     %i= t '.upnew.body_count', count: @new_articles.length
-  = render 'sync_table', articles: @new_articles, field: 'new_articles', hidden_fields: %w(shared_updated_on order_number availability)
+  = render 'sync_table', articles: @new_articles, field: 'new_articles', hidden_fields: %w(order_number availability)
   %hr/
 
 - if ignored_article_count > 0

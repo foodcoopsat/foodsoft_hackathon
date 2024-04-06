@@ -12,6 +12,7 @@ class GroupOrderForm {
     this.minimumBalance = config.minimumBalance;
 
     this.initializeIncreaseDecreaseButtons();
+    this.submitButton$.removeAttr('disabled');
   }
 
   initializeIncreaseDecreaseButtons() {

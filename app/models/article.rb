@@ -113,6 +113,16 @@ class Article < ApplicationRecord
     order.order_articles.includes(:article_version).where(article_version: { article_id: id }).where('quantity > 0').one?
   end
 
+  # to get the correspondent shared article
+  def shared_article(supplier = self.supplier)
+    order_number.blank? and return nil
+    @shared_article ||= begin
+                          supplier.shared_supplier.find_article_by_number(order_number)
+    rescue StandardError
+                          nil
+    end
+  end
+
   # this method checks, if the shared_article has been changed
   # unequal attributes will returned in array
   # if only the timestamps differ and the attributes are equal,
@@ -167,8 +177,6 @@ class Article < ApplicationRecord
         price: [latest_article_version.price.to_f.round(2), new_price.to_f.round(2)],
         tax: [latest_article_version.tax, new_article.tax],
         deposit: [latest_article_version.deposit.to_f.round(2), new_article.deposit.to_f.round(2)],
-        # take care of different num-objects.
-        # :article_unit_ratios_attributes => [self.latest_article_version.article_unit_ratios, new_unit_quantity.article_unit_ratios],
         note: [latest_article_version.note.to_s, new_article.note.to_s]
       }
     )
@@ -182,6 +190,11 @@ class Article < ApplicationRecord
     if ratios_differ
       ratio_attribs = new_article.article_unit_ratios.map(&:attributes)
       ret[:article_unit_ratios_attributes] = ratio_attribs
+    end
+
+    if options[:convert_units] && latest_article_version.article_unit_ratios.length < 2 && new_article.article_unit_ratios.length < 2 && !new_unit_quantity.nil?
+      ret[:article_unit_ratios_attributes] = [new_article.article_unit_ratios.build(unit: 'XPP', quantity: new_unit_quantity, sort: 1).attributes]
+      # TODO: Either remove this aspect of the :convert_units feature or extend it to also work for the new units system
     end
 
     ret
