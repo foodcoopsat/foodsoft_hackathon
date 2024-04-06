@@ -1188,6 +1188,7 @@ de:
       task_title: "%{name} (%{duration}h)"
     unit_conversion_fields:
       title: Einheiten umrechnen
+      disabled_title: Einheit kann nicht konvertiert werden
       cancel: Abbrechen
       apply: Anwenden
   home:
