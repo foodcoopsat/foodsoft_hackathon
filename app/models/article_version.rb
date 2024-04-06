@@ -148,6 +148,13 @@ class ArticleVersion < ApplicationRecord
     unequal_attributes.to_a.map { |a| [a[0], a[1].last] }.to_h
   end
 
+  def uses_tolerance?
+    (
+      !supplier_order_unit_is_si_convertible &&
+      convert_quantity(1, supplier_order_unit, group_order_unit) != group_order_granularity
+    ) || (minimum_order_quantity.presence || 0) > group_order_granularity
+  end
+
   protected
 
   # We used have the name unique per supplier+deleted_at+type. With the addition of shared_sync_method all,

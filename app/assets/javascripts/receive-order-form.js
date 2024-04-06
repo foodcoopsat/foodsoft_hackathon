@@ -32,6 +32,10 @@
     }
 
     convertFieldUnit(field$, fromUnit, toUnit) {
+      if (field$.is(':disabled')) {
+        return;
+      }
+
       const units = parseFloat(field$.val().replace(',', '.'));
       if (isNaN(units)) {
         return;
@@ -51,8 +55,10 @@
 
     convertFromBillingUnit(field$) {
       const convertedValue = this.convertFieldUnit(field$, field$.data('billing-unit'), field$.data('supplier-order-unit'));
-      const hiddenReceivedField$ = $(`<input type="hidden" name="${field$.attr('name')}" value="${convertedValue}" />`);
-      this.receiveForm$.append(hiddenReceivedField$);
+      if (convertedValue !== undefined) {
+        const hiddenReceivedField$ = $(`<input type="hidden" name="${field$.attr('name')}" value="${convertedValue}" />`);
+        this.receiveForm$.append(hiddenReceivedField$);
+      }
     }
 
     updateDelta(input) {

@@ -81,9 +81,9 @@ class Order < ApplicationRecord
 
   def supplier_articles
     if stockit?
-      StockArticle.undeleted.reorder('articles.name')
+      StockArticle.undeleted.with_latest_versions_and_categories.reorder('article_versions.name')
     else
-      supplier.articles.undeleted.reorder('articles.name')
+      supplier.articles.undeleted.with_latest_versions_and_categories.reorder('article_versions.name')
     end
   end
 

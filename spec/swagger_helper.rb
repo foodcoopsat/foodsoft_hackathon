@@ -146,15 +146,15 @@ RSpec.configure do |config|
                 description: 'foodcoop price'
               },
               quantity: {
-                type: :integer,
+                type: :float,
                 description: 'number of units ordered by members'
               },
               tolerance: {
-                type: :integer,
+                type: :float,
                 description: 'number of extra units that members are willing to buy to fill a box'
               },
               units_to_order: {
-                type: :integer,
+                type: :float,
                 description: 'number of units to order from the supplier'
               },
               article: {
@@ -297,12 +297,12 @@ RSpec.configure do |config|
             properties: {
               quantity:
               {
-                type: :integer,
+                type: :float,
                 description: 'number of units ordered by the users ordergroup'
               },
               tolerance:
               {
-                type: :integer,
+                type: :float,
                 description: 'number of extra units the users ordergroup is willing to buy for filling a box'
               }
             }
@@ -332,8 +332,7 @@ RSpec.configure do |config|
                     type: :integer
                   },
                   result: {
-                    type: :number,
-                    format: :float,
+                    type: :float,
                     description: 'number of units the users ordergroup will receive or has received'
                   },
                   total_price:

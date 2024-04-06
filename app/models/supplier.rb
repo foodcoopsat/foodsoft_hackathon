@@ -77,9 +77,9 @@ class Supplier < ApplicationRecord
     end
   end
 
-  # @return [Boolean] Whether there are articles that would use tolerance (unit_quantity > 1)
+  # @return [Boolean] Whether there are articles that would use tolerance
   def has_tolerance?
-    articles.where('articles.unit_quantity > 1').any?
+    articles.with_latest_versions_and_categories.any? { |article| article.latest_article_version.uses_tolerance? }
   end
 
   # TODO: Maybe use the nilify blanks gem instead of the following two methods?:

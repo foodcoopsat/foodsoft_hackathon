@@ -354,13 +354,13 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_16_190960) do
 
   create_table "order_articles", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "order_id", default: 0, null: false
-    t.decimal "quantity", precision: 8, scale: 3, default: "0.0", null: false
-    t.decimal "tolerance", precision: 8, scale: 3, default: "0.0", null: false
-    t.decimal "units_to_order", precision: 8, scale: 3, default: "0.0", null: false
+    t.decimal "quantity", precision: 8, scale: 3, default: "0.0", null: false, comment: "stored in `article_versions.group_order_unit`"
+    t.decimal "tolerance", precision: 8, scale: 3, default: "0.0", null: false, comment: "stored in `article_versions.group_order_unit`"
+    t.decimal "units_to_order", precision: 8, scale: 3, default: "0.0", null: false, comment: "stored in `article_versions.supplier_order_unit`"
     t.integer "lock_version", default: 0, null: false
     t.integer "article_version_id", null: false
-    t.decimal "units_billed", precision: 8, scale: 3
-    t.decimal "units_received", precision: 8, scale: 3
+    t.decimal "units_billed", precision: 8, scale: 3, comment: "stored in `article_versions.supplier_order_unit`"
+    t.decimal "units_received", precision: 8, scale: 3, comment: "stored in `article_versions.supplier_order_unit`"
     t.index ["article_version_id"], name: "index_order_articles_on_article_version_id"
     t.index ["order_id", "article_version_id"], name: "index_order_articles_on_order_id_and_article_version_id", unique: true
     t.index ["order_id"], name: "index_order_articles_on_order_id"
