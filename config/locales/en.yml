@@ -805,9 +805,8 @@ en:
       rows:
       - Order Number
       - Amount
-      - Name
-      - Unit quantity
       - Unit
+      - Name
       - Price/Unit
       - Subtotal
       total: Total
