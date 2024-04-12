@@ -1,6 +1,12 @@
 module PriceCalculation
   extend ActiveSupport::Concern
 
+  class UnsupportedUnitConversionError < StandardError
+    def initialize(msg = 'Unit not supported')
+      super
+    end
+  end
+
   def unit_quantity
     first_ratio = article_unit_ratios.first
     if first_ratio.nil?
@@ -28,12 +34,18 @@ module PriceCalculation
     ratio = article_unit_ratios.find_by_unit(unit)
     return ratio.quantity unless ratio.nil?
 
-    related_ratio = article_unit_ratios.detect do |current_ratio|
-      ArticleUnit.as_hash[current_ratio.unit][:baseUnit] == ArticleUnit.as_hash[unit][:baseUnit]
-    end
-    return related_ratio.quantity / ArticleUnit.as_hash[unit][:conversionFactor] * ArticleUnit.as_hash[related_ratio.unit][:conversionFactor] unless related_ratio.nil?
+    unit_hash = ArticleUnit.as_hash[unit]
+    raise UnsupportedUnitConversionError, "unit '#{unit}' is unknown" if unit_hash.nil?
 
-    ArticleUnit.as_hash[supplier_order_unit][:conversionFactor] / ArticleUnit.as_hash[unit][:conversionFactor]
+    related_ratio = article_unit_ratios.detect do |current_ratio|
+      ArticleUnit.as_hash[current_ratio.unit][:baseUnit] == unit_hash[:baseUnit]
+    end
+    return related_ratio.quantity / unit_hash[:conversionFactor] * ArticleUnit.as_hash[related_ratio.unit][:conversionFactor] unless related_ratio.nil?
+
+    supplier_order_unit_conversion_factor = ArticleUnit.as_hash[supplier_order_unit]&.dig(:conversionFactor)
+    raise UnsupportedUnitConversionError, "supplier_order_unit '#{supplier_order_unit}' is unknown or has no conversionFactor" if supplier_order_unit_conversion_factor.nil?
+
+    supplier_order_unit_conversion_factor / unit_hash[:conversionFactor]
   end
 
   def convert_quantity(quantity, input_unit, output_unit)

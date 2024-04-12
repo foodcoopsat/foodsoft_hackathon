@@ -29,8 +29,13 @@ class Api::V1::ArticlesController < Api::V1::BaseController
       version_attributes
     end
 
-    latest_update = Article.with_latest_versions_and_categories.undeleted.where(supplier_id: supplier,
-                                                                                type: nil).maximum('article_versions.updated_at')
+    latest_update = Article
+                    .with_latest_versions
+                    .undeleted
+                    .where(supplier_id: supplier, type: nil)
+                    .order('article_versions.updated_at DESC')
+                    .limit(1)
+                    .first&.updated_at
     latest_update = latest_update.utc unless latest_update.nil?
 
     pagination = nil

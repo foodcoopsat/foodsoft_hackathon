@@ -56,11 +56,18 @@ class Article < ApplicationRecord
   scope :not_in_stock, -> { where(type: nil) }
 
   scope :with_latest_versions_and_categories, lambda {
-                                                includes(:latest_article_version)
-                                                  .joins(article_versions: [:article_category])
-                                                  .joins(ArticleVersion.latest_outer_join_sql("#{table_name}.#{primary_key}"))
-                                                  .where(later_article_versions: { id: nil })
-                                              }
+    includes(:latest_article_version)
+      .joins(article_versions: [:article_category])
+      .joins(ArticleVersion.latest_outer_join_sql("#{table_name}.#{primary_key}"))
+      .where(later_article_versions: { id: nil })
+  }
+
+  scope :with_latest_versions, lambda {
+    includes(:latest_article_version)
+      .joins(:article_versions)
+      .joins(ArticleVersion.latest_outer_join_sql("#{table_name}.#{primary_key}"))
+      .where(later_article_versions: { id: nil })
+  }
 
   accepts_nested_attributes_for :latest_article_version
 
