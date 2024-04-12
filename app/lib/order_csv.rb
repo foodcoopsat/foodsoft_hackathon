@@ -19,7 +19,7 @@ class OrderCsv < RenderCsv
     @object.order_articles.ordered.includes(:article_version).all.map do |oa|
       yield [
         oa.article_version.order_number,
-        number_with_precision(oa.units_to_order, precision: 2),
+        number_with_precision(oa.units_to_order, precision: 3),
         format_supplier_order_unit_with_ratios(oa.article_version),
         oa.article_version.name,
         number_to_currency(oa.article_version.price),
