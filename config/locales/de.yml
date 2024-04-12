@@ -258,7 +258,7 @@ de:
     errors:
       has_many_left: ist noch mit einem/r %{collection} verknüpft!
       models:
-        article:
+        article_version:
           attributes:
             name:
               taken: Name ist bereits vergeben

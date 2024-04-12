@@ -261,7 +261,7 @@ en:
     errors:
       has_many_left: is still associated with a %{collection}!
       models:
-        article:
+        article_version:
           attributes:
             name:
               taken: name is already taken
