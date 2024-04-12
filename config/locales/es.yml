@@ -239,7 +239,7 @@ es:
     errors:
       has_many_left: todavía está asociado con un %{collection}!
       models:
-        article:
+        article_version:
           attributes:
             name:
               taken: ese nombre ya está cogido

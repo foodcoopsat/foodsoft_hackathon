@@ -239,7 +239,7 @@ tr:
     errors:
       has_many_left: Bu %{collection} ile hala ilişkili!
       models:
-        article:
+        article_version:
           attributes:
             name:
               taken: isim zaten alınmış
