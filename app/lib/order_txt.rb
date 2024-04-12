@@ -1,4 +1,6 @@
 class OrderTxt
+  include ActionView::Helpers::NumberHelper
+
   def initialize(order, _options = {})
     @order = order
   end
@@ -19,7 +21,7 @@ class OrderTxt
                    I18n.t('orders.fax.name'))
     # now display all ordered articles
     @order.order_articles.ordered.includes(:article_version).each do |oa|
-      text += format("%8s %8d   %s\n", oa.article_version.order_number, oa.units_to_order.to_i, oa.article_version.name)
+      text += format("%8s %8.2f   %s\n", oa.article_version.order_number, oa.units_to_order, oa.article_version.name)
     end
     text
   end

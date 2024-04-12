@@ -758,9 +758,8 @@ es:
       rows:
         - Número de pedido
         - Importe
-        - Nombre
-        - Cantidad de unidades
         - Unidad
+        - Nombre
         - Precio/Unidad
         - Subtotal
       total: Total
