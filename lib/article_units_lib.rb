@@ -43,10 +43,12 @@ class ArticleUnitsLib
   end
 
   def self.units
-    return @units unless @units.nil?
+    @units = {} if @units.nil?
+    units_cached_in_current_locale = @units[I18n.locale]
+    return units_cached_in_current_locale unless @units_cached_in_current_locale.nil?
 
     units = untranslated_units
-    @units = units.to_h do |code, unit|
+    @units[I18n.locale] = units.to_h do |code, unit|
       translated_name = ArticleUnitsLib.get_translated_name_for_code(code, default_nil: true)
       unit = unit.clone
       unit[:name] = translated_name || unit[:name]
