@@ -24,6 +24,7 @@ class Supplier < ApplicationRecord
   validate :uniqueness_of_name
   validates :shared_sync_method, presence: true, unless: -> { supplier_remote_source.blank? }
   validates :shared_sync_method, absence: true, if: -> { supplier_remote_source.blank? }
+  validates :supplier_remote_source, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), allow_blank: true }
 
   enum shared_sync_method: { all_available: 'all_available', all_unavailable: 'all_unavailable', import: 'import' }
 

@@ -239,7 +239,7 @@ nl:
     errors:
       has_many_left: is nog met een %{collection} verbonden!
       models:
-        article:
+        article_version:
           attributes:
             name:
               taken: naam bestaat al

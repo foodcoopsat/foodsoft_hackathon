@@ -62,9 +62,9 @@ class ArticleVersion < ApplicationRecord
 
   def self.latest_outer_join_sql(article_field_name)
     %(
-      LEFT OUTER JOIN article_versions later_article_versions
+      LEFT OUTER JOIN #{table_name} later_article_versions
       ON later_article_versions.article_id = #{article_field_name}
-        AND later_article_versions.created_at > article_versions.created_at
+        AND later_article_versions.created_at > #{table_name}.created_at
     )
   end
 
@@ -161,15 +161,26 @@ class ArticleVersion < ApplicationRecord
   # this came in the way, and we now allow duplicate names for the 'all' methods - expecting foodcoops to
   # make their own choice among products with different units by making articles available/unavailable.
   def uniqueness_of_name
-    matches = Article.includes(latest_article_version: :article_unit_ratios).where(article_versions: { name: name },
-                                                                                   supplier_id: article.supplier_id, deleted_at: article.deleted_at, type: article.type)
+    matches = Article.with_latest_versions.where(article_versions: { name: name },
+                                                 supplier_id: article.supplier_id,
+                                                 deleted_at: article.deleted_at,
+                                                 type: article.type)
     matches = matches.where.not(id: article.id) unless article.new_record?
     # supplier should always be there - except, perhaps, on initialization (on seeding)
     if article.supplier && (article.supplier.shared_sync_method.blank? || article.supplier.shared_sync_method == 'import')
       errors.add :name, :taken if matches.any?
-    elsif matches.where(article_versions: { unit: unit, supplier_order_unit: nil,
-                                            article_unit_ratios: { quantity: unit_quantity, unit: 'XPP' } }).any?
-      errors.add :name, :taken_with_unit
+    else
+      article_unit_ratios.each_with_index do |article_unit_ratio, index|
+        matches = matches.joins(%(
+          INNER JOIN #{ArticleUnitRatio.table_name} #{ArticleUnitRatio.table_name}_#{index}
+          ON #{ArticleUnitRatio.table_name}_#{index}.article_version_id = #{ArticleVersion.table_name}.id
+            AND #{ArticleUnitRatio.table_name}_#{index}.sort = #{ArticleUnitRatio.connection.quote(article_unit_ratio.sort)}
+            AND #{ArticleUnitRatio.table_name}_#{index}.unit = #{ArticleUnitRatio.connection.quote(article_unit_ratio.unit)}
+            AND #{ArticleUnitRatio.table_name}_#{index}.quantity = #{ArticleUnitRatio.connection.quote(article_unit_ratio.quantity)}
+        ))
+      end
+
+      errors.add :name, :taken_with_unit if matches.where(article_versions: { supplier_order_unit: supplier_order_unit, unit: unit }).any?
     end
   end
 
