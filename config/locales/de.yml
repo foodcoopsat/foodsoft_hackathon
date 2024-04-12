@@ -799,9 +799,8 @@ de:
       rows:
         - BestellNr.
         - Menge
-        - Name
-        - Gebinde
         - Einheit
+        - Name
         - Preis/Einheit
         - Summe
       total: Gesamtpreis

@@ -80,16 +80,13 @@ class OrderFax < OrderPdf
       subtotal = oa.units_to_order * price
       total += subtotal
       data << [oa.article_version.order_number,
-               oa.units_to_order,
-               oa.article_version.name,
-               # TODO-article-units: Why should we show the supplier the group order unit quantity?:
-               oa.article_version.convert_quantity(1, oa.article_version.supplier_order_unit,
-                                                   oa.article_version.group_order_unit),
+               number_with_precision(oa.units_to_order, precision: 2),
                format_supplier_order_unit_with_ratios(oa.price),
+               oa.article_version.name,
                number_to_currency(price),
                number_to_currency(subtotal)]
     end
-    data << [I18n.t('documents.order_fax.total'), nil, nil, nil, nil, nil, number_to_currency(total)]
+    data << [I18n.t('documents.order_fax.total'), nil, nil, nil, nil, number_to_currency(total)]
     table data, cell_style: { size: fontsize(8), overflow: :shrink_to_fit } do |table|
       table.header = true
       table.cells.border_width = 1
@@ -97,8 +94,8 @@ class OrderFax < OrderPdf
 
       table.row(0).border_bottom_width = 2
       table.columns(1).align = :right
-      table.columns(3..6).align = :right
-      table.row(data.length - 1).columns(0..5).borders = %i[top bottom]
+      table.columns(4..5).align = :right
+      table.row(data.length - 1).columns(0..4).borders = %i[top bottom]
       table.row(data.length - 1).columns(0).borders = %i[top bottom left]
       table.row(data.length - 1).border_top_width = 2
     end
