@@ -163,7 +163,7 @@ tr:
         last_order: Son sipariş
         last_user_activity: Son etkinlik
         name: Adı
-        user_tokens: Üyeler    
+        user_tokens: Üyeler
       stock_article:
         available: Mevcut
         price: Fiyat
@@ -757,9 +757,8 @@ tr:
       rows:
       - Sipariş Numarası
       - Miktar
-      - Ad
-      - Birim miktarı
       - Birim
+      - Ad
       - Birim fiyatı
       - Ara toplam
       total: Toplam
@@ -1026,7 +1025,7 @@ tr:
   group_order_articles:
     form:
       amount_change_for: '%{article} için miktarı değiştirin'
-      result_hint: 'Birim: %{unit}' 
+      result_hint: 'Birim: %{unit}'
   group_orders:
     archive:
       desc: Tüm %{link} burada görüntüleyebilirsiniz.
@@ -1099,7 +1098,7 @@ tr:
     update:
       error_general: Sipariş bir hatadan dolayı güncellenemedi.
       error_stale: Bu sırada başka birisi sipariş vermiş, sipariş güncellenemedi.
-      notice: Sipariş kaydedildi.  
+      notice: Sipariş kaydedildi.
   helpers:
     application:
       edit_user: Kullanıcıyı düzenle
@@ -1288,7 +1287,7 @@ tr:
       text: |
         Sevgili %{user},
 
-        Çalışma grubunun '%{task}' görevi %{when} tarihinde tamamlanacak 
+        Çalışma grubunun '%{task}' görevi %{when} tarihinde tamamlanacak
         ve daha fazla katılımcıya ihtiyaç duyuyor!
 
         Eğer henüz bu göreve atanmadıysanız, şimdi fırsatınız var:
@@ -1342,9 +1341,9 @@ tr:
       text: |
         Merhaba %{user},
 
-        Yeni bir şifre istediniz (veya başka birisi istedi). 
+        Yeni bir şifre istediniz (veya başka birisi istedi).
         Yeni bir şifre belirlemek için bu linke tıklayın: %{link}
-        Bu link sadece bir kez kullanılabilir ve %{expires} tarihinde geçersiz olacaktır. 
+        Bu link sadece bir kez kullanılabilir ve %{expires} tarihinde geçersiz olacaktır.
         Eğer şifrenizi değiştirmek istemiyorsanız, bu mesajı görmezden gelebilirsiniz. Şifreniz henüz değiştirilmedi.
 
 
@@ -1434,7 +1433,7 @@ tr:
       pickups: Teslim Günleri
       title: Siparişler
     tasks: Görevler
-    workgroups: Çalışma Grupları      
+    workgroups: Çalışma Grupları
   number:
     percentage:
       format:

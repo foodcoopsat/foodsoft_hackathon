@@ -480,9 +480,8 @@ fr:
       rows:
         - Numéro
         - Quantité
-        - Nom du produit
-        - Nombre d'unités
         - Unité
+        - Nom du produit
         - Prix unitaire
         - Prix
     order_matrix:

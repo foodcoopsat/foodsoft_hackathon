@@ -758,9 +758,8 @@ nl:
       rows:
         - Nummer
         - Aantal
-        - Naam
-        - Colli
         - Eenheid
+        - Naam
         - Prijs/eenh.
         - Subtotaal
       total: Totaal
