@@ -11,21 +11,36 @@ describe ArticleVersion do
     let(:article_version) { order.order_articles.first.article_version }
     let(:article) { article_version.article }
 
-    it 'updates the name of articles in open orders in place' do
-      article.update(latest_article_version_attributes: { name: 'new name', id: article_version.id })
+    it 'updates the properties of article versions in open orders in place' do
+      original_version_id = article_version.id
 
-      expect(order.order_articles.first.article_version.name).to eq 'new name'
+      new_version = create(:article_version)
+      new_attributes = new_version.attributes.except('updated_at', 'created_at', 'id', 'article_id')
+
+      article.update(latest_article_version_attributes: new_attributes.merge(id: article_version.id))
+
+      new_attributes.each do |key, value|
+        expect(order.order_articles.first.article_version[key]).to eq value
+      end
+      expect(original_version_id).to eq article.latest_article_version.id
     end
 
-    it 'keeps the names of articles in closed orders' do
-      original_name = article_version.name
+    it 'keeps the properties of article versions in closed orders' do
+      original_version_id = article_version.id
+      original_version = article_version.dup
+
+      new_version = create(:article_version)
+      new_attributes = new_version.attributes.except('updated_at', 'created_at', 'id', 'article_id')
 
       order.finish!(admin)
 
-      article.update(latest_article_version_attributes: { name: 'new name', id: article_version.id })
+      article.update(latest_article_version_attributes: new_attributes.merge(id: article_version.id))
 
-      expect(article.latest_article_version.name).to eq 'new name'
-      expect(order.order_articles.first.article_version.name).to eq original_name
+      new_attributes.each do |key, value|
+        expect(article.latest_article_version[key]).to eq value
+        expect(order.order_articles.first.article_version[key]).to eq original_version[key]
+      end
+      expect(original_version_id).not_to eq article.latest_article_version.id
     end
   end
 
