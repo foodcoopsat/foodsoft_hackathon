@@ -39,11 +39,13 @@ class ArticleUnitsLib
   end
 
   def self.unit_translations
-    return @unit_translations unless @unit_translations.nil?
+    @unit_translations = {} if @unit_translations.nil?
+    unit_translations_cached_in_current_locale = @unit_translations[I18n.locale]
+    return unit_translations_cached_in_current_locale unless unit_translations_cached_in_current_locale.nil?
 
-    @unit_translations = YAML.safe_load(ERB.new(File.read(File.expand_path(
-                                                            "config/units-of-measure/locales/unece_#{I18n.locale}.yml", Rails.root
-                                                          ))).result) || {}
+    @unit_translations[I18n.locale] = YAML.safe_load(ERB.new(File.read(File.expand_path(
+                                                                         "config/units-of-measure/locales/unece_#{I18n.locale}.yml", Rails.root
+                                                                       ))).result) || {}
   end
 
   def self.units
@@ -51,10 +53,9 @@ class ArticleUnitsLib
     units_cached_in_current_locale = @units[I18n.locale]
     return units_cached_in_current_locale unless @units_cached_in_current_locale.nil?
 
-    units = untranslated_units
-    @units[I18n.locale] = units.to_h do |code, unit|
+    @units[I18n.locale] = untranslated_units.to_h do |code, untranslated_unit|
       translated_name = ArticleUnitsLib.get_translated_name_for_code(code, default_nil: true)
-      unit = unit.clone
+      unit = untranslated_unit.clone
       unit[:name] = translated_name || unit[:name]
       unit[:untranslated] = translated_name.nil?
       unit[:symbol] = ArticleUnitsLib.get_translated_symbol_for_code(code)
