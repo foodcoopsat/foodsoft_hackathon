@@ -17,6 +17,12 @@ form.delta-input, .delta-input form {
   input[data-delta] {
     text-align: center;
     height: 14px;
+
+    -moz-appearance: textfield;
+
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
   }
 
   .btn-ordering {

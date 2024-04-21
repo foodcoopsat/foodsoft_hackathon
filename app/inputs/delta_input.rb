@@ -2,7 +2,8 @@ class DeltaInput < SimpleForm::Inputs::StringInput
   # for now, need to pass id or it won't work
   def input(wrapper_options)
     options = merge_wrapper_options(input_html_options, wrapper_options)
-    options[:type] = 'text'
+    options[:type] = 'number'
+    options[:step] = 'any'
     options[:data] ||= {}
     options[:data][:delta] ||= 1
     options[:autocomplete] ||= 'off'

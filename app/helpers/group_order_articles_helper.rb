@@ -19,7 +19,7 @@ module GroupOrderArticlesHelper
                                                                                                    article_version.billing_unit, article_version.group_order_unit))
         end
         f.input_field(:result, as: :delta, class: 'input-nano', data: input_data, id: "r_#{goa.id}",
-                               value: converted_value.round(3))
+                               value: format_number(converted_value, 3))
       end
     else
       result

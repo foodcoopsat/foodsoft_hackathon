@@ -78,7 +78,7 @@ module OrdersHelper
       first_ratio = article&.article_unit_ratios&.first
       return '' if first_ratio.nil? || first_ratio.quantity == 1
 
-      uq_text = "× #{first_ratio.quantity} #{ArticleUnitsLib.units[first_ratio.unit][:symbol]}"
+      uq_text = "× #{number_with_precision(first_ratio.quantity, precision: 3, strip_insignificant_zeros: true)} #{ArticleUnitsLib.units[first_ratio.unit][:symbol]}"
     else
       unit = ArticleUnitsLib.units[options[:unit]]
       uq_text = unit[:symbol] || unit[:name]
