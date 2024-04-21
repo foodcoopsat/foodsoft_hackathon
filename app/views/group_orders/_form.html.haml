@@ -117,9 +117,9 @@
             - quantity_data['minimum_order_quantity'] = @ordering_data[:order_articles][order_article.id][:minimum_order_quantity] unless @ordering_data[:order_articles][order_article.id][:minimum_order_quantity].nil?
             - quantity_data['e2e-order-article-id'] = order_article.id
             %td.quantity.group-order-input{class: ('stock-order' if @order.stockit?)}
-              %span.used= format_number(@ordering_data[:order_articles][order_article.id][:used_quantity])
+              %span.used= number_with_precision(@ordering_data[:order_articles][order_article.id][:used_quantity], precision: 3, strip_insignificant_zeros: true)
               +
-              %span.unused= format_number(@ordering_data[:order_articles][order_article.id][:quantity] - @ordering_data[:order_articles][order_article.id][:used_quantity])
+              %span.unused= number_with_precision(@ordering_data[:order_articles][order_article.id][:quantity] - @ordering_data[:order_articles][order_article.id][:used_quantity], precision: 3, strip_insignificant_zeros: true)
               .btn-group.numeric-step
                 %a.btn.btn-ordering.increase
                   %i.icon-plus
@@ -131,9 +131,9 @@
 
             %td.tolerance.group-order-input{style: ('display:none' if @order.stockit?)}
               - if (order_article.article_version.uses_tolerance?)
-                %span.used= format_number(@ordering_data[:order_articles][order_article.id][:used_tolerance])
+                %span.used= number_with_precision(@ordering_data[:order_articles][order_article.id][:used_tolerance], precision: 3, strip_insignificant_zeros: true)
                 +
-                %span.unused= format_number(@ordering_data[:order_articles][order_article.id][:tolerance] - @ordering_data[:order_articles][order_article.id][:used_tolerance])
+                %span.unused= number_with_precision(@ordering_data[:order_articles][order_article.id][:tolerance] - @ordering_data[:order_articles][order_article.id][:used_tolerance], precision: 3, strip_insignificant_zeros: true)
                 .btn-group
                   %a.btn.btn-ordering.increase
                     %i.icon-plus

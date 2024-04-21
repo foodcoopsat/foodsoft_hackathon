@@ -6,7 +6,7 @@ $(function() {
   $(document).on('click', 'button[data-decrement]', function() {
     data_delta_update($('#'+$(this).data('decrement')), -1);
   });
-  $(document).on('change keyup', 'input[type="text"][data-delta]', function() {
+  $(document).on('change keyup', 'input[type="number"][data-delta]', function() {
     data_delta_update(this, 0);
   });
 });
