@@ -49,7 +49,7 @@ module ArticlesHelper
     return base if first_si_convertible_unit.nil?
 
     quantity = article.convert_quantity(1, unit_code, first_si_convertible_unit)
-    "#{base} (#{format_number(quantity)}\u00a0#{ArticleUnitsLib.units.to_h[first_si_convertible_unit][:symbol]})"
+    "#{base} (#{number_with_precision(quantity, precision: 2, strip_insignificant_zeros: true)}\u00a0#{ArticleUnitsLib.units.to_h[first_si_convertible_unit][:symbol]})"
   end
 
   def format_supplier_order_unit_with_ratios(article)
