@@ -53,7 +53,7 @@ class ArticleForm {
   }
 
   initializePriceDisplay() {
-    mergeJQueryObjects([this.price$, this.priceUnit$]).on('change keyup', () => {
+    mergeJQueryObjects([this.price$, this.priceUnit$, this.tax$, this.deposit$]).on('change keyup', () => {
       const price = parseFloat(this.price$.val());
       const tax = parseFloat(this.tax$.val());
       const deposit = parseFloat(this.deposit$.val());
