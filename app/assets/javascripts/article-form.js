@@ -176,7 +176,13 @@ class ArticleForm {
   loadAvailableUnits() {
     this.availableUnits = Object.entries(this.units)
       .filter(([, unit]) => unit.visible)
-      .map(([code, unit]) => ({ key: code, label: unit.name, baseUnit: unit.baseUnit, symbol: unit.symbol, aliases: unit.aliases ? unit.aliases : [] }));
+      .map(([code, unit]) => {
+        let label = unit.name;
+        if (unit.symbol != null) {
+          label += ` (${unit.symbol})`;
+        }
+        return { key: code, label, baseUnit: unit.baseUnit, symbol: unit.symbol, aliases: unit.aliases ? unit.aliases : [] };
+      });
 
     $(`#${this.unitFieldsIdPrefix}_supplier_order_unit`, this.articleForm$).select2(this.select2Config);
   }
