@@ -149,7 +149,7 @@
       const unit = this.units[this.supplierOrderUnit];
       options.push({
         value: this.supplierOrderUnit,
-        label: unit === undefined ? this.customUnit : unit.name
+        label: unit === undefined ? this.customUnit : this.getUnitLabel(unit)
       });
       if (unit !== undefined) {
         options.push(...this.getRelatedUnits(this.supplierOrderUnit));
@@ -159,13 +159,22 @@
       for (const ratio of this.ratios) {
         options.push({
           value: ratio.unit,
-          label: this.units[ratio.unit].name
+          label: this.getUnitLabel(this.units[ratio.unit])
         });
 
         options.push(...this.getRelatedUnits(ratio.unit));
       }
 
       return options.sort((a, b) => a.label.localeCompare(b.label));
+    }
+
+    getUnitLabel(unit) {
+      let label = unit.name;
+      if (unit.symbol != null) {
+        label += ` (${unit.symbol})`;
+      }
+
+      return label;
     }
 
     prepareConversion() {
@@ -223,7 +232,7 @@
         .filter(([id, unit]) => unit.visible && unit.baseUnit !== null && unit.baseUnit === this.units[unitId].baseUnit && id !== unitId)
         .map(([id, unit]) => ({
           value: id,
-          label: unit.name
+          label: this.getUnitLabel(unit)
         }));
     }
   }
