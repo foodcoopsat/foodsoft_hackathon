@@ -147,7 +147,7 @@
                 .article-name= order_article.article_version.name
                 .pull-right
                   = t('.units_full') + ':'
-                  %span{id: "units_#{order_article.id}"}= order_article.units_to_order
+                  %span{id: "units_#{order_article.id}"}= order_article.article_version.convert_quantity(order_article.units_to_order, order_article.article_version.supplier_order_unit, order_article.article_version.group_order_unit)
                   %br/
                   = t('.units_total') + ':'
                   %span{id: "q_total_#{order_article.id}"}= @ordering_data[:order_articles][order_article.id][:quantity] + @ordering_data[:order_articles][order_article.id][:others_quantity]
@@ -158,7 +158,14 @@
                 .pull-left
                   #{heading_helper Article, :manufacturer}: #{order_article.article_version.manufacturer}
                   %br/
-                  #{heading_helper Article, :units}: #{@order.stockit? ? order_article.article_version.article.quantity_available : format_supplier_order_unit_with_ratios(order_article.article_version)}
+                  #{heading_helper Article, :units}:
+                  - if @order.stockit?
+                    #{order_article.article_version.article.quantity_available}
+                  - elsif order_article.article_version.uses_tolerance?
+                    #{format_supplier_order_unit_with_ratios(order_article.article_version)}
+                  - else
+                    #{format_group_order_unit_with_ratios(order_article.article_version)}
+
                   %br/
                   #{heading_helper Article, :note}: #{order_article.article_version.note}
                   %br/
