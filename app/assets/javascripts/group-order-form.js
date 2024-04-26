@@ -169,7 +169,7 @@ class GroupOrderForm {
     usedTolerance$.text(round(usedTolerance));
     unusedTolerance$.text(round(unusedTolerance));
 
-    totalPacks$.text(round(totalPacks));
+    totalPacks$.text(packSizeDeterminedBySupplierOrderUnit ? round(totalPacks) : round(totalQuantity));
 
     totalPacks$.css('color', this.packCompletedFromTolerance(packSize, totalQuantity, totalTolerance) ? 'grey' : 'auto');
 
