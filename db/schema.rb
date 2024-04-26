@@ -58,7 +58,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_16_190960) do
   create_table "article_unit_ratios", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.bigint "article_version_id", null: false
     t.integer "sort", null: false
-    t.decimal "quantity", precision: 8, scale: 3, null: false
+    t.decimal "quantity", precision: 38, scale: 3, null: false
     t.string "unit"
     t.index ["article_version_id"], name: "index_article_unit_ratios_on_article_version_id"
     t.index ["sort"], name: "index_article_unit_ratios_on_sort"
