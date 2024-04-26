@@ -14,7 +14,7 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
       t.references :article_version, null: false
 
       t.column :sort, :integer, null: false, index: true
-      t.column :quantity, :decimal, precision: 8, scale: 3, null: false
+      t.column :quantity, :decimal, precision: 38, scale: 3, null: false
       t.column :unit, :string, length: 3
     end
 
