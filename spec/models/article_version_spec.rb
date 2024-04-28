@@ -26,8 +26,10 @@ describe ArticleVersion do
     end
 
     it 'keeps the properties of article versions in closed orders' do
-      original_version_id = article_version.id
-      original_version = article_version.dup
+      oa = order.order_articles.first
+      current_article_version = oa.reload.article_version
+      original_version_id = current_article_version.id
+      original_version = current_article_version.dup
 
       new_version = create(:article_version)
       new_attributes = new_version.attributes.except('updated_at', 'created_at', 'id', 'article_id')
@@ -36,11 +38,15 @@ describe ArticleVersion do
 
       article.update(latest_article_version_attributes: new_attributes.merge(id: article_version.id))
 
+      new_version = article.latest_article_version
+      version_in_order = oa.reload.article_version
+
+      expect(original_version_id).not_to eq new_version.id
+      expect(original_version_id).to eq version_in_order.id
       new_attributes.each do |key, value|
-        expect(article.latest_article_version[key]).to eq value
-        expect(order.order_articles.first.article_version[key]).to eq original_version[key]
+        expect(new_version[key]).to eq value
+        expect(version_in_order[key]).to eq(original_version[key])
       end
-      expect(original_version_id).not_to eq article.latest_article_version.id
     end
   end
 
