@@ -10,10 +10,24 @@ FactoryBot.define do
         order_number { nil }
         unit_quantity { nil }
         unit { nil }
+        supplier_order_unit { 'XPK' }
+        group_order_unit { 'XPK' }
+        billing_unit { 'XPK' }
+        price_unit { 'XPK' }
+        article_unit_ratio_count { 1 }
       end
 
       after(:create) do |article, evaluator|
-        create_list(:article_version, evaluator.article_version_count, article: article, order_number: evaluator.order_number, unit_quantity: evaluator.unit_quantity, unit: evaluator.unit)
+        create_list(:article_version, evaluator.article_version_count,
+                    article: article,
+                    order_number: evaluator.order_number,
+                    unit_quantity: evaluator.unit_quantity,
+                    unit: evaluator.unit,
+                    supplier_order_unit: evaluator.supplier_order_unit,
+                    group_order_unit: evaluator.group_order_unit,
+                    billing_unit: evaluator.billing_unit,
+                    price_unit: evaluator.price_unit,
+                    article_unit_ratio_count: evaluator.article_unit_ratio_count)
 
         article.reload
       end
