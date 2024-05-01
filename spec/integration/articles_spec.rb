@@ -12,28 +12,74 @@ feature ArticlesController do
   end
 
   describe ':index', :js do
-    before { visit supplier_articles_path(supplier_id: supplier.id) }
+    let!(:existing_article) do
+      create(:article,
+             supplier: supplier,
+             supplier_order_unit: 'B22',
+             group_order_unit: 'B22',
+             billing_unit: 'B22',
+             price_unit: 'B22',
+             article_unit_ratio_count: 0)
+    end
+
+    before do
+      visit supplier_articles_path(supplier_id: supplier.id)
+    end
 
     it 'can visit supplier articles path' do
       expect(page).to have_content(supplier.name)
       expect(page).to have_content(I18n.t('articles.index.edit_all'))
     end
 
-    it 'can create a new article' do
-      click_on I18n.t('articles.index.new')
-      expect(page).to have_css('form#new_article_version')
-      article_version = build(:article_version, supplier_order_unit: article_unit.unit)
-      within('#new_article_version') do
-        fill_in 'article_version_name', with: article_version.name
-        select article_category.name, from: 'article_version_article_category_id'
-        fill_in 'article_version_price', with: article_version.price
-        unit_label = ArticleUnitsLib.units[article_version.supplier_order_unit][:name]
-        select unit_label, from: 'article_version_supplier_order_unit'
-        fill_in 'article_version_tax', with: article_version.tax
-        fill_in 'article_version_deposit', with: article_version.deposit
-        find('input[type="submit"]').click
+    describe 'creating articles' do
+      it 'can create a new article' do
+        click_on I18n.t('articles.index.new')
+        expect(page).to have_css('form#new_article_version')
+        article_version = build(:article_version, supplier_order_unit: article_unit.unit)
+        within('#new_article_version') do
+          fill_in 'article_version_name', with: article_version.name
+          select article_category.name, from: 'article_version_article_category_id'
+          fill_in 'article_version_price', with: article_version.price
+          unit_label = ArticleUnitsLib.units[article_version.supplier_order_unit][:name]
+          select unit_label, from: 'article_version_supplier_order_unit'
+          fill_in 'article_version_tax', with: article_version.tax
+          fill_in 'article_version_deposit', with: article_version.deposit
+          find('input[type="submit"]:enabled').click
+        end
+        expect(page).to have_content(article_version.name)
       end
-      expect(page).to have_content(article_version.name)
+
+      it 'provides units that have been added to article_units' do
+        create(:article_unit, unit: 'KGM')
+        create(:article_unit, unit: 'LTR')
+
+        click_on I18n.t('articles.index.new')
+        expect(page).to have_css('form#new_article_version')
+        expect(page).to have_select('article_version_supplier_order_unit', options: ['Custom', 'kilogram (kg)', 'litre (l)', 'Package', 'Piece'])
+      end
+    end
+
+    describe 'editing articles' do
+      it 'can edit an existing article' do
+        find("*[data-e2e-edit-article='#{existing_article.id}']").click
+        expect(page).to have_css("form#edit_article_version_#{existing_article.id}")
+        within("#edit_article_version_#{existing_article.id}") do
+          fill_in 'article_version_name', with: 'New name'
+          sleep 0.25 # <- unsure why this is required as the following line should wait for the button to be enabled:
+          find('input[type="submit"]:enabled').click
+        end
+
+        expect(page).to have_content('New name')
+      end
+
+      it 'provides units that have been added to article_units as well as those in the article being edited' do
+        create(:article_unit, unit: 'KGM')
+        create(:article_unit, unit: 'LTR')
+
+        find("*[data-e2e-edit-article='#{existing_article.id}']").click
+        expect(page).to have_css("form#edit_article_version_#{existing_article.id}")
+        expect(page).to have_select('article_version_supplier_order_unit', options: ['Custom', 'kiloampere (kA)', 'kilogram (kg)', 'litre (l)', 'Package', 'Piece'])
+      end
     end
   end
 

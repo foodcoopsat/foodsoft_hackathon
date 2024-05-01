@@ -25,6 +25,7 @@ class ArticleForm {
       this.unitsReceived$ = $('#order_article_units_received', this.articleForm$);
       this.toggleExtraUnitsButton$ = $('.toggle-extra-units', this.articleForm$);
       this.extraUnits$ = $('.extra-unit-fields', this.articleForm$);
+      this.submitButton$ = $('input[type="submit"]', this.articleForm$);
       this.multiForm$ = multiForm$;
       const selectContainer$ = this.articleForm$.parents('#modalContainer');
       this.select2Config = {
@@ -47,6 +48,7 @@ class ArticleForm {
       this.convertOrderedAndReceivedUnits(this.supplierUnitSelect$.val(), this.billingUnit$.val());
       this.initializeFormSubmitListener();
       this.initializeToggleExtraUnitsButton();
+      this.enableSubmitButton();
     } catch (e) {
       console.log('Could not initialize article form', e, 'articleUnitRatioTemplate$', articleUnitRatioTemplate$, 'articleForm$', articleForm$, 'units', units, 'priceMarkup', priceMarkup, 'multiForm$', multiForm$, 'unitFieldsIdPrefix', unitFieldsIdPrefix, 'unitFieldsNamePrefix', unitFieldsNamePrefix);
     }
@@ -577,6 +579,10 @@ class ArticleForm {
 
   ratioQuantityFieldNameByIndex(i) {
     return `${this.unitFieldsNamePrefix}[article_unit_ratios_attributes][${i}][quantity]`;
+  }
+
+  enableSubmitButton() {
+    this.submitButton$.removeAttr('disabled');
   }
 }
 
