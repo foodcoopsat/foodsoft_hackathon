@@ -2,10 +2,11 @@ require 'factory_bot'
 FactoryBot.define do
   factory :article_version do
     sequence(:name) { |n| Faker::Lorem.words(number: rand(2..4)).join(' ') + " ##{n}" }
-    supplier_order_unit { 'XPK' } # TODO
-    group_order_unit { 'XPK' } # TODO
-    billing_unit { 'XPK' } # TODO
+    supplier_order_unit { 'XPK' }
+    group_order_unit { 'XPK' }
+    billing_unit { 'XPK' }
     price { rand(0.1..26.0).round(2) }
+    price_unit { 'XPK' }
     tax { [6, 21].sample }
     deposit { rand(10) < 8 ? 0 : [0.0, 0.80, 1.20, 12.00].sample }
     article_category

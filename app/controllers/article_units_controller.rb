@@ -5,7 +5,7 @@ class ArticleUnitsController < ApplicationController
   def index; end
 
   def search
-    @query = params[:q].blank? ? nil : params[:q].downcase
+    @query = article_unit_params[:q].blank? ? nil : article_unit_params[:q].downcase
 
     existing_article_units = ArticleUnit.all.to_a
     @article_units = @available_units
@@ -46,7 +46,7 @@ class ArticleUnitsController < ApplicationController
   end
 
   def article_unit_params
-    params.require(:article_unit).permit(:unit)
+    params.permit(:q)
   end
 
   def sort_by_unit_name(query, a_unit, b_unit)
