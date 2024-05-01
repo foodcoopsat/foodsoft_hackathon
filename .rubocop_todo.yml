@@ -372,6 +372,7 @@ RSpec/BeforeAfterAll:
 # Configuration parameters: EnabledMethods.
 RSpec/Capybara/FeatureMethods:
   Exclude:
+    - 'spec/integration/article_units_spec.rb'
     - 'spec/integration/articles_spec.rb'
     - 'spec/integration/balancing_spec.rb'
     - 'spec/integration/config_spec.rb'
@@ -433,6 +434,7 @@ RSpec/ExampleLength:
 # Include: **/*_spec*rb*, **/spec/**/*
 RSpec/FilePath:
   Exclude:
+    - 'spec/integration/article_units_spec.rb'
     - 'spec/integration/articles_spec.rb'
     - 'spec/integration/login_spec.rb'
     - 'spec/lib/bank_account_information_importer_spec.rb'
@@ -524,6 +526,7 @@ RSpec/RepeatedExample:
 # Include: **/*_spec.rb
 RSpec/SpecFilePathFormat:
   Exclude:
+    - 'spec/integration/article_units_spec.rb'
     - 'spec/integration/articles_spec.rb'
     - 'spec/integration/login_spec.rb'
     - 'spec/lib/bank_account_information_importer_spec.rb'
