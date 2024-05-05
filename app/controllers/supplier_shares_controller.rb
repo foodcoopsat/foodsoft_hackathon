@@ -1,4 +1,6 @@
 class SupplierSharesController < ApplicationController
+  before_action :authenticate_suppliers
+
   def create
     @supplier = Supplier.find(params[:supplier_id])
     @supplier.update_attribute(:external_uuid, SecureRandom.uuid)

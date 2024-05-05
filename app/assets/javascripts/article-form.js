@@ -243,11 +243,7 @@ class ArticleForm {
       .text(chosenOptionLabel !== undefined ? chosenOptionLabel : unitVal);
 
     const converter = this.getUnitsConverter();
-    if (converter.isUnitSiConversible(this.supplierUnitSelect$.val())) {
-      this.minimumOrderQuantity$.removeAttr('step');
-    } else {
-      this.minimumOrderQuantity$.attr('step', 1);
-    }
+    this.minimumOrderQuantity$.attr('step', converter.isUnitSiConversible(this.supplierUnitSelect$.val()) ? 'any' : 1);
   }
 
   bindAddRatioButton() {

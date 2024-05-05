@@ -2,7 +2,7 @@ class ArticlesController < ApplicationController
   before_action :authenticate_article_meta, :find_supplier
 
   before_action :load_article, only: %i[edit update]
-  before_action :load_article_units, only: %i[edit update new create sync update_synchronized]
+  before_action :load_article_units, only: %i[edit update new create]
   before_action :load_article_categories, only: %i[edit_all migrate_units update_all]
   before_action :new_empty_article_ratio,
                 only: %i[edit edit_all migrate_units update new create parse_upload sync update_synchronized]
@@ -270,11 +270,9 @@ class ArticlesController < ApplicationController
   # renders a form with articles, which should be updated
   def sync
     @updated_article_pairs, @outlisted_articles, @new_articles = @supplier.sync_from_remote
-    if @updated_article_pairs.empty? && @outlisted_articles.empty? && @new_articles.empty?
-      redirect_to supplier_articles_path(@supplier),
-                  notice: I18n.t('articles.controller.parse_upload.notice')
-    end
+    redirect_to(supplier_articles_path(@supplier), notice: I18n.t('articles.controller.parse_upload.notice')) if @updated_article_pairs.empty? && @outlisted_articles.empty? && @new_articles.empty?
     @ignored_article_count = 0
+    load_article_units((@new_articles + @updated_article_pairs.map(&:first)).map(&:current_article_units).flatten.uniq)
   rescue StandardError => e
     redirect_to upload_supplier_articles_path(@supplier), alert: I18n.t('errors.general_msg', msg: e.message)
   end
@@ -319,6 +317,7 @@ class ArticlesController < ApplicationController
     end
 
     if has_error
+      load_article_units((@new_articles + @updated_articles).map(&:current_article_units).flatten.uniq)
       @updated_article_pairs = @updated_articles.map do |article|
         orig_article = Article.find(article.id)
         [article, orig_article.unequal_attributes(article)]

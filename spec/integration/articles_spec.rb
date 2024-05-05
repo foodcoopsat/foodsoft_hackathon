@@ -2,6 +2,7 @@ require_relative '../spec_helper'
 
 feature ArticlesController do
   let(:user) { create(:user, groups: [create(:workgroup, role_article_meta: true)]) }
+  let(:remote_supplier) { create(:supplier, external_uuid: 'TestUUID', article_count: 10) }
   let(:supplier) { create(:supplier) }
   let!(:article_unit) { create(:article_unit, unit: 'XPK') }
   let!(:article_category) { create(:article_category) }
@@ -80,6 +81,34 @@ feature ArticlesController do
         expect(page).to have_css("form#edit_article_version_#{existing_article.id}")
         expect(page).to have_select('article_version_supplier_order_unit', options: ['Custom', 'kiloampere (kA)', 'kilogram (kg)', 'litre (l)', 'Package', 'Piece'])
       end
+    end
+  end
+
+  describe ':sync', :js do
+    before do
+      supplier.update(
+        supplier_remote_source: api_v1_shared_supplier_articles_url(remote_supplier.external_uuid,
+                                                                    foodcoop: FoodsoftConfig[:default_scope],
+                                                                    host: Capybara.current_session.server.host,
+                                                                    port: Capybara.current_session.server.port),
+        shared_sync_method: 'all_available'
+      )
+      remote_supplier.articles.each_with_index do |article, index|
+        article.latest_article_version.update(order_number: index.to_s)
+      end
+    end
+
+    it 'synchronises articles from external suppliers' do
+      visit supplier_articles_path(supplier_id: supplier.id)
+      click_on I18n.t('articles.index.ext_db.sync')
+      expect(page).to have_css('.sync-table tbody tr', count: 10)
+
+      10.times do |index|
+        select ArticleCategory.first.name, from: "new_articles_#{index}_article_category_id"
+      end
+
+      click_on I18n.t('articles.sync.submit')
+      expect(page).to have_css('.just-updated.article', count: 10)
     end
   end
 
