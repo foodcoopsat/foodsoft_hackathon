@@ -117,7 +117,12 @@ class ArticleVersion < ApplicationRecord
     if value.blank?
       self[:minimum_order_quantity] = nil
     else
-      super
+      begin
+        value = value.to_i if Float(value) % 1 == 0
+      rescue ArgumentException
+        # not any number -> let validation handle this
+      end
+      super(value)
     end
   end
 
