@@ -413,6 +413,7 @@ RSpec/DescribedClass:
 RSpec/EmptyExampleGroup:
   Exclude:
     - 'spec/requests/api/v1/article_categories_controller_spec.rb'
+    - 'spec/requests/api/v1/shared_suppliers/articles_controller_spec.rb'
     - 'spec/requests/api/v1/configs_controller_spec.rb'
     - 'spec/requests/api/v1/financial_transaction_classes_controller_spec.rb'
     - 'spec/requests/api/v1/financial_transaction_types_controller_spec.rb'
