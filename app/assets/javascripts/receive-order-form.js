@@ -133,7 +133,7 @@
     unlockReceiveInputField(unlockButton$) {
       $('.units_received', unlockButton$.closest('tr')).prop('disabled', false).focus();
       unlockButton$.closest('.input-prepend').prop('title', I18n.t('orders.edit_amount.field_unlocked_title'));
-      unlockButton$.replaceWith('<i class="icon icon-warning-sign add-on"></i>');
+      unlockButton$.replaceWith('<i class="icon icon-warning-sign"></i>');
     }
   }
 

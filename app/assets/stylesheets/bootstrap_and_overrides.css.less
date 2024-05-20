@@ -293,10 +293,24 @@ tr.order-article {
   .group-order-input:not(.stock-order) {
     text-align: center;
 
-    .goa-quantity {
+    .goa-quantity, .goa-tolerance {
       width: 45px;
       text-align: right;
     }
+  }
+}
+
+.units_received_cell {
+  button {
+    margin-top: 0px;
+    height: 28px;
+    font-size: 10px;
+    line-height: 10px;
+  }
+
+  input.units_received {
+    min-width: 45px;
+    height: 18px;
   }
 }
 
@@ -444,7 +458,8 @@ label {
   background-position: @align center;
 }
 input.package {
-  .package-image(right);
+  .package-image(90%);
+  background-size: 15px 15px;
   // disabled and readonly definitions though
   &[disabled], &[readonly] {
     background-color: @inputDisabledBackground;
