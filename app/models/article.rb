@@ -265,6 +265,12 @@ class Article < ApplicationRecord
       .compact
   end
 
+  def duplicate_including_latest_version_and_ratios
+    article = dup
+    article.latest_article_version = latest_article_version.duplicate_including_article_unit_ratios
+    article
+  end
+
   protected
 
   # Checks if the article is in use before it will deleted
