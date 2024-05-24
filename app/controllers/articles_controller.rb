@@ -3,7 +3,7 @@ class ArticlesController < ApplicationController
 
   before_action :load_article, only: %i[edit update]
   before_action :load_article_units, only: %i[edit update new create]
-  before_action :load_article_categories, only: %i[edit_all migrate_units update_all]
+  before_action :load_article_categories, only: %i[edit_all copy migrate_units update_all]
   before_action :new_empty_article_ratio,
                 only: %i[edit edit_all migrate_units update new create parse_upload sync update_synchronized]
 
@@ -50,7 +50,9 @@ class ArticlesController < ApplicationController
   end
 
   def copy
-    @article = @supplier.articles.find(params[:article_id]).dup
+    article = @supplier.articles.find(params[:article_id])
+    @article = article.duplicate_including_latest_version_and_ratios
+    load_article_units(@article.current_article_units)
     render layout: false
   end
 
@@ -71,6 +73,7 @@ class ArticlesController < ApplicationController
     if valid
       render layout: false
     else
+      load_article_units(@article.current_article_units)
       render action: 'new', layout: false
     end
   end
