@@ -130,25 +130,6 @@ class Article < ApplicationRecord
     end
   end
 
-  # this method checks, if the shared_article has been changed
-  # unequal attributes will returned in array
-  # if only the timestamps differ and the attributes are equal,
-  # false will returned and self.shared_updated_on will be updated
-  def shared_article_changed?(supplier = self.supplier)
-    # skip early if the timestamp hasn't changed
-    shared_article = self.shared_article(supplier)
-    return if shared_article.nil? || shared_updated_on == shared_article.updated_on
-
-    attrs = unequal_attributes(shared_article)
-    if attrs.empty?
-      # when attributes not changed, update timestamp of article
-      update_attribute(:shared_updated_on, shared_article.updated_on)
-      false
-    else
-      attrs
-    end
-  end
-
   # Return article attributes that were changed (incl. unit conversion)
   # @param new_article [Article] New article to update self
   # @option options [Boolean] :convert_units Omit or set to +true+ to keep current unit and recompute unit quantity and price.
