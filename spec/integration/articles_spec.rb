@@ -1,8 +1,8 @@
 require_relative '../spec_helper'
+require_relative '../support/active_record_helper'
 
 feature ArticlesController do
   let(:user) { create(:user, groups: [create(:workgroup, role_article_meta: true)]) }
-  let(:remote_supplier) { create(:supplier, external_uuid: 'TestUUID', article_count: 10) }
   let(:supplier) { create(:supplier) }
   let!(:article_unit) { create(:article_unit, unit: 'XPK') }
   let!(:article_category) { create(:article_category) }
@@ -85,6 +85,8 @@ feature ArticlesController do
   end
 
   describe ':sync', :js do
+    let(:remote_supplier) { create(:supplier, external_uuid: 'TestUUID', article_count: 10) }
+
     before do
       supplier.update(
         supplier_remote_source: api_v1_shared_supplier_articles_url(remote_supplier.external_uuid,
@@ -93,12 +95,9 @@ feature ArticlesController do
                                                                     port: Capybara.current_session.server.port),
         shared_sync_method: 'all_available'
       )
-      remote_supplier.articles.each_with_index do |article, index|
-        article.latest_article_version.update(order_number: index.to_s)
-      end
     end
 
-    it 'synchronises articles from external suppliers' do
+    it 'imports articles from external suppliers' do
       visit supplier_articles_path(supplier_id: supplier.id)
       click_on I18n.t('articles.index.ext_db.sync')
       expect(page).to have_css('.sync-table tbody tr', count: 10)
@@ -109,6 +108,22 @@ feature ArticlesController do
 
       click_on I18n.t('articles.sync.submit')
       expect(page).to have_css('.just-updated.article', count: 10)
+    end
+
+    it 'synchronizes articles updated in external supplier' do
+      clone_supplier_articles(remote_supplier, supplier)
+
+      first_remote_article_version = remote_supplier.articles.first.latest_article_version
+      first_remote_article_version.name = 'Changed'
+      first_remote_article_version.save
+
+      visit supplier_articles_path(supplier_id: supplier.id)
+      click_on I18n.t('articles.index.ext_db.sync')
+      expect(page).to have_css '.sync-table tbody tr',
+                               count: 2 # 1 row for original + 1 row for changed version
+
+      click_on I18n.t('articles.sync.submit')
+      expect(page).to have_css('.just-updated.article', count: 1)
     end
   end
 

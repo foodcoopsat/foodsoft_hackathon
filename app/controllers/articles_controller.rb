@@ -254,15 +254,15 @@ class ArticlesController < ApplicationController
     options = { filename: uploaded_file.original_filename }
     options[:outlist_absent] = (params[:articles]['outlist_absent'] == '1')
     options[:convert_units] = (params[:articles]['convert_units'] == '1')
-    @updated_article_pairs, @outlisted_articles, @new_articles = @supplier.sync_from_file uploaded_file.tempfile,
-                                                                                          options
+    @updated_article_pairs, @outlisted_articles, @new_articles, import_data = @supplier.sync_from_file(uploaded_file.tempfile,
+                                                                                                       options)
 
     @articles = @updated_article_pairs.pluck(0) + @new_articles
     load_article_units
 
     if @updated_article_pairs.empty? && @outlisted_articles.empty? && @new_articles.empty?
       redirect_to supplier_articles_path(@supplier),
-                  notice: I18n.t('articles.controller.parse_upload.notice')
+                  notice: I18n.t('articles.controller.parse_upload.notice', count: import_data[:articles].length)
     end
     @ignored_article_count = 0
   rescue StandardError => e
@@ -272,8 +272,8 @@ class ArticlesController < ApplicationController
   # sync all articles with the external database
   # renders a form with articles, which should be updated
   def sync
-    @updated_article_pairs, @outlisted_articles, @new_articles = @supplier.sync_from_remote
-    redirect_to(supplier_articles_path(@supplier), notice: I18n.t('articles.controller.parse_upload.notice')) if @updated_article_pairs.empty? && @outlisted_articles.empty? && @new_articles.empty?
+    @updated_article_pairs, @outlisted_articles, @new_articles, import_data = @supplier.sync_from_remote
+    redirect_to(supplier_articles_path(@supplier), notice: I18n.t('articles.controller.parse_upload.notice', count: import_data[:articles].length)) if @updated_article_pairs.empty? && @outlisted_articles.empty? && @new_articles.empty?
     @ignored_article_count = 0
     load_article_units((@new_articles + @updated_article_pairs.map(&:first)).map(&:current_article_units).flatten.uniq)
   rescue StandardError => e
