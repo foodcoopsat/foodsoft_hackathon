@@ -79,8 +79,13 @@ class OrderFax < OrderPdf
       price = oa.article_version.price
       subtotal = oa.units_to_order * price
       total += subtotal
+      quantity = if oa.article_version.supplier_order_unit_is_si_convertible
+                   number_with_precision(oa.units_to_order, precision: 3)
+                 else
+                   oa.units_to_order.floor
+                 end
       data << [oa.article_version.order_number,
-               number_with_precision(oa.units_to_order, precision: 3),
+               quantity,
                format_supplier_order_unit_with_ratios(oa.price),
                oa.article_version.name,
                number_to_currency(price),
