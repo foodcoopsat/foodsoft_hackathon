@@ -47,7 +47,7 @@ class Supplier < ApplicationRecord
   # @option options [Boolean] :convert_units Omit or set to +true+ to keep current units, recomputing unit quantity and price.
   def sync_from_file(file, options = {})
     data = FoodsoftFile.parse(file, options)
-    parse_import_data({ articles: data }, options)
+    parse_import_data({ articles: data }, options) + [data]
   end
 
   def read_from_remote(search_params = {})
@@ -63,7 +63,7 @@ class Supplier < ApplicationRecord
 
   def sync_from_remote(options = {})
     data = read_from_remote(options[:search_params])
-    parse_import_data(data, options)
+    parse_import_data(data, options) + [data]
   end
 
   def deleted?

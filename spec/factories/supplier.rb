@@ -19,7 +19,9 @@ FactoryBot.define do
     after :create do |supplier, evaluator|
       article_count = evaluator.article_count
       article_count = rand(1..99) if article_count == true
-      create_list(:article, article_count, supplier: supplier)
+      article_count.times do |index|
+        create(:article, supplier: supplier, order_number: index.to_s)
+      end
     end
   end
 
