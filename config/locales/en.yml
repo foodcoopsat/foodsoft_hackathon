@@ -1541,6 +1541,7 @@ en:
       heading: Order for %{name}
       name: Name
       number: Number
+      unit: Unit
       to_address: Shipping address
     finish:
       notice: The order has been closed.

@@ -1537,6 +1537,7 @@ de:
       heading: Bestellung für %{name}
       name: Name
       number: Nummer
+      unit: Einheit
       to_address: Versandaddresse
     finish:
       notice: Die Bestellung wurde beendet.

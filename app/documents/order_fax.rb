@@ -1,5 +1,6 @@
 class OrderFax < OrderPdf
   include ArticlesHelper
+  include OrdersHelper
 
   BATCH_SIZE = 250
 
@@ -74,33 +75,41 @@ class OrderFax < OrderPdf
 
   def articles_paragraph
     total = 0
-    data = [I18n.t('documents.order_fax.rows')]
+    data = [I18n.t('documents.order_fax.rows').clone]
+    any_order_number_present = false
     each_order_article do |oa|
       price = oa.article_version.price
       subtotal = oa.units_to_order * price
       total += subtotal
-      quantity = if oa.article_version.supplier_order_unit_is_si_convertible
-                   number_with_precision(oa.units_to_order, precision: 3)
-                 else
-                   oa.units_to_order.floor
-                 end
-      data << [oa.article_version.order_number,
-               quantity,
+      order_number = oa.article_version.order_number
+      any_order_number_present = true if order_number
+      data << [order_number,
+               format_units_to_order(oa),
                format_supplier_order_unit_with_ratios(oa.price),
                oa.article_version.name,
                number_to_currency(price),
                number_to_currency(subtotal)]
     end
-    data << [I18n.t('documents.order_fax.total'), nil, nil, nil, nil, number_to_currency(total)]
+
+    total_row = [I18n.t('documents.order_fax.total'), nil, nil, nil, nil, number_to_currency(total)]
+
+    unless any_order_number_present
+      data.map { |row| row.delete_at(0) }
+      total_row.delete_at(1)
+    end
+
+    data << total_row
+
     table data, cell_style: { size: fontsize(8), overflow: :shrink_to_fit } do |table|
       table.header = true
       table.cells.border_width = 1
       table.cells.border_color = '666666'
 
       table.row(0).border_bottom_width = 2
-      table.columns(1).align = :right
-      table.columns(4..5).align = :right
-      table.row(data.length - 1).columns(0..4).borders = %i[top bottom]
+      table.columns(-5).align = :right
+      table.columns(-2..-1).align = :right
+      table.row(data.length - 1).columns(0).align = :left
+      table.row(data.length - 1).columns(0..-2).borders = %i[top bottom]
       table.row(data.length - 1).columns(0).borders = %i[top bottom left]
       table.row(data.length - 1).border_top_width = 2
     end

@@ -3,6 +3,7 @@ require 'csv'
 class OrderCsv < RenderCsv
   include ApplicationHelper
   include ArticlesHelper
+  include OrdersHelper
 
   def header
     [
@@ -17,14 +18,9 @@ class OrderCsv < RenderCsv
 
   def data
     @object.order_articles.ordered.includes(:article_version).all.map do |oa|
-      quantity = if oa.article_version.supplier_order_unit_is_si_convertible
-                   number_with_precision(oa.units_to_order, precision: 3)
-                 else
-                   oa.units_to_order.floor
-                 end
       yield [
         oa.article_version.order_number,
-        quantity,
+        format_units_to_order(oa, strip_insignificant_zeros: true),
         format_supplier_order_unit_with_ratios(oa.article_version),
         oa.article_version.name,
         number_to_currency(oa.article_version.price),
