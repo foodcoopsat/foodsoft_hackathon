@@ -20,6 +20,9 @@ class OrderArticle < ApplicationRecord
   scope :belonging_to_open_order, -> { joins(:order).merge(Order.open) }
   scope :belonging_to_finished_order, -> { joins(:order).merge(Order.finished) }
 
+  # alias for old code which is hard to automatically replace (.price could also refer to ArticleVersion.price)
+  alias price article_version
+
   before_create :init_from_balancing
   after_destroy :update_ordergroup_prices
 
@@ -29,12 +32,6 @@ class OrderArticle < ApplicationRecord
 
   def self.ransackable_associations(_auth_object = nil)
     %w[order article]
-  end
-
-  # This method returns either the ArticleVersion or the Article
-  # The first will be set, when the the order is finished
-  def price
-    article_version || article
   end
 
   # latest information on available units
