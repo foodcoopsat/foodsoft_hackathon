@@ -290,13 +290,21 @@ tr.order-article {
     white-space: nowrap;
   }
 
-  .group-order-input:not(.stock-order) {
-    text-align: center;
 
+  .used-unused, .used-unused-tolerance {
+    width: 70px;
+    text-wrap: nowrap;
+  }
+
+  .group-order-input:not(.stock-order) {
     .goa-quantity, .goa-tolerance {
       width: 45px;
       text-align: right;
     }
+  }
+
+  .group-order-input.stock-order {
+    width: 50px;
   }
 }
 
