@@ -362,11 +362,25 @@ td.symbol, th.symbol {
 .partused    .symbol { color: tint(@articlePartusedColor, @nonessentialDim); }
 .unavailable .symbol { color: @articleUnavailColor; }
 
-.article-form .icon-warning-sign {
-  margin-top: 8px;
-  margin-left: 10px;
-  color: @articleCustomUnitWarning;
+.article-form {
+  .icon-warning-sign {
+    margin-top: 8px;
+    margin-left: 10px;
+    color: @articleCustomUnitWarning;
+  }
+
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Firefox */
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
 }
+
 
 // hide symbols completely on small screens to save space
 @media (max-width: 768px) {
