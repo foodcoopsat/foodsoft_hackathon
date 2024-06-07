@@ -106,13 +106,13 @@ class GroupOrderForm {
   }
 
   updateMissingUnits(row$) {
-    const used$ = row$.find('.quantity .used');
-    const unused$ = row$.find('.quantity .unused');
+    const used$ = row$.find('.used-unused .used');
+    const unused$ = row$.find('.used-unused .unused');
 
     const quantity$ = row$.find('.goa-quantity');
     const tolerance$ = row$.find('.goa-tolerance');
-    const usedTolerance$ = row$.find('.tolerance .used');
-    const unusedTolerance$ = row$.find('.tolerance .unused');
+    const usedTolerance$ = row$.find('.used-unused-tolerance .used');
+    const unusedTolerance$ = row$.find('.used-unused-tolerance .unused');
     const totalPacks$ = row$.find('.article-info *[id^="units_"]');
     const totalQuantity$ = row$.find('.article-info *[id^="q_total_"]');
     const totalTolerance$ = row$.find('.article-info *[id^="t_total_"]');
