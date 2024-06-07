@@ -75,28 +75,26 @@ class OrderFax < OrderPdf
 
   def articles_paragraph
     total = 0
-    data = [I18n.t('documents.order_fax.rows').clone]
-    any_order_number_present = false
+    any_order_number_present = order_articles.where.not(article_version: { order_number: nil }).any?
+    data = [get_header_labels(!any_order_number_present)]
     each_order_article do |oa|
       price = oa.article_version.price
       subtotal = oa.units_to_order * price
       total += subtotal
-      order_number = oa.article_version.order_number
-      any_order_number_present = true if order_number
-      data << [order_number,
-               format_units_to_order(oa),
-               format_supplier_order_unit_with_ratios(oa.price),
-               oa.article_version.name,
-               number_to_currency(price),
-               number_to_currency(subtotal)]
+      oa_data = []
+      oa_data += [oa.article_version.order_number] if any_order_number_present
+      oa_data += [
+        format_units_to_order(oa),
+        format_supplier_order_unit_with_ratios(oa.price),
+        oa.article_version.name,
+        number_to_currency(price),
+        number_to_currency(subtotal)
+      ]
+      data << oa_data
     end
 
-    total_row = [I18n.t('documents.order_fax.total'), nil, nil, nil, nil, number_to_currency(total)]
-
-    unless any_order_number_present
-      data.map { |row| row.delete_at(0) }
-      total_row.delete_at(1)
-    end
+    total_row_spacing_columns = [nil] * (any_order_number_present ? 4 : 3)
+    total_row = [I18n.t('documents.order_fax.total')] + total_row_spacing_columns + [number_to_currency(total)]
 
     data << total_row
 
@@ -129,5 +127,11 @@ class OrderFax < OrderPdf
 
   def each_order_article(&block)
     order_articles.find_each_with_order(batch_size: BATCH_SIZE, &block)
+  end
+
+  def get_header_labels(exclude_order_number)
+    labels = I18n.t('documents.order_fax.rows').clone
+    labels.delete(0) if exclude_order_number
+    labels
   end
 end
