@@ -73,15 +73,16 @@ module OrdersHelper
   #   Sensible in tables with multiple columns.
   # @return [String] Text showing unit and unit quantity when applicable.
   def pkg_helper(article, options = {})
-    if options[:unit].nil? || article.supplier_order_unit == options[:unit]
+    unit_code = options[:unit] || article.supplier_order_unit
+    if unit_code == article.supplier_order_unit
       first_ratio = article&.article_unit_ratios&.first
-      return '' if first_ratio.nil? || first_ratio.quantity == 1
+      return ArticleUnitsLib.human_readable_unit(unit_code) if first_ratio.nil? || first_ratio.quantity == 1
 
-      uq_text = "× #{number_with_precision(first_ratio.quantity, precision: 3, strip_insignificant_zeros: true)} #{ArticleUnitsLib.units[first_ratio.unit][:symbol]}"
+      uq_text = "× #{number_with_precision(first_ratio.quantity, precision: 3, strip_insignificant_zeros: true)} #{ArticleUnitsLib.human_readable_unit(first_ratio.unit)}"
     else
-      unit = ArticleUnitsLib.units[options[:unit]]
-      uq_text = unit[:symbol] || unit[:name]
+      uq_text = ArticleUnitsLib.human_readable_unit(unit_code)
     end
+
     uq_text = content_tag(:span, uq_text, class: 'hidden-phone') if options[:soft_uq]
     if options[:plain]
       uq_text

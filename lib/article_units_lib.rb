@@ -69,6 +69,11 @@ class ArticleUnitsLib
     !units.to_h[code]&.dig(:conversionFactor).nil?
   end
 
+  def self.human_readable_unit(unit_code)
+    unit = units.to_h[unit_code]
+    unit[:symbol] || unit[:name]
+  end
+
   def self.get_translated_name_for_code(code, default_nil: false)
     return nil if code.blank?
 
