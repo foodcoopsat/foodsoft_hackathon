@@ -19,8 +19,7 @@ module ArticlesHelper
     unit_code = article.send(unit_property)
     return article.unit if unit_code.nil?
 
-    unit = ArticleUnitsLib.units.to_h[unit_code]
-    unit[:symbol] || unit[:name]
+    ArticleUnitsLib.human_readable_unit(unit_code)
   end
 
   def format_supplier_order_unit(article)
