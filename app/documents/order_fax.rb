@@ -131,7 +131,7 @@ class OrderFax < OrderPdf
 
   def get_header_labels(exclude_order_number)
     labels = I18n.t('documents.order_fax.rows').clone
-    labels.delete(0) if exclude_order_number
+    labels.delete_at(0) if exclude_order_number
     labels
   end
 end
