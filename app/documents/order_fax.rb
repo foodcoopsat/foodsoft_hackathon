@@ -1,5 +1,6 @@
 class OrderFax < OrderPdf
   include ArticlesHelper
+  include OrdersHelper
 
   BATCH_SIZE = 250
 
@@ -74,28 +75,39 @@ class OrderFax < OrderPdf
 
   def articles_paragraph
     total = 0
-    data = [I18n.t('documents.order_fax.rows')]
+    any_order_number_present = order_articles.where.not(article_version: { order_number: nil }).any?
+    data = [get_header_labels(!any_order_number_present)]
     each_order_article do |oa|
       price = oa.article_version.price
       subtotal = oa.units_to_order * price
       total += subtotal
-      data << [oa.article_version.order_number,
-               number_with_precision(oa.units_to_order, precision: 3),
-               format_supplier_order_unit_with_ratios(oa.price),
-               oa.article_version.name,
-               number_to_currency(price),
-               number_to_currency(subtotal)]
+      oa_data = []
+      oa_data += [oa.article_version.order_number] if any_order_number_present
+      oa_data += [
+        format_units_to_order(oa),
+        format_supplier_order_unit_with_ratios(oa.price),
+        oa.article_version.name,
+        number_to_currency(price),
+        number_to_currency(subtotal)
+      ]
+      data << oa_data
     end
-    data << [I18n.t('documents.order_fax.total'), nil, nil, nil, nil, number_to_currency(total)]
+
+    total_row_spacing_columns = [nil] * (any_order_number_present ? 4 : 3)
+    total_row = [I18n.t('documents.order_fax.total')] + total_row_spacing_columns + [number_to_currency(total)]
+
+    data << total_row
+
     table data, cell_style: { size: fontsize(8), overflow: :shrink_to_fit } do |table|
       table.header = true
       table.cells.border_width = 1
       table.cells.border_color = '666666'
 
       table.row(0).border_bottom_width = 2
-      table.columns(1).align = :right
-      table.columns(4..5).align = :right
-      table.row(data.length - 1).columns(0..4).borders = %i[top bottom]
+      table.columns(-5).align = :right
+      table.columns(-2..-1).align = :right
+      table.row(data.length - 1).columns(0).align = :left
+      table.row(data.length - 1).columns(0..-2).borders = %i[top bottom]
       table.row(data.length - 1).columns(0).borders = %i[top bottom left]
       table.row(data.length - 1).border_top_width = 2
     end
@@ -115,5 +127,11 @@ class OrderFax < OrderPdf
 
   def each_order_article(&block)
     order_articles.find_each_with_order(batch_size: BATCH_SIZE, &block)
+  end
+
+  def get_header_labels(exclude_order_number)
+    labels = I18n.t('documents.order_fax.rows').clone
+    labels.delete_at(0) if exclude_order_number
+    labels
   end
 end
