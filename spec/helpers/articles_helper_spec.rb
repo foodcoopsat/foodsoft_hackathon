@@ -7,14 +7,8 @@ describe ArticlesHelper do
   let(:article_version) { article.latest_article_version }
 
   describe 'formatting supplier order unit' do
-    def test_with_article_data(data)
-      article_version.supplier_order_unit = data[:supplier_order_unit] unless data[:supplier_order_unit].nil?
-      unless data[:ratios].nil?
-        ratios = data[:ratios].each_with_index.map { |ratio_data, index| ArticleUnitRatio.create(sort: index, quantity: ratio_data[0], unit: ratio_data[1]) }
-        article_version.article_unit_ratios = ratios
-      end
-      article_version.group_order_unit = data[:group_order_unit] unless data[:group_order_unit].nil?
-
+    def test_with_article_data(supplier_order_unit: nil, group_order_unit: nil, ratios: nil)
+      setup_article_version(supplier_order_unit: supplier_order_unit, group_order_unit: group_order_unit, ratios: ratios)
       format_supplier_order_unit_with_ratios(article_version).gsub(Prawn::Text::NBSP, ' ')
     end
 
@@ -79,14 +73,8 @@ describe ArticlesHelper do
   end
 
   describe 'formatting group order unit' do
-    def test_with_article_data(data)
-      article_version.supplier_order_unit = data[:supplier_order_unit] unless data[:supplier_order_unit].nil?
-      unless data[:ratios].nil?
-        ratios = data[:ratios].each_with_index.map { |ratio_data, index| ArticleUnitRatio.create(sort: index, quantity: ratio_data[0], unit: ratio_data[1]) }
-        article_version.article_unit_ratios = ratios
-      end
-      article_version.group_order_unit = data[:group_order_unit] unless data[:group_order_unit].nil?
-
+    def test_with_article_data(supplier_order_unit: nil, group_order_unit: nil, ratios: nil)
+      setup_article_version(supplier_order_unit: supplier_order_unit, group_order_unit: group_order_unit, ratios: ratios)
       format_group_order_unit_with_ratios(article_version).gsub(Prawn::Text::NBSP, ' ')
     end
 
@@ -122,4 +110,16 @@ describe ArticlesHelper do
       end
     end
   end
+end
+
+private
+
+def setup_article_version(supplier_order_unit:, ratios:, group_order_unit:)
+  article_version.supplier_order_unit = supplier_order_unit unless supplier_order_unit.nil?
+  unless ratios.nil?
+    article_version.article_unit_ratios = ratios.each_with_index.map do |ratio_data, index|
+      ArticleUnitRatio.create(sort: index, quantity: ratio_data[0], unit: ratio_data[1])
+    end
+  end
+  article_version.group_order_unit = group_order_unit unless group_order_unit.nil?
 end
