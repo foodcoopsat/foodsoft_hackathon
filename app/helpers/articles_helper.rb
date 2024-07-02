@@ -15,13 +15,6 @@ module ArticlesHelper
     classes.join(' ')
   end
 
-  def format_unit(unit_property, article)
-    unit_code = article.send(unit_property)
-    return article.unit if unit_code.nil?
-
-    ArticleUnitsLib.human_readable_unit(unit_code)
-  end
-
   def format_supplier_order_unit(article)
     format_unit(:supplier_order_unit, article)
   end
@@ -32,15 +25,6 @@ module ArticlesHelper
 
   def format_billing_unit(article)
     format_unit(:billing_unit, article)
-  end
-
-  def format_unit_with_ratios(unit_property, article_version, reference_unit = :group_order_unit)
-    base = format_unit(unit_property, article_version)
-
-    factorized_unit_str = get_factorized_unit_str(article_version, unit_property, reference_unit) unless reference_unit.nil?
-    return base if factorized_unit_str.nil?
-
-    "#{base} (#{factorized_unit_str})"
   end
 
   def format_supplier_order_unit_with_ratios(article)
@@ -71,6 +55,22 @@ module ArticlesHelper
   end
 
   private
+
+  def format_unit_with_ratios(unit_property, article_version, reference_unit = :group_order_unit)
+    base = format_unit(unit_property, article_version)
+
+    factorized_unit_str = get_factorized_unit_str(article_version, unit_property, reference_unit) unless reference_unit.nil?
+    return base if factorized_unit_str.nil?
+
+    "#{base} (#{factorized_unit_str})"
+  end
+
+  def format_unit(unit_property, article)
+    unit_code = article.send(unit_property)
+    return article.unit if unit_code.nil?
+
+    ArticleUnitsLib.human_readable_unit(unit_code)
+  end
 
   def get_factorized_unit_str(article_version, unit_property, reference_unit)
     unit_code = article_version.send(unit_property)
