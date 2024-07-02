@@ -157,7 +157,7 @@ feature ArticlesController do
     end
 
     describe 'can update existing article' do
-      let!(:article) { create(:article, supplier: supplier, name: 'Foobar', order_number: 1, unit: '250 g') }
+      let!(:article) { create(:article, supplier: supplier, name: 'Foobar', order_number: 1, unit: '250 g', group_order_unit: nil) }
 
       it do
         find('input[type="submit"]').click
@@ -198,7 +198,7 @@ feature ArticlesController do
     end
 
     describe 'can convert units when updating' do
-      let!(:article) { create(:article, supplier: supplier, order_number: 1, unit: '250 g') }
+      let!(:article) { create(:article, supplier: supplier, order_number: 1, unit: '250 g', group_order_unit: nil) }
 
       it do
         check('articles_convert_units')
