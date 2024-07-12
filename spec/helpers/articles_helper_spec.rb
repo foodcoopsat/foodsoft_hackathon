@@ -49,7 +49,7 @@ describe ArticlesHelper do
           ratios: [[20.148, 'KGM'], [20, 'XBO'], [10, 'LTR']],
           group_order_unit: 'XBO'
         )
-        expect(result).to eq('Crate (20 x 0.5 l)')
+        expect(result).to eq('Crate (20 × 0.5 l)')
       end
 
       it 'formats ratio from group order unit to first SI ratio if group order unit equals or defaults to supplier order unit' do
@@ -58,7 +58,7 @@ describe ArticlesHelper do
           ratios: [[100, 'XPC'], [400, 'XPK'], [4000, 'X6H'], [200_000, 'GRM']],
           group_order_unit: 'XPK'
         )
-        expect(result).to eq('Pallet (400 x 500 g)')
+        expect(result).to eq('Pallet (400 × 500 g)')
       end
 
       it 'formats ratio from group order unit to first SI ratio' do

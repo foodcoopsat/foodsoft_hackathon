@@ -112,7 +112,7 @@ module ArticlesHelper
 
     factor_str_arr
       .compact
-      .join("#{Prawn::Text::NBSP}x#{Prawn::Text::NBSP}")
+      .join("#{Prawn::Text::NBSP}×#{Prawn::Text::NBSP}")
   end
 
   def format_unit_factor(factor, with_unit)
@@ -126,7 +126,7 @@ module ArticlesHelper
     unit_label = is_si_conversible ? unit_data[:symbol] : unit_data[:name]
     return unit_label if factor[:quantity] == 1
 
-    multiplier_str = 'x' unless is_si_conversible
+    multiplier_str = '×' unless is_si_conversible
 
     [quantity_str, multiplier_str, unit_label]
       .compact
