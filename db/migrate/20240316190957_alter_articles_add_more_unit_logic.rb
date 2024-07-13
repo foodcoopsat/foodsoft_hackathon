@@ -50,9 +50,9 @@ class AlterArticlesAddMoreUnitLogic < ActiveRecord::Migration[5.2]
     change_table :order_articles do |t|
       t.change :quantity, :decimal, precision: 8, scale: 3, null: false, comment: 'stored in `article_versions.group_order_unit`'
       t.change :tolerance, :decimal, precision: 8, scale: 3, null: false, comment: 'stored in `article_versions.group_order_unit`'
-      t.change :units_to_order, :decimal, precision: 8, scale: 3, null: false, comment: 'stored in `article_versions.supplier_order_unit`'
-      t.change :units_billed, :decimal, precision: 8, scale: 3, null: true, comment: 'stored in `article_versions.supplier_order_unit`'
-      t.change :units_received, :decimal, precision: 8, scale: 3, null: true, comment: 'stored in `article_versions.supplier_order_unit`'
+      t.change :units_to_order, :decimal, precision: 11, scale: 6, null: false, comment: 'stored in `article_versions.supplier_order_unit`'
+      t.change :units_billed, :decimal, precision: 11, scale: 6, null: true, comment: 'stored in `article_versions.supplier_order_unit`'
+      t.change :units_received, :decimal, precision: 11, scale: 6, null: true, comment: 'stored in `article_versions.supplier_order_unit`'
     end
 
     change_table :group_order_articles do |t|
