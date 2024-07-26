@@ -73,7 +73,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_26_083744) do
 
   create_table "article_versions", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "article_id", null: false
-    t.decimal "price", precision: 8, scale: 2, default: "0.0", null: false
+    t.decimal "price", precision: 11, scale: 6, default: "0.0", null: false, comment: "stored in `article_versions.supplier_order_unit`"
     t.decimal "tax", precision: 8, scale: 2, default: "0.0", null: false
     t.decimal "deposit", precision: 8, scale: 2, default: "0.0", null: false
     t.datetime "created_at"
