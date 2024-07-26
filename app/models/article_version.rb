@@ -117,9 +117,10 @@ class ArticleVersion < ApplicationRecord
     if value.blank?
       self[:minimum_order_quantity] = nil
     else
+      value = value.gsub(I18n.t('number.format.separator'), '.') if value.is_a?(String)
       begin
         value = value.to_i if Float(value) % 1 == 0
-      rescue ArgumentException
+      rescue ArgumentError
         # not any number -> let validation handle this
       end
       super(value)
