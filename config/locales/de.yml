@@ -22,9 +22,17 @@ de:
         supplier: Lieferantin
         tax: MwSt
         unit: Einheit
+        custom_unit: Benutzerdefinierte Einheit
         unit_quantity: Gebindegröße
         unit_quantity_short: GebGr
         units: Gebinde
+        supplier_order_unit: von Lieferantin bestellbar in (Einheit)
+        ratios_to_supplier_order_unit: Inhalt
+        minimum_order_quantity: Mindestbestellmenge
+        billing_unit: abgerechnet nach (Einheit)
+        group_order_granularity: für Mitglieder bestellbar in (Menge)
+        group_order_unit: für Mitglieder bestellbar in (Einheit)
+        price_unit: pro (Preiseinheit)
       article_unit:
         code: Einheitencode gemäß Empfehlung der United Nations Economic Commission (UNECE)
         code_short: Code

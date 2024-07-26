@@ -22,10 +22,18 @@ en:
         supplier: Supplier
         tax: VAT
         unit: Unit
+        custom_unit: Custom unit
         unit_quantity: Unit quantity
         unit_quantity_short: U.Q.
         units: Units
-        supplier_order_unit: Supplier order unit
+        supplier_order_unit: orderable from supplier per (unit)
+        ratios_to_supplier_order_unit: Content
+        minimum_order_quantity: Minimum order quantity
+        billing_unit: billed per (unit)
+        group_order_granularity: members can order per (amount)
+        group_order_unit: members can order per (unit)
+        price_unit: per (price unit)
+
       article_unit:
         code: Unit code according to the recommendation of the United Nations Economic Commission (UNECE)
         code_short: Code
