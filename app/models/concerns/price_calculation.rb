@@ -31,7 +31,7 @@ module PriceCalculation
   def get_unit_ratio_quantity(unit)
     return 1 if unit == supplier_order_unit
 
-    ratio = article_unit_ratios.find_by_unit(unit)
+    ratio = new_record? ? article_unit_ratios.detect { |ratio| ratio[:unit] == unit } : article_unit_ratios.find_by_unit(unit)
     return ratio.quantity unless ratio.nil?
 
     unit_hash = ArticleUnit.as_hash[unit]
