@@ -27,6 +27,10 @@ module ArticlesHelper
     format_unit(:billing_unit, article)
   end
 
+  def format_price_unit(article)
+    format_unit(:price_unit, article)
+  end
+
   def format_supplier_order_unit_with_ratios(article)
     format_unit_with_ratios(:supplier_order_unit, article)
   end

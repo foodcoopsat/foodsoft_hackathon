@@ -47,6 +47,10 @@ class Supplier < ApplicationRecord
   # @option options [Boolean] :convert_units Omit or set to +true+ to keep current units, recomputing unit quantity and price.
   def sync_from_file(file, options = {})
     data = FoodsoftFile.parse(file, options)
+    data.each do |new_attrs|
+      new_article = foodsoft_file_attrs_to_article(new_attrs.dup)
+      new_attrs[:price] = new_attrs[:price].to_d / new_article.convert_quantity(1, new_article.price_unit, new_article.supplier_order_unit)
+    end
     parse_import_data({ articles: data }, options) + [data]
   end
 
@@ -120,15 +124,7 @@ class Supplier < ApplicationRecord
 
     data[:articles].each do |new_attrs|
       article = articles.includes(:latest_article_version).undeleted.where(article_versions: { order_number: new_attrs[:order_number] }).first
-      new_attrs[:article_category] = ArticleCategory.find_match(new_attrs[:article_category])
-      new_attrs[:tax] ||= FoodsoftConfig[:tax_default]
-      new_attrs[:article_unit_ratios] = new_attrs[:article_unit_ratios].map do |ratio_hash|
-        ArticleUnitRatio.new(ratio_hash)
-      end
-      new_article = articles.build
-      new_article_version = new_article.article_versions.build(new_attrs)
-      new_article.article_versions << new_article_version
-      new_article.latest_article_version = new_article_version
+      new_article = foodsoft_file_attrs_to_article(new_attrs)
 
       if new_attrs[:availability]
         if article.nil?
@@ -151,5 +147,20 @@ class Supplier < ApplicationRecord
     end
     outlisted_articles += articles.includes(:latest_article_version).undeleted.where.not(article_versions: { order_number: all_order_numbers + [nil] }) if options[:outlist_absent]
     [updated_article_pairs, outlisted_articles, new_articles]
+  end
+
+  def foodsoft_file_attrs_to_article(foodsoft_file_attrs)
+    foodsoft_file_attrs = foodsoft_file_attrs.dup
+    foodsoft_file_attrs[:article_category] = ArticleCategory.find_match(foodsoft_file_attrs[:article_category])
+    foodsoft_file_attrs[:tax] ||= FoodsoftConfig[:tax_default]
+    foodsoft_file_attrs[:article_unit_ratios] = foodsoft_file_attrs[:article_unit_ratios].map do |ratio_hash|
+      ArticleUnitRatio.new(ratio_hash)
+    end
+    new_article = articles.build
+    new_article_version = new_article.article_versions.build(foodsoft_file_attrs)
+    new_article.article_versions << new_article_version
+    new_article.latest_article_version = new_article_version
+
+    new_article
   end
 end

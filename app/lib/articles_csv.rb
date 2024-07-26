@@ -34,7 +34,7 @@ class ArticlesCsv < RenderCsv
         article.manufacturer,
         article.origin,
         article.unit,
-        article.price,
+        article.price_unit_price,
         article.tax,
         article.deposit,
         ArticleUnitsLib.get_translated_name_for_code(article.supplier_order_unit),

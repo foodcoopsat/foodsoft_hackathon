@@ -58,6 +58,12 @@ module PriceCalculation
     value / convert_quantity(1, supplier_order_unit, group_order_unit)
   end
 
+  def price_unit_price(value = nil)
+    value ||= price
+    # price is always stored in supplier_order_unit:
+    value / convert_quantity(1, supplier_order_unit, price_unit)
+  end
+
   def gross_group_order_price
     group_order_price(gross_price)
   end
