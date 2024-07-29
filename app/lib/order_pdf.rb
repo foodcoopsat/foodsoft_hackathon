@@ -1,5 +1,6 @@
 class OrderPdf < RenderPdf
   include ArticlesHelper
+  include OrdersHelper
   attr_reader :order
 
   def initialize(order, options = {})
@@ -55,23 +56,46 @@ class OrderPdf < RenderPdf
     "#{number_to_currency(order_article_price(order_article))} / #{format_group_order_unit_with_ratios(order_article.article_version)}"
   end
 
-  def price_per_billing_unit(goa)
-    article_version = goa.order_article.article_version
+  def price_per_billing_unit(article_version)
     "#{number_to_currency(article_version.convert_quantity(article_version.fc_price, article_version.billing_unit,
                                                            article_version.supplier_order_unit))} / #{format_billing_unit_with_ratios(article_version)}"
   end
 
-  def billing_quantity_with_tolerance(goa)
+  def group_order_quantity_with_tolerance(goa, strip_insignificant_zeros: false)
     article_version = goa.order_article.article_version
-    quantity = number_with_precision(
-      article_version.convert_quantity(goa.quantity, article_version.group_order_unit,
-                                       article_version.billing_unit), strip_insignificant_zeros: true, precision: 2
-    )
-    tolerance = number_with_precision(
-      article_version.convert_quantity(goa.tolerance, article_version.group_order_unit,
-                                       article_version.billing_unit), strip_insignificant_zeros: true, precision: 2
-    )
-    goa.tolerance > 0 ? "#{quantity} + #{tolerance}" : quantity
+    quantity = format_units_amount(goa.quantity, article_version.group_order_unit, strip_insignificant_zeros: strip_insignificant_zeros)
+    tolerance = format_units_amount(goa.tolerance, article_version.group_order_unit, strip_insignificant_zeros: strip_insignificant_zeros)
+    amount = goa.tolerance > 0 ? "#{quantity} + #{tolerance}" : quantity.to_s
+    amount += " #{format_group_order_unit_with_ratios(article_version)}"
+    amount
+  end
+
+  def billing_quantity(goa, strip_insignificant_zeros: false)
+    article_version = goa.order_article.article_version
+    amount = format_units_amount(article_version.convert_quantity(goa.result,
+                                                                  article_version.group_order_unit,
+                                                                  article_version.billing_unit),
+                                 article_version.billing_unit,
+                                 strip_insignificant_zeros: strip_insignificant_zeros)
+    "#{amount} #{format_billing_unit_with_ratios(article_version)}"
+  end
+
+  def total_group_order_quantity_with_tolerance(order_article)
+    article_version = order_article.article_version
+    quantity = format_units_amount(order_article.quantity, article_version.group_order_unit)
+    tolerance = format_units_amount(order_article.tolerance, article_version.group_order_unit)
+    amount = order_article.tolerance > 0 ? "#{quantity} + #{tolerance}" : quantity.to_s
+    amount += " #{format_group_order_unit_with_ratios(article_version)}"
+    amount
+  end
+
+  def total_billing_quantity(order_article)
+    article_version = order_article.article_version
+    amount = format_units_amount(article_version.convert_quantity(order_article.group_orders_sum[:quantity],
+                                                                  article_version.group_order_unit,
+                                                                  article_version.billing_unit),
+                                 article_version.billing_unit)
+    "#{amount} #{format_billing_unit_with_ratios(article_version)}"
   end
 
   def group_order_article_result(goa)
