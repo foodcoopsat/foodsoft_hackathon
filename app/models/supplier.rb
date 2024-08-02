@@ -87,7 +87,7 @@ class Supplier < ApplicationRecord
     articles.with_latest_versions_and_categories.any? { |article| article.latest_article_version.uses_tolerance? }
   end
 
-  # TODO: Maybe use the nilify blanks gem instead of the following two methods?:
+  # TODO: Maybe use the `nilify_blanks` gem instead of the following two methods? (see https://github.com/foodcoopsat/foodsoft_hackathon/issues/93):
   def supplier_remote_source=(value)
     if value.blank?
       self[:supplier_remote_source] = nil

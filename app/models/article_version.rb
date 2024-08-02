@@ -72,7 +72,7 @@ class ArticleVersion < ApplicationRecord
     ArticleUnitsLib.unit_is_si_convertible(supplier_order_unit)
   end
 
-  # TODO: Maybe use the nilify blanks gem instead of the following six methods?:
+  # TODO: Maybe use the `nilify_blanks` gem instead of the following six methods? (see https://github.com/foodcoopsat/foodsoft_hackathon/issues/93):
   def unit=(value)
     if value.blank?
       self[:unit] = nil

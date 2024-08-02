@@ -564,7 +564,6 @@ de:
     prepare_units_migration:
       title: Artikel von %{supplier} migrieren
       explanation: |
-        TODO: Allgemeine Erklärung
         Es wird sehr empfohlen ein Backup herunterzuladen ehe Sie fortfahren:
       download: Artikel-Backup herunterladen
       migrate_units: Nächster Schritt
@@ -572,7 +571,6 @@ de:
       title: Artikel von %{supplier} migrieren
       explanation: |
         Die Artikeleinheiten werden nun in eine neue, flexiblere Form konvertiert. Passen Sie die Konvertierungsvorschläge an, ehe sie fortfahren.
-        TODO: Besser erklären; vielleicht mit Doku verlinken?
       column_headers:
         apply: Konvertieren
         original_plaintext_unit: Ursprüngliche Volltext-Einheit

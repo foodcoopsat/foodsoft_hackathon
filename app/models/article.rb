@@ -71,7 +71,7 @@ class Article < ApplicationRecord
 
   accepts_nested_attributes_for :latest_article_version
 
-  # TODO-article-version: Discuss if these delegates aren't actually a code smell:
+  # TODO: Remove these (see https://github.com/foodcoopsat/foodsoft_hackathon/issues/91):
   begin
     ArticleVersion.column_names.each do |column_name|
       next if column_name == ArticleVersion.primary_key
@@ -92,12 +92,12 @@ class Article < ApplicationRecord
   after_save :reload_article_on_version_change
 
   def self.ransackable_attributes(_auth_object = nil)
-    # TODO-article-version
+    # TODO: - see https://github.com/foodcoopsat/foodsoft_hackathon/issues/92
     %w[id name supplier_id article_category_id unit note manufacturer origin unit_quantity order_number]
   end
 
   def self.ransackable_associations(_auth_object = nil)
-    # TODO-article-version
+    # TODO: - see https://github.com/foodcoopsat/foodsoft_hackathon/issues/92
     %w[article_category supplier order_articles orders]
   end
 
@@ -182,7 +182,7 @@ class Article < ApplicationRecord
 
     if options[:convert_units] && latest_article_version.article_unit_ratios.length < 2 && new_article.article_unit_ratios.length < 2 && !new_unit_quantity.nil?
       ret[:article_unit_ratios_attributes] = [new_article.article_unit_ratios.build(unit: 'XPP', quantity: new_unit_quantity, sort: 1).attributes]
-      # TODO: Either remove this aspect of the :convert_units feature or extend it to also work for the new units system
+      # TODO: Either remove this aspect of the :convert_units feature or extend it to also work for the new units system (see https://github.com/foodcoopsat/foodsoft_hackathon/issues/90)
     end
 
     ret
