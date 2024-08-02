@@ -29,7 +29,6 @@ feature 'product distribution', :js do
 
     find(".goa-quantity[data-e2e-order-article-id='#{oa.id}']").set '2'
     find(".goa-tolerance[data-e2e-order-article-id='#{oa.id}']").set '3'
-    close_unit_conversion_popover
     find('input[type=submit]').click
     expect(page).to have_selector('body')
     # gruppe b bestellt 2(0)
@@ -37,7 +36,6 @@ feature 'product distribution', :js do
     visit new_group_order_path(order_id: order.id)
     scrolldown
     find(".goa-quantity[data-e2e-order-article-id='#{oa.id}']").set '2'
-    close_unit_conversion_popover
     find('input[type=submit]').click
     expect(page).to have_css('body')
     # gruppe a faellt ein dass sie doch noch mehr braucht von x und aendert auf 4(1).
@@ -46,7 +44,6 @@ feature 'product distribution', :js do
     scrolldown
     find(".goa-quantity[data-e2e-order-article-id='#{oa.id}']").set '4'
     find(".goa-tolerance[data-e2e-order-article-id='#{oa.id}']").set '1'
-    close_unit_conversion_popover
     find('input[type=submit]').click
     expect(page).to have_css('body')
     # die zuteilung

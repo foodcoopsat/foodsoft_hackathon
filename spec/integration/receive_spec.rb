@@ -36,7 +36,6 @@ feature 'receiving an order', :js do
 
   def fill_units_field(order_article_id, with)
     fill_in "order_articles_#{order_article_id}_units_received", with: with
-    close_unit_conversion_popover
   end
 
   before { login admin }

@@ -566,7 +566,6 @@ en:
       upload: Upload articles
     prepare_units_migration:
       explanation: |
-        TODO: General explanation
         It's highly recommended to download a backup before continuing:
       title: Migrate articles of %{supplier}
       download: Download articles backup
@@ -574,7 +573,6 @@ en:
       title: Migrate articles of %{supplier}
       explanation: |
         This will try to migrate articles to their new, more versatile format. You may adapt the suggested changes before continuing if you see fit.
-        TODO: Expand on this explanation - maybe link to some docs
       column_headers:
         apply: Convert
         original_plaintext_unit: Original plaintext unit

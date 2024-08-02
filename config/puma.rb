@@ -57,5 +57,5 @@ end
 # Allow puma to be restarted by `rails restart` command.
 plugin :tmp_restart
 
-# TODO-no-upstream
+# TODO: Check if we can leave that in there - see https://github.com/foodcoopsat/foodsoft_hackathon/issues/95:
 worker_timeout 3600 if ENV.fetch('RAILS_ENV') == 'development'

@@ -53,7 +53,7 @@ class GroupOrderForm {
     this.newBalance$.text(I18n.l('currency', balance));
 
     // TODO: Figure out why this hidden field is required (Should be
-    // calculated in the controller IMO!):
+    // calculated in the controller IMO! - see https://github.com/foodcoopsat/foodsoft_hackathon/issues/97):
     this.totalBalance$.val(I18n.l('currency', balance));
 
     // determine bgcolor and submit button state according to balance

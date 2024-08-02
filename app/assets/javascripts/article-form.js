@@ -162,7 +162,6 @@ class ArticleForm {
     const relativePrice = this.price$.val();
     const priceUnit = this.priceUnit$.val();
     if (priceUnit === undefined) {
-      // TODO-article-version: StockArticles don't have a price unit?
       return;
     }
     const ratio = this.getUnitRatio(1, priceUnit, this.supplierUnitSelect$.val());
@@ -484,7 +483,6 @@ class ArticleForm {
     const supplierUnitPrice = this.price$.val();
     const priceUnit = this.priceUnit$.val();
     if (priceUnit === undefined) {
-      // TODO-article-version: StockArticles don't have a price unit?
       return;
     }
     const ratio = this.getUnitRatio(1, priceUnit, this.supplierUnitSelect$.val());
@@ -587,7 +585,7 @@ class ArticleForm {
 }
 
 
-// TODO: Move those functions to some global js utils file:
+// TODO: Move those functions to some global js utils file (see https://github.com/foodcoopsat/foodsoft_hackathon/issues/88):
 function mergeJQueryObjects(array_of_jquery_objects) {
   return $($.map(array_of_jquery_objects, function (el) {
     return el.get();
