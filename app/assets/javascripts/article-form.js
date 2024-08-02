@@ -466,9 +466,13 @@ class ArticleForm {
   }
 
   prepareRatioDataForSequentialRepresentation() {
-    const numberOfRatios = $(`input[name^="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes]"][name$="[quantity]"]`).length;
+    const indices = $(`input[name^="${this.unitFieldsNamePrefix}[article_unit_ratios_attributes]"][name$="[quantity]"]`)
+      .toArray()
+      .map((field) => parseInt(field.name.replace(/.+\[([0-9]+)\]\[quantity\]/, '$1')));
+    const maxIndex = Math.max(...indices);
+    const minIndex = Math.min(...indices);
 
-    for (let i = numberOfRatios; i > 1; i--) {
+    for (let i = maxIndex; i > minIndex; i--) {
       const currentField$ = $(`input[name="${this.ratioQuantityFieldNameByIndex(i)}"]`, this.articleForm$);
       const currentValue = currentField$.val();
       const previousValue = $(`input[name="${this.ratioQuantityFieldNameByIndex(i - 1)}"]:last`, this.articleForm$).val();
