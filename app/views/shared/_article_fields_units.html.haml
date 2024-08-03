@@ -9,7 +9,7 @@
   = f.input :supplier_order_unit, as: :select, collection: @article_units, selected: supplier_order_unit_override, include_blank: t('.custom_unit'), input_html: {class: 'input-medium'}
   -# title: free text unit
   = f.input :unit, input_html: {class: 'input-mini ml-1', placeholder: t('.unit')}, label: false
-  %i.icon-warning-sign{title: t('warn_about_needless_custom_unit')}
+  %i.icon-warning-sign{title: t('.warn_about_needless_custom_unit')}
 .fold-line
   .control-group
     %label.control-label

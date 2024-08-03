@@ -481,14 +481,10 @@ tr:
         notice: "%{count} yeni ürün kaydedildi."
       error_invalid: Ürünlerde hatalar var
       error_nosel: Seçilmiş bir ürün yok
-      error_parse: "%{msg} ... satır %{line}'da"
       error_update: '%{article} ürünleri güncellerken bir hata oluştu: %{msg}'
       parse_upload:
         no_file: Lütfen yüklemek için bir dosya seçin.
         notice: "%{count} ürün başarıyla analiz edildi."
-      sync:
-        notice: Katalog güncel
-        shared_alert: "%{supplier} harici bir veritabanına bağlı değil"
       update_all:
         notice: Tüm ürünler ve fiyatlar güncellendi.
       update_sel:
@@ -509,10 +505,6 @@ tr:
     form:
       title_edit: Ürün düzenle
       title_new: Yeni ürün ekle
-    import_search_results:
-      action_import: İçe aktar
-      already_imported: içe aktarıldı
-      not_found: Ürün bulunamadı
     index:
       change_supplier: Tedarikçi değiştir
       download: Ürünleri indir
@@ -1792,6 +1784,10 @@ tr:
       show_deliveries: Tümünü göster
     update:
       notice: Tedarikçi güncellendi
+    import_search_results:
+      action_import: İçe aktar
+      already_imported: içe aktarıldı
+      not_found: Ürün bulunamadı
   tasks:
     accept:
       notice: Görevi kabul ettiniz

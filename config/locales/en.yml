@@ -284,6 +284,7 @@ en:
               exclusion: finished tasks may not be repeated
     models:
       article: Article
+      article_version: Article
       article_category: Category
       bank_account: Bank account
       bank_gateway: Bank gateway
@@ -511,14 +512,10 @@ en:
         notice: "%{count} new articles were saved."
       error_invalid: There are errors in articles
       error_nosel: No articles selected
-      error_parse: "%{msg} ... in line %{line}"
       error_update: 'An error occured when updating article ''%{article}'': %{msg}'
       parse_upload:
         no_file: Please select a file to upload.
         notice: "%{count} articles were succesfully analysed."
-      sync:
-        notice: Catalog is up to date
-        shared_alert: "%{supplier} is not linked to an external database"
       update_all:
         notice: All articles and prices were updated.
       update_sel:
@@ -542,10 +539,6 @@ en:
       title_edit: Edit article
       title_new: Add new article
       per: per
-    import_search_results:
-      action_import: import
-      already_imported: imported
-      not_found: No articles found
     index:
       change_supplier: Change supplier
       download: Download articles
@@ -569,6 +562,7 @@ en:
         It's highly recommended to download a backup before continuing:
       title: Migrate articles of %{supplier}
       download: Download articles backup
+      migrate_units: Next step
     migrate_units:
       title: Migrate articles of %{supplier}
       explanation: |
@@ -1196,6 +1190,7 @@ en:
       task_title: "%{name} (%{duration}h)"
     unit_conversion_fields:
       title: Convert units
+      disabled_title: Unit cannot be converted
       cancel: Cancel
       apply: Apply
   home:
@@ -1673,6 +1668,7 @@ en:
       unit: Unit
       unit_ratios: Unit ratios
       add_ratio: Add ratio
+      warn_about_needless_custom_unit: Refrain from using custom plain text units when there are apt units in the dropdown. (Choosing units from the dropdown allows for interoperability with other systems and enables automatically converting them into other units.)
     article_unit_ratio:
       remove: Remove ratio
       per: per
@@ -1840,6 +1836,21 @@ en:
       stock_changes: Stock quantity changes
     update:
       notice: Stock article %{name} was saved.
+  article_units:
+    index:
+      search: Search for unit/symbol
+      only_recommended: Only recommended
+    rows:
+      request_translation: There is no translation available for this unit. If you think this unit might be of common use, click here to create a new GitHub issue.
+    create_link:
+      add: Add
+    destroy_link:
+      delete: Remove
+      confirm: Do you really want to remove this article unit? (Existing articles using this unit will not be altered, but it won't be possible to use it for new articles.)
+    create:
+      success: Article unit %{name} has been added successfully.
+    destroy:
+      success: Article unit %{name} has been removed successfully.
   suppliers:
     create:
       notice: Supplier was created

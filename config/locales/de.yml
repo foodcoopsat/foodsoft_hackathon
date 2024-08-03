@@ -165,6 +165,7 @@ de:
         updated_by: Zuletzt geändert von
       order_article:
         article: Artikel
+        article_version: Artikel
         missing_units: Fehlende Einheiten
         missing_units_short: Fehlend
         quantity: Gewünschte Einheiten
@@ -509,14 +510,10 @@ de:
         notice: "Es wurden %{count} neue Artikel gespeichert."
       error_invalid: Artikel sind fehlerhaft
       error_nosel: Du hast keine Artikel ausgewählt
-      error_parse: "%{msg} ... in Zeile %{line}"
       error_update: 'Es trat ein Fehler beim Aktualisieren des Artikels ''%{article}'' auf: %{msg}'
       parse_upload:
         no_file: Bitte eine Datei zum hochladen auswählen.
         notice: "%{count} Artikel sind erfolgreich analysiert."
-      sync:
-        notice: Der Katalog ist aktuell
-        shared_alert: "%{supplier} ist nicht mit einer externen Datenbank verknüpft."
       update_all:
         notice: Alle Artikel und Preise wurden aktualisiert
       update_sel:
@@ -539,10 +536,7 @@ de:
     form:
       title_edit: Artikel bearbeiten
       title_new: Neuen Artikel einfügen
-    import_search_results:
-      action_import: importieren
-      already_imported: schon importiert
-      not_found: Keine Artikel gefunden
+      per: pro
     index:
       change_supplier: Lieferant wechseln
       download: Artikel herunterladen
@@ -1669,6 +1663,7 @@ de:
       unit: Einheit
       unit_ratios: Einheiten-Umrechnung
       add_ratio: Umrechnung hinzufügen
+      warn_about_needless_custom_unit: Wenn möglich keine benutzerdefinierten Einheiten eintippen, sondern stattdessen das Einheiten-Dropdown verwenden (Das gewährleistet Interoperabilität mit anderen Systemen und erlaubt die automatische Umrechnung in andere Einheiten.)
     article_unit_ratio:
       remove: Umrechnung entfernen
       per: pro
@@ -1839,6 +1834,7 @@ de:
   article_units:
     index:
       search: Einheit/Symbol suchen
+      only_recommended: Nur empfohlene
     rows:
       request_translation: Für diese Einheit existiert noch keine Übersetzung. Wenn Sie der Meinung sind, dass es eine gebräuchliche Einheit ist, klicken Sie hier um ein neues GitHub Issue zu erstellen.
     create_link:
@@ -1883,8 +1879,19 @@ de:
       last_orders: Letzte Bestellungen
       new_delivery: Neue Lieferung anlegen
       show_deliveries: Zeige alle Lieferungen
+      share: Teilen
+      remove_share: Nicht mehr teilen
+      confirm_remove_share: Willst Du wirklich aufhören die Artikel dieser Lieferantin zu teilen? (Wenn Du sie später wieder freigeben willst, musst du den Link an alle Abonnentinnen schicken, die deiner Meinung nach Zugriff haben sollten.)
     update:
       notice: Lieferant wurde aktualisiert
+    import_search_results:
+      action_import: importieren
+      already_imported: schon importiert
+      not_found: Keine Artikel gefunden
+  supplier_shares:
+    share_link:
+      not_shared: Die Artikel der Lieferantin werden aktuell mit niemandem geteilt.
+      share_link_copied_to_clipboard: Link zum Teilen in die Zwischenablage kopiert.
   tasks:
     accept:
       notice: Du hast die Aufgabe übernommen
