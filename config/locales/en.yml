@@ -799,6 +799,7 @@ en:
     update:
       notice: Delivery was updated.
   documents:
+    total: Total
     order_by_articles:
       filename: Order %{name}-%{date} - by articles
       title: 'Order sorted by articles: %{name}, closed at %{date}'

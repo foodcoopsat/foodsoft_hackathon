@@ -797,6 +797,7 @@ de:
     update:
       notice: Lieferung wurde aktualisiert.
   documents:
+    total: Gesamt
     order_by_articles:
       filename: Bestellung %{name}-%{date} - Artikelsortierung
       title: 'Artikelsortierung der Bestellung: %{name}, beendet am %{date}'

@@ -24,7 +24,12 @@ module OrdersHelper
   end
 
   def format_units_to_order(order_article, strip_insignificant_zeros: false)
-    format_amount(order_article.units_to_order, order_article, strip_insignificant_zeros: strip_insignificant_zeros)
+    format_units_amount(order_article.units_to_order, order_article.article_version.supplier_order_unit, strip_insignificant_zeros: strip_insignificant_zeros)
+  end
+
+  def format_units_amount(amount, unit, strip_insignificant_zeros: false)
+    strip_insignificant_zeros = true unless ArticleUnitsLib.unit_is_si_convertible(unit)
+    number_with_precision(amount, precision: 3, strip_insignificant_zeros: strip_insignificant_zeros)
   end
 
   # "1×2 ordered, 2×2 billed, 2×2 received"
@@ -209,12 +214,5 @@ module OrdersHelper
       link_to t('orders.index.action_receive'), receive_order_path(order),
               class: "btn#{' btn-success' unless order.received?} #{options[:class]}"
     end
-  end
-
-  private
-
-  def format_amount(amount, order_article, strip_insignificant_zeros: false)
-    strip_insignificant_zeros = true unless order_article.article_version.supplier_order_unit_is_si_convertible
-    number_with_precision(amount, precision: 3, strip_insignificant_zeros: strip_insignificant_zeros)
   end
 end
