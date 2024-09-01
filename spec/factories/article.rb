@@ -10,6 +10,7 @@ FactoryBot.define do
         order_number { nil }
         unit_quantity { nil }
         unit { nil }
+        minimum_order_quantity { nil }
         supplier_order_unit { 'XPK' }
         group_order_unit { 'XPK' }
         billing_unit { 'XPK' }
@@ -23,6 +24,7 @@ FactoryBot.define do
                     order_number: evaluator.order_number,
                     unit_quantity: evaluator.unit_quantity,
                     unit: evaluator.unit,
+                    minimum_order_quantity: evaluator.minimum_order_quantity,
                     supplier_order_unit: evaluator.supplier_order_unit,
                     group_order_unit: evaluator.group_order_unit,
                     billing_unit: evaluator.billing_unit,

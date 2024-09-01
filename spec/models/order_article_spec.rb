@@ -213,4 +213,59 @@ describe OrderArticle do
       # end
     end
   end
+
+  describe 'minimum order quantity' do
+    let(:order) { create(:order, article_ids: [article.id], starts: 1.week.ago) }
+    let(:oa) { order.order_articles.first }
+    let(:go) { create(:group_order, order: order) }
+    let(:goa) { create(:group_order_article, group_order: go, order_article: oa) }
+
+    shared_context 'minimum order quantity' do |quantity|
+      before do
+        goa.update_quantities(quantity[:quantity], quantity[:tolerance])
+        oa.update_results!
+        oa.reload
+      end
+
+      it 'is calculated correctly' do
+        expect(oa.units_to_order).to eq quantity[:expected_units_to_order]
+      end
+    end
+
+    context 'without unit_quantity' do
+      let(:article) { create(:article, minimum_order_quantity: 10) }
+
+      context 'doesn\'t order anything, if the minimum order quantity hasn\'t been reached' do
+        include_examples 'minimum order quantity', { quantity: 4, tolerance: 0, expected_units_to_order: 0 }
+      end
+
+      context 'orders the minimum order quantity, if tolerance allows for it' do
+        include_examples 'minimum order quantity', { quantity: 9, tolerance: 1, expected_units_to_order: 10 }
+      end
+
+      context 'orders the desired amount, if minimum order quantity has been surpassed' do
+        include_examples 'minimum order quantity', { quantity: 12, tolerance: 1, expected_units_to_order: 12 }
+      end
+    end
+
+    context 'with unit_quantity' do
+      let(:article) { create(:article, minimum_order_quantity: 2, unit_quantity: 5) }
+
+      context 'doesn\'t order anything if the minimum order quantity hasn\'t been reached' do
+        include_examples 'minimum order quantity', { quantity: 4, tolerance: 0, expected_units_to_order: 0 }
+      end
+
+      context 'orders the minimum order quantity if tolerance allows for it' do
+        include_examples 'minimum order quantity', { quantity: 9, tolerance: 1, expected_units_to_order: 2 }
+      end
+
+      context 'orders a lower amount, even if minimum order quantity has been surpassed, but unit_quantity demands it' do
+        include_examples 'minimum order quantity', { quantity: 12, tolerance: 1, expected_units_to_order: 2 }
+      end
+
+      context 'orders the exact amount, if minimum order quantity has been surpassed and unit_quantity allows for it' do
+        include_examples 'minimum order quantity', { quantity: 14, tolerance: 1, expected_units_to_order: 3 }
+      end
+    end
+  end
 end

@@ -40,14 +40,13 @@ class ArticleVersion < ApplicationRecord
   validates :price, numericality: { greater_than_or_equal_to: 0 }
   validates :group_order_granularity, numericality: { greater_than_or_equal_to: 0 }
   validates :deposit, :tax, numericality: true
-  validates :minimum_order_quantity,
-            numericality: { allow_nil: true, only_integer: false, if: :supplier_order_unit_is_si_convertible }
-  validates :minimum_order_quantity,
-            numericality: { allow_nil: true, only_integer: true, unless: :supplier_order_unit_is_si_convertible }
+  validates :minimum_order_quantity, numericality: { allow_nil: true }
+
   # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type], if: Proc.new {|a| a.supplier.shared_sync_method.blank? or a.supplier.shared_sync_method == 'import' }
   # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type, :unit, :unit_quantity]
   validate :uniqueness_of_name
   validate :only_one_unit_type
+  validate :minimum_order_quantity_as_integer, unless: :supplier_order_unit_is_si_convertible
 
   # Replace numeric seperator with database format
   localize_input_of :price, :tax, :deposit
@@ -117,13 +116,7 @@ class ArticleVersion < ApplicationRecord
     if value.blank?
       self[:minimum_order_quantity] = nil
     else
-      value = value.gsub(I18n.t('number.format.separator'), '.') if value.is_a?(String)
-      begin
-        value = value.to_i if Float(value) % 1 == 0
-      rescue ArgumentError
-        # not any number -> let validation handle this
-      end
-      super(value)
+      super
     end
   end
 
@@ -188,6 +181,17 @@ class ArticleVersion < ApplicationRecord
 
       errors.add :name, :taken_with_unit if matches.where(article_versions: { supplier_order_unit: supplier_order_unit, unit: unit }).any?
     end
+  end
+
+  def minimum_order_quantity_as_integer
+    begin
+      return if Float(minimum_order_quantity) % 1 == 0
+    rescue ArgumentError, TypeError
+      # not any number -> let numericality validation handle this
+      return
+    end
+
+    errors.add(:minimum_order_quantity, :only_integer)
   end
 
   def only_one_unit_type
