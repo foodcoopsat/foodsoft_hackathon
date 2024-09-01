@@ -272,6 +272,8 @@ de:
             name:
               taken: Name ist bereits vergeben
               taken_with_unit: Name und Einheit sind bereits vergeben
+            minimum_order_quantity:
+              only_integer: Muss eine Ganzzahl sein, wenn die Liefereinheit eine Stückeinheit ist.
         supplier:
           attributes:
             shared_sync_method:

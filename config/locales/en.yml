@@ -274,6 +274,8 @@ en:
             name:
               taken: name is already taken
               taken_with_unit: name and unit are already taken
+            minimum_order_quantity:
+              only_integer: Must be an integer if supplier order unit is a piece unit
         supplier:
           attributes:
             shared_sync_method:
