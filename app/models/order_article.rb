@@ -81,6 +81,8 @@ class OrderArticle < ApplicationRecord
   #      4        |    5     |     4     |           2
   #
   def calculate_units_to_order(quantity, tolerance = 0)
+    quantity = [price.maximum_order_quantity || quantity, quantity].min
+    return 0 if price.minimum_order_quantity && quantity < price.minimum_order_quantity
     return price.minimum_order_quantity if quantity > 0 && !price.minimum_order_quantity.nil? && quantity < price.minimum_order_quantity && quantity + tolerance >= price.minimum_order_quantity
 
     unit_size = price.convert_quantity(1, price.supplier_order_unit, price.group_order_unit)

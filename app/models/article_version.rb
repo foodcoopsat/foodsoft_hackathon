@@ -44,6 +44,10 @@ class ArticleVersion < ApplicationRecord
             numericality: { allow_nil: true, only_integer: false, if: :supplier_order_unit_is_si_convertible }
   validates :minimum_order_quantity,
             numericality: { allow_nil: true, only_integer: true, unless: :supplier_order_unit_is_si_convertible }
+  validates :maximum_order_quantity,
+            numericality: { allow_nil: true, only_integer: false, if: :supplier_order_unit_is_si_convertible }
+  validates :maximum_order_quantity,
+            numericality: { allow_nil: true, only_integer: true, unless: :supplier_order_unit_is_si_convertible }
   # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type], if: Proc.new {|a| a.supplier.shared_sync_method.blank? or a.supplier.shared_sync_method == 'import' }
   # validates_uniqueness_of :name, :scope => [:supplier_id, :deleted_at, :type, :unit, :unit_quantity]
   validate :uniqueness_of_name
@@ -116,6 +120,20 @@ class ArticleVersion < ApplicationRecord
   def minimum_order_quantity=(value)
     if value.blank?
       self[:minimum_order_quantity] = nil
+    else
+      value = value.gsub(I18n.t('number.format.separator'), '.') if value.is_a?(String)
+      begin
+        value = value.to_i if Float(value) % 1 == 0
+      rescue ArgumentError
+        # not any number -> let validation handle this
+      end
+      super(value)
+    end
+  end
+
+  def maximum_order_quantity=(value)
+    if value.blank?
+      self[:maximum_order_quantity] = nil
     else
       value = value.gsub(I18n.t('number.format.separator'), '.') if value.is_a?(String)
       begin
