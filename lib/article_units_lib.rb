@@ -51,7 +51,7 @@ class ArticleUnitsLib
   def self.units
     @units = {} if @units.nil?
     units_cached_in_current_locale = @units[I18n.locale]
-    return units_cached_in_current_locale unless @units_cached_in_current_locale.nil?
+    return units_cached_in_current_locale unless units_cached_in_current_locale.nil?
 
     @units[I18n.locale] = untranslated_units.to_h do |code, untranslated_unit|
       translated_name = ArticleUnitsLib.get_translated_name_for_code(code, default_nil: true)
@@ -66,7 +66,7 @@ class ArticleUnitsLib
   end
 
   def self.unit_is_si_convertible(code)
-    !units.to_h[code]&.dig(:conversionFactor).nil?
+    !units[code]&.dig(:conversionFactor).nil?
   end
 
   def self.human_readable_unit(unit_code)

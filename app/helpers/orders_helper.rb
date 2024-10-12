@@ -152,7 +152,7 @@ module OrdersHelper
     data['supplier-order-unit'] = order_article.article_version.supplier_order_unit
     data['default-unit'] = default_unit
     data['custom-unit'] = order_article.article_version.unit
-    order_article.article_version.article_unit_ratios.all.each_with_index do |ratio, index|
+    order_article.article_version.article_unit_ratios.each_with_index do |ratio, index|
       data["ratio-quantity-#{index}"] = ratio.quantity
       data["ratio-unit-#{index}"] = ratio.unit
     end

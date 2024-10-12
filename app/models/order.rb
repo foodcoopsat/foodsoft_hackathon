@@ -178,8 +178,8 @@ class Order < ApplicationRecord
   # e.g: [["drugs",[teethpaste, toiletpaper]], ["fruits" => [apple, banana, lemon]]]
   def articles_grouped_by_category
     @articles_grouped_by_category ||= order_articles
-                                      .includes([:article_version, :group_order_articles,
-                                                 { article_version: :article_category }])
+                                      .includes([:group_order_articles,
+                                                 { article_version: %i[article_category article_unit_ratios] }])
                                       .order('article_versions.name')
                                       .group_by { |oa| oa.article_version.article_category.name }
                                       .sort { |a, b| a[0] <=> b[0] }
