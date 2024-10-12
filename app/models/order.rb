@@ -180,7 +180,7 @@ class Order < ApplicationRecord
     @articles_grouped_by_category ||= order_articles
                                       .includes([:group_order_articles,
                                                  { article_version: %i[article_category article_unit_ratios] }])
-                                      .order('article_versions.name')
+                                      .order('article_versions.name', 'article_unit_ratios.sort')
                                       .group_by { |oa| oa.article_version.article_category.name }
                                       .sort { |a, b| a[0] <=> b[0] }
   end
