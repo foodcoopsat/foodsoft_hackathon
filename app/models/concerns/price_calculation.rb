@@ -31,7 +31,7 @@ module PriceCalculation
   def get_unit_ratio_quantity(unit)
     return 1 if unit == supplier_order_unit
 
-    ratio = new_record? ? article_unit_ratios.detect { |ratio| ratio[:unit] == unit } : article_unit_ratios.find_by_unit(unit)
+    ratio = new_record? ? article_unit_ratios.detect { |ratio| ratio[:unit] == unit } : find_ratio_by_unit(unit)
     return ratio.quantity unless ratio.nil?
 
     unit_hash = ArticleUnit.as_hash[unit]
@@ -76,5 +76,15 @@ module PriceCalculation
 
   def add_percent(value, percent)
     (value * ((percent * 0.01) + 1)).round(2)
+  end
+
+  def find_ratio_by_unit(unit)
+    begin
+      return article_unit_ratios.detect { |ratio| ratio.unit == unit } if association(:article_unit_ratios).loaded?
+    rescue StandardError
+      # continue
+    end
+
+    article_unit_ratios.find_by_unit(unit)
   end
 end
