@@ -26,6 +26,9 @@
       this.opener$ = $('<button class="conversion-popover-opener btn btn-ordering"><i class="icon-retweet"></i></button>');
       this.opener$.attr('title', this.popoverTemplate.dataset.title);
       this.field$.after(this.opener$);
+      if (this.field$.css('display') === 'none') {
+        this.opener$.hide();
+      }
 
       if (this.disabled) {
         this.opener$.attr('disabled', 'disabled');
