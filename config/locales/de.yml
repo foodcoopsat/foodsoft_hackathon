@@ -219,6 +219,7 @@ de:
         order_howto: Kurzanleitung Bestellen
         phone: Telefon
         phone2: Telefon 2
+        supplier_remote_source: Synchronisierungsquelle
         shared_sync_method: Syncronisierungsmethode
         url: Webseite
       supplier_category:

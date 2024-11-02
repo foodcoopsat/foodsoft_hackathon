@@ -221,6 +221,7 @@ en:
         order_howto: How to order
         phone: Phone
         phone2: Phone 2
+        supplier_remote_source: Supplier remote source
         shared_sync_method: How to synchronize
         url: Homepage
       supplier_category:
