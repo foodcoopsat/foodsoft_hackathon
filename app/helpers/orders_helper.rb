@@ -80,7 +80,11 @@ module OrdersHelper
     unit_code = options[:unit] || article.supplier_order_unit
     if unit_code == article.supplier_order_unit
       first_ratio = article&.article_unit_ratios&.first
-      return ArticleUnitsLib.human_readable_unit(unit_code) if first_ratio.nil? || first_ratio.quantity == 1
+      if first_ratio.nil? || first_ratio.quantity == 1
+        return "x #{article.unit}" if unit_code.nil?
+
+        return ArticleUnitsLib.human_readable_unit(unit_code)
+      end
 
       uq_text = "× #{number_with_precision(first_ratio.quantity, precision: 3, strip_insignificant_zeros: true)} #{ArticleUnitsLib.human_readable_unit(first_ratio.unit)}"
     else
